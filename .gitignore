@@ -73,3 +73,34 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# ==========================================
+# FMOD Studio Project Ignores
+# ==========================================
+# 로컬 빌드 캐시 및 임시 파일
+.cache/
+.unsaved/
+.user/
+
+# FMOD Studio UI 상태 및 레이아웃 (개인별 창 배치 등 충돌 방지)
+*.fspro.user
+*.fspro.local
+
+# FMOD 빌드 출력 캐시 (프로젝트 폴더 내에 생성되는 경우)
+Build/
+
+# Never ignore DLLs in the FMOD subfolder.
+!/[Aa]ssets/Plugins/FMOD/**/lib/*
+
+# Don't ignore images and gizmos used by FMOD in the Unity Editor.
+!/[Aa]ssets/Gizmos/FMOD/*
+!/[Aa]ssets/Editor Default Resources/FMOD/*
+
+# Ignore the Cache folder since it is updated locally.
+/[Aa]ssets/Plugins/FMOD/Cache/*
+
+
+# If the source bank files are kept outside of the StreamingAssets folder then these can be ignored.
+# Log files can be ignored.
+fmod_editor.log
+
