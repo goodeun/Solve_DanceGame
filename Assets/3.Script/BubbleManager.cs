@@ -9,6 +9,9 @@ public class BubbleManager : MonoBehaviour
 
     [SerializeField] private BoxCollider spawnArea;
 
+    [Header("말풍선 콜라이더 방향")]
+    [SerializeField] private bool IsColiderRotation = false;
+
     private List<Bubble> positiveBubbles = new List<Bubble>();
     private List<Bubble> negativeBubbles = new List<Bubble>();
 
@@ -39,13 +42,37 @@ public class BubbleManager : MonoBehaviour
 
         additiveBubble = disableBubbles.Dequeue();
 
-        Bounds bounds = spawnArea.bounds;
-        float randomX = Random.Range(bounds.min.x, bounds.max.x);
-        float randomY = Random.Range(bounds.min.y, bounds.max.y);
-        float randomZ = Random.Range(bounds.min.z, bounds.max.z);
+        if (!IsColiderRotation)
+        {
+            // 1. 말풍선 항상 정면 보는 방식
+            Bounds bounds = spawnArea.bounds;
+            float randomX = Random.Range(bounds.min.x, bounds.max.x);
+            float randomY = Random.Range(bounds.min.y, bounds.max.y);
+            float randomZ = Random.Range(bounds.min.z, bounds.max.z);
 
-        additiveBubble.transform.position = new Vector3(randomX, randomY, randomZ);
-        additiveBubble.Initialize(state, BubbleContentInit());
+            additiveBubble.transform.position = new Vector3(randomX, randomY, randomZ);
+        }
+        else
+        {
+            // 2. 말풍선 콜라이더 방향 보는 방식
+            Vector3 center = spawnArea.center;
+            Vector3 extents = spawnArea.size / 2f;
+
+            float randomX = Random.Range(center.x - extents.x, center.x + extents.x);
+            float randomY = Random.Range(center.y - extents.y, center.y + extents.y);
+            float randomZ = Random.Range(center.z - extents.z, center.z + extents.z);
+            Vector3 localRandomPos = new Vector3(randomX, randomY, randomZ);
+
+            additiveBubble.transform.position = spawnArea.transform.TransformPoint(localRandomPos);
+            additiveBubble.transform.rotation = spawnArea.transform.rotation;
+        }
+
+
+        //TODO 플레이어 전체 스탯 객체 가져와야 함
+        PlayerStats myStats = new PlayerStats { rhythm = 20, groove = 15, power = 10, style = 5, condition = 80 };
+        string targetLine = DialogueManager.Instance.GetDialogue("Dance", state.ToString(), myStats);
+
+        additiveBubble.Initialize(state, targetLine);
 
         switch (state)
         {
