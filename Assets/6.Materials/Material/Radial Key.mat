@@ -90,7 +90,7 @@ Material:
     - _BumpScale: 1
     - _ButtonThickness: 0.212
     - _Button_Angle: 60
-    - _Button_Thickness: 0.183
+    - _Button_Thickness: 0.2
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _ColorMask: 15
@@ -104,12 +104,12 @@ Material:
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
     - _GapWidth: 0.059
-    - _Gap_Width: 0.0394
+    - _Gap_Width: 0.1
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _InnerRadius: 0.262
-    - _Inner_Radius: 0.217
+    - _Inner_Radius: 0.25
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -126,7 +126,7 @@ Material:
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
     - _StrokeWidth: 0.0237
-    - _Stroke_Width: 0.15
+    - _Stroke_Width: 0.1
     - _Surface: 0
     - _UIMaskSoftnessX: 1
     - _UIMaskSoftnessY: 1
