@@ -1,54 +1,42 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine;
 using DG.Tweening;
 
 public class FeverUI : MonoBehaviour
 {
-    [SerializeField] private Image feverGage_img;
-    private float fillAmount_m;
+    public FeverCamera FeverCameraGroup;
 
-    private void Awake()
+    [SerializeField] private PopUpForMoment feverSuccess_img;
+    [SerializeField] private PopUpForMoment feverFailure_img;
+    private void Start()
     {
-        feverGage_img = GetComponent<Image>();
+        feverSuccess_img.gameObject.SetActive(false);
+        feverFailure_img.gameObject.SetActive(false);
+    }
+    public void FeverSuccess(float feverDuration)
+    {
+        StartCoroutine(SuccessEffect_co(feverDuration));
+
+        FeverCameraGroup.FeverCameraOnAir(feverDuration);
     }
 
-    private void OnEnable()
+    public void FeverFailure()
     {
-        feverGage_img.material.SetFloat("_FillAmount", 0f);
+        StartCoroutine(FailureEffect_co());
+    }
+    private IEnumerator SuccessEffect_co(float feverDuration)
+    {
+        feverSuccess_img.gameObject.SetActive(true);
+        yield return new WaitForSeconds(1f);
     }
 
-    public void UpdateFeverGage(float targetValue)
+    private IEnumerator FailureEffect_co()
     {
-        fillAmount_m = targetValue;
-
-        if(feverGage_img != null && feverGage_img.material != null)
-        {
-            feverGage_img.material.
-                DOFloat(targetValue, "_FillAmount", 0.2f).SetEase(Ease.OutQuad);
-        }
+        feverFailure_img.gameObject.SetActive(true);
+        yield return new WaitForSeconds(1f);
     }
 
-    #region µð¹ö±×
-    public void DEBUG_FeverGage()
-    {
-        StartCoroutine(DEBUG_feverGage_co());
-    }
 
-    private IEnumerator DEBUG_feverGage_co()
-    {
-
-        UpdateFeverGage(0.1f); 
-        yield return new WaitForSeconds(5f);
-
-        UpdateFeverGage(0.6f); 
-
-        yield return new WaitForSeconds(5f);
-
-        UpdateFeverGage(1f); 
-
-    }
-
-    #endregion
 }
