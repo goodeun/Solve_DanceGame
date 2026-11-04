@@ -16,10 +16,6 @@ public class BubbleManager : MonoBehaviour
     private List<Bubble> negativeBubbles = new List<Bubble>();
 
     private Queue<Bubble> disableBubbles = new Queue<Bubble>();
-    private void Awake()
-    {
-        spawnArea = GetComponentInChildren<BoxCollider>();
-    }
 
     private void Start()
     {
