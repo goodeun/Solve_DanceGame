@@ -1,0 +1,48 @@
+{
+  "dialogues": [
+    {
+      "id": "Daily_P_001",
+      "scene": "Daily",
+      "state": "positive",
+      "text": "Condition Best!<br> Broooo",
+      "minRhythm": 0,
+      "minGroove": 10,
+      "minPower": 0,
+      "minStyle": 0,
+      "minCondition": 50
+    },
+    {
+      "id": "Daily_N_001",
+      "scene": "Daily",
+      "state": "negative",
+      "text": "oh...<br> tired.",
+      "minRhythm": 0,
+      "minGroove": 0,
+      "minPower": 0,
+      "minStyle": 0,
+      "minCondition": 0
+    },
+    {
+      "id": "Dance_P_001",
+      "scene": "Dance",
+      "state": "positive",
+      "text": "best tempo!",
+      "minRhythm": 20,
+      "minGroove": 15,
+      "minPower": 10,
+      "minStyle": 5,
+      "minCondition": 70
+    },
+    {
+      "id": "Dance_N_001",
+      "scene": "Dance",
+      "state": "negative",
+      "text": "steps are <br>bad...",
+      "minRhythm": 0,
+      "minGroove": 0,
+      "minPower": 0,
+      "minStyle": 0,
+      "minCondition": 0
+    }
+  ]
+}
