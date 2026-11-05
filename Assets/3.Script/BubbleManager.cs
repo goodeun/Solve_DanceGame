@@ -16,10 +16,6 @@ public class BubbleManager : MonoBehaviour
     private List<Bubble> negativeBubbles = new List<Bubble>();
 
     private Queue<Bubble> disableBubbles = new Queue<Bubble>();
-    private void Awake()
-    {
-        spawnArea = GetComponentInChildren<BoxCollider>();
-    }
 
     private void Start()
     {
@@ -85,11 +81,6 @@ public class BubbleManager : MonoBehaviour
         }
 
         additiveBubble.gameObject.SetActive(true);
-    }
-
-    public string BubbleContentInit()
-    {
-        return "";
     }
 
     public int PopPositiveBubble() // 터진 말풍선 갯수 반환. 점수로 치환 바람

@@ -6,24 +6,24 @@ using DG.Tweening;
 public class JudgementUI : MonoBehaviour
 {
     [SerializeField] private Sprite[] judgementSprites = new Sprite[4];
+    [SerializeField] private Image judgement_img;
 
-    private Image judgement_img;
-
-    private Color judgement_color;
     private Vector2 AncorePos;
+    private Color alpha;
+
+    private Coroutine animCoroutine;
 
     private void Awake()
     {
-        if (TryGetComponent(out judgement_img))
-        {
-            judgement_color = judgement_img.color;
-        }
         AncorePos = gameObject.transform.position;
+        judgement_img = GetComponent<Image>();
+        alpha = Color.white;
+        alpha.a = 0;
     }
 
     private void OnEnable()
     {
-        judgement_color.a = 0f;
+        judgement_img.color = alpha;
     }
 
     public void JudgementUpdate(Judge judge)
@@ -35,14 +35,21 @@ public class JudgementUI : MonoBehaviour
 
         judgement_img.sprite = judgementSprites[(int)judge];
 
-        StopCoroutine(Anim_Judgement_co());
-        StartCoroutine(Anim_Judgement_co());
+        if(animCoroutine != null)
+        {
+            StopCoroutine(animCoroutine);
+        }
+
+        judgement_img.DOKill();
+        transform.DOKill();
+
+        animCoroutine = StartCoroutine(Anim_Judgement_co());
 
     }
 
     public IEnumerator Anim_Judgement_co()
     {
-        judgement_color.a = 0f;
+        judgement_img.color = alpha;
         transform.position = new Vector2(AncorePos.x, AncorePos.y - 20f);
 
         judgement_img.DOFade(1f, 0.1f);

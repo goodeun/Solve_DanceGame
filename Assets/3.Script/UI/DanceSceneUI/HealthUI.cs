@@ -13,7 +13,7 @@ public class HealthUI : MonoBehaviour
     private void OnEnable()
     {
         //TODO. 임시 HP
-        SetHealth(100);
+        SetHealth((int)HPSlider.maxValue);
     }
 
     //TODO 생성될 때 맥스 HP값 계산해 연결
