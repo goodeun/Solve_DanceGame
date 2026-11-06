@@ -9,6 +9,10 @@ public class RhythmWheelUI : MonoBehaviour
 {
     [SerializeField] private int BPM = 120;
 
+    [Header("Pulse Color Settings")]
+    [SerializeField] private Color normalPulseColor = Color.cyan;
+    [SerializeField] private Color fourthBeatPulseColor = Color.red;
+
     [SerializeField] private GameObject[] Key_Images = new GameObject[6];
 
     [SerializeField] private Image circlePulse;
@@ -20,6 +24,8 @@ public class RhythmWheelUI : MonoBehaviour
 
     [Header("Judgement Settings")]
     [SerializeField] private DanceSceneHUD danceHUD;
+    [Tooltip("판정 창 수치의 기준 BPM입니다. 실제 판정 창은 현재 BPM에 맞춰 비례 조정됩니다.")]
+    [SerializeField, Min(1)] private int judgementReferenceBPM = 120;
     [SerializeField, Min(0f)] private float justWindow = 0.05f;
     [SerializeField, Min(0f)] private float goodWindow = 0.10f;
     [SerializeField, Min(0f)] private float badWindow = 0.18f;
@@ -32,6 +38,7 @@ public class RhythmWheelUI : MonoBehaviour
     public int Score { get; private set; }
     public int Combo { get; private set; }
     public event System.Action<Keys, Judge, float> OnJudged;
+    public event System.Action OnFourthBeatStarted;
 
     private PlayerInput playerInput;
     private readonly Dictionary<Keys, KeyImage> keyImagesByKey = new();
@@ -39,7 +46,10 @@ public class RhythmWheelUI : MonoBehaviour
     private static readonly int ProgressProperty = Shader.PropertyToID("_Progress");
     private Material circlePulseMaterial;
     private float pulseStartTime;
+    private bool isFourthBeat;
     private int lastJudgedBeat = int.MinValue;
+    private int lastAutoMissedBeat = -1;
+    private int lastObservedBeat = -1;
     private float feverGauge;
     private bool isFeverActive;
 
@@ -81,7 +91,10 @@ public class RhythmWheelUI : MonoBehaviour
         OnJudged += HandleFeverJudgement;
 
         pulseStartTime = Time.unscaledTime;
+        isFourthBeat = false;
         lastJudgedBeat = int.MinValue;
+        lastAutoMissedBeat = -1;
+        lastObservedBeat = -1;
         Score = 0;
         Combo = 0;
         feverGauge = 0f;
@@ -105,8 +118,14 @@ public class RhythmWheelUI : MonoBehaviour
         if (!System.Enum.TryParse(context.control.name, true, out Keys pressedKey))
             return;
 
-        if (keyImagesByKey.TryGetValue(pressedKey, out KeyImage keyImage))
-            keyImage.PlayPressAnimation();
+        if (IsFourthBeat())
+            return;
+
+        if (!IsKeyInputEnabled(pressedKey))
+            return;
+
+        KeyImage keyImage = keyImagesByKey[pressedKey];
+        keyImage.PlayPressAnimation();
 
         JudgeInput(pressedKey);
     }
@@ -117,7 +136,7 @@ public class RhythmWheelUI : MonoBehaviour
     /// </summary>
     public void JudgeInput(Keys pressedKey)
     {
-        if (BPM <= 0)
+        if (BPM <= 0 || IsFourthBeat() || !IsKeyInputEnabled(pressedKey))
             return;
 
         float beatDuration = 60f / BPM;
@@ -134,15 +153,35 @@ public class RhythmWheelUI : MonoBehaviour
         ApplyJudgement(pressedKey, judge, offset);
     }
 
+    private bool IsKeyInputEnabled(Keys pressedKey)
+    {
+        // A disabled key button must not be judged or score.
+        return keyImagesByKey.TryGetValue(pressedKey, out KeyImage keyImage)
+            && keyImage.gameObject.activeInHierarchy
+            && keyImage.enabled;
+    }
+
     private Judge GetJudge(float absoluteOffset)
     {
-        if (absoluteOffset <= justWindow)
+        // Window values are authored at the reference BPM so the judgement difficulty
+        // remains the same relative to each beat when BPM changes.
+        float bpmScale = (float)judgementReferenceBPM / BPM;
+        float scaledJustWindow = justWindow * bpmScale;
+        float scaledGoodWindow = goodWindow * bpmScale;
+        float scaledBadWindow = badWindow * bpmScale;
+
+        if (absoluteOffset <= scaledJustWindow)
             return Judge.Just;
-        if (absoluteOffset <= goodWindow)
+        if (absoluteOffset <= scaledGoodWindow)
             return Judge.Good;
-        if (absoluteOffset <= badWindow)
+        if (absoluteOffset <= scaledBadWindow)
             return Judge.Bad;
         return Judge.Miss;
+    }
+
+    private float GetScaledBadWindow()
+    {
+        return badWindow * ((float)judgementReferenceBPM / BPM);
     }
 
     private void ApplyJudgement(Keys pressedKey, Judge judge, float offset)
@@ -216,12 +255,66 @@ public class RhythmWheelUI : MonoBehaviour
 
     private void Update()
     {
-        if (circlePulseMaterial == null || BPM <= 0)
+        if (BPM <= 0)
             return;
 
         float beatDuration = 60f / BPM;
-        float beatProgress = Mathf.Repeat((Time.unscaledTime - pulseStartTime) / beatDuration, 1f);
+        float elapsed = Time.unscaledTime - pulseStartTime;
+        int currentBeat = Mathf.FloorToInt(elapsed / beatDuration);
+
+        NotifyFourthBeatStart(currentBeat);
+        TryApplyMissedBeats(elapsed, beatDuration);
+
+        if (circlePulseMaterial == null)
+            return;
+
+        float beatProgress = Mathf.Repeat(elapsed / beatDuration, 1f);
+
+        isFourthBeat = IsFourthBeat();
+
+        circlePulseMaterial.SetColor(
+            "_Ring_Color",
+            isFourthBeat ? fourthBeatPulseColor : normalPulseColor);
+
         circlePulseMaterial.SetFloat(ProgressProperty, beatProgress * 0.5f);
+    }
+
+    private void TryApplyMissedBeats(float elapsed, float beatDuration)
+    {
+        // Wait until the Bad window has passed before resolving a beat with no input.
+        int latestExpiredBeat = Mathf.FloorToInt((elapsed - GetScaledBadWindow()) / beatDuration);
+
+        for (int beat = lastAutoMissedBeat + 1; beat <= latestExpiredBeat; beat++)
+        {
+            lastAutoMissedBeat = beat;
+
+            // The fourth beat is a rest, so it never produces a Miss.
+            if (beat < 0 || beat % 4 == 3 || beat == lastJudgedBeat)
+                continue;
+
+            ApplyJudgement(default, Judge.Miss, elapsed - (beat * beatDuration));
+        }
+    }
+
+    private void NotifyFourthBeatStart(int currentBeat)
+    {
+        for (int beat = lastObservedBeat + 1; beat <= currentBeat; beat++)
+        {
+            if (beat >= 0 && beat % 4 == 3)
+                OnFourthBeatStarted?.Invoke();
+        }
+
+        lastObservedBeat = currentBeat;
+    }
+
+    private bool IsFourthBeat()
+    {
+        if (BPM <= 0)
+            return false;
+
+        float beatDuration = 60f / BPM;
+        int currentBeat = Mathf.FloorToInt((Time.unscaledTime - pulseStartTime) / beatDuration);
+        return currentBeat % 4 == 3;
     }
 
     private void OnDestroy()

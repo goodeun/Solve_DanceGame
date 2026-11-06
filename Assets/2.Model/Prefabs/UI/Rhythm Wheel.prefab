@@ -587,6 +587,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1380488885996941064}
   - component: {fileID: 6024124593711664056}
+  - component: {fileID: 5840876300083699231}
   - component: {fileID: 5351060673896333243}
   m_Layer: 5
   m_Name: Rhythm Wheel
@@ -636,6 +637,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelUI
   BPM: 120
+  normalPulseColor: {r: 0, g: 1, b: 1, a: 1}
+  fourthBeatPulseColor: {r: 1, g: 0, b: 0, a: 1}
   Key_Images:
   - {fileID: 4777808413754992731}
   - {fileID: 6958210713751153811}
@@ -647,11 +650,25 @@ MonoBehaviour:
   isSquare: 0
   isRhombus: 0
   isSixKeys: 0
-  enableCombinedOutline: 1
   danceHUD: {fileID: 0}
   justWindow: 0.05
   goodWindow: 0.1
   badWindow: 0.18
+  feverGainPerJust: 0.1
+  feverDuration: 10
+--- !u!114 &5840876300083699231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332927072827704353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d03b674fd6ea7174ea82d8c5882b7e24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ComboAndMagnification
+  rhythmWheel: {fileID: 6024124593711664056}
 --- !u!114 &5351060673896333243
 MonoBehaviour:
   m_ObjectHideFlags: 0

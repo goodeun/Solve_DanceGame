@@ -57,8 +57,8 @@ Material:
     m_Floats:
     - _AlphaClip: 0.5
     - _ColorMask: 15
-    - _FillAmount: 0.6
-    - _LineThickness: 0.06
+    - _FillAmount: 0.2
+    - _LineThickness: 0.0368
     - _NoiseStrength: 0
     - _QueueControl: 0
     - _QueueOffset: 0
