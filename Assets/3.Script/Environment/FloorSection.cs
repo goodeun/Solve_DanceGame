@@ -24,7 +24,6 @@ public class FloorSection : MonoBehaviour
         {
             floorSprite = GetComponent<SpriteRenderer>();
         }
-            floorSprite.color = transparent;
     }
     private void OnEnable()
     {
@@ -50,17 +49,11 @@ public class FloorSection : MonoBehaviour
 
         if (!isActivated)
         {
-            Color whiteAlpha = Color.white;
-            whiteAlpha.a = 0.8f;
-            floorSprite.color = whiteAlpha;
+
         }
         else
         {
-            Color blinkColor = Color.white * secondaryColor;
-            blinkColor.a = 1f;
 
-            floorSprite.color = transparent;
-            floorSprite.DOColor(blinkColor, 0.05f).SetLoops(1, LoopType.Yoyo);
         }
     }
 
@@ -72,16 +65,9 @@ public class FloorSection : MonoBehaviour
 
         if (isComboSuccess)
         {
-            Color burstColor = floorSprite.color;
-            burstColor.a = 1f;
-
-            Sequence burstSeq = DOTween.Sequence();
-            burstSeq.Append(floorSprite.DOColor(burstColor, 0.05f))
-                .Append(floorSprite.DOColor(transparent, burstDuration).SetEase(Ease.InExpo));
         }
         else
         {
-            floorSprite.DOColor(transparent, fadeDuration);
         }
     }
 
