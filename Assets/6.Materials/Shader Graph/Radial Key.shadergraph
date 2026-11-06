@@ -4,12 +4,6 @@
     "m_ObjectId": "5c88a616949440589e979e7a4ee29877",
     "m_Properties": [
         {
-            "m_Id": "7b27a7e6280e42f484db19932b503a40"
-        },
-        {
-            "m_Id": "570460727c674954a1fd9b0bdd1028aa"
-        },
-        {
             "m_Id": "0fea174fd7c545c69bb4cc895c5e3a54"
         },
         {
@@ -3876,46 +3870,6 @@
 }
 
 {
-    "m_SGVersion": 1,
-    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
-    "m_ObjectId": "570460727c674954a1fd9b0bdd1028aa",
-    "m_Guid": {
-        "m_GuidSerialized": "696d7db9-6534-4eb9-84b3-3470383e1733"
-    },
-    "m_Name": "Stroke Width",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Stroke Width",
-    "m_DefaultReferenceName": "_Stroke_Width",
-    "m_OverrideReferenceName": "",
-    "m_GeneratePropertyBlock": true,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_DismissedVersion": 0,
-    "m_Precision": 0,
-    "overrideHLSLDeclaration": false,
-    "hlslDeclarationOverride": 0,
-    "m_Hidden": false,
-    "m_PerRendererData": false,
-    "m_customAttributes": [],
-    "m_Value": 0.15000000596046449,
-    "m_FloatType": 1,
-    "m_RangeValues": {
-        "x": 0.0,
-        "y": 0.10000000149011612
-    },
-    "m_SliderType": 0,
-    "m_SliderPower": 3.0,
-    "m_EnumType": 0,
-    "m_CSharpEnumString": "",
-    "m_EnumNames": [
-        "Default"
-    ],
-    "m_EnumValues": [
-        0
-    ]
-}
-
-{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
     "m_ObjectId": "578ef07545f64bf5988c7e1831b4ffaa",
@@ -4324,12 +4278,6 @@
     "m_ObjectId": "6178427a737d43798672c8baebbd6a6b",
     "m_Name": "",
     "m_ChildObjectList": [
-        {
-            "m_Id": "570460727c674954a1fd9b0bdd1028aa"
-        },
-        {
-            "m_Id": "7b27a7e6280e42f484db19932b503a40"
-        },
         {
             "m_Id": "0fea174fd7c545c69bb4cc895c5e3a54"
         },
@@ -4796,38 +4744,6 @@
     "m_CustomColors": {
         "m_SerializableColors": []
     }
-}
-
-{
-    "m_SGVersion": 3,
-    "m_Type": "UnityEditor.ShaderGraph.Internal.ColorShaderProperty",
-    "m_ObjectId": "7b27a7e6280e42f484db19932b503a40",
-    "m_Guid": {
-        "m_GuidSerialized": "dd744d13-3496-4098-944e-e779fb8efac7"
-    },
-    "m_Name": "Line Color",
-    "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Line Color",
-    "m_DefaultReferenceName": "_Line_Color",
-    "m_OverrideReferenceName": "",
-    "m_GeneratePropertyBlock": true,
-    "m_UseCustomSlotLabel": false,
-    "m_CustomSlotLabel": "",
-    "m_DismissedVersion": 0,
-    "m_Precision": 0,
-    "overrideHLSLDeclaration": false,
-    "hlslDeclarationOverride": 0,
-    "m_Hidden": false,
-    "m_PerRendererData": false,
-    "m_customAttributes": [],
-    "m_Value": {
-        "r": 1.0,
-        "g": 1.0,
-        "b": 1.0,
-        "a": 1.0
-    },
-    "isMainColor": false,
-    "m_ColorMode": 1
 }
 
 {
