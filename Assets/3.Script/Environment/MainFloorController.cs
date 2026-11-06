@@ -63,19 +63,19 @@ public class MainFloorController : MonoBehaviour
         switch (colorIndex_temp)
         {
             case 0:
-                TempEventManager.OnThemaColorChange_Temp.Invoke(Color.green);
+                TempEventManager.OnThemaColorChange_Temp.Invoke(Color.green*3f);
                 colorIndex_temp++;
                 break;
             case 1:
-                TempEventManager.OnThemaColorChange_Temp.Invoke(Color.aliceBlue);
+                TempEventManager.OnThemaColorChange_Temp.Invoke(Color.aliceBlue * 3f);
                 colorIndex_temp++;
                 break;
             case 2:
-                TempEventManager.OnThemaColorChange_Temp.Invoke(Color.deepPink);
+                TempEventManager.OnThemaColorChange_Temp.Invoke(Color.deepPink * 3f);
                 colorIndex_temp++;
                 break;
             case 3:
-                TempEventManager.OnThemaColorChange_Temp.Invoke(Color.yellow);
+                TempEventManager.OnThemaColorChange_Temp.Invoke(Color.yellow * 3f);
                 colorIndex_temp = 0;
                 break;
         }
