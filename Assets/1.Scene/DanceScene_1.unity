@@ -632,6 +632,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 5.53
       objectReference: {fileID: 0}
+    - target: {fileID: 4737450504873478763, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 84cb6ad2cff421a44a15e681970cabde, type: 2}
     - target: {fileID: 5977543513376890662, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: m_Name
       value: DanceSceneEnvironment
