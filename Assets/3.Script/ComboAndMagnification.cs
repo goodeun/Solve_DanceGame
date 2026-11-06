@@ -13,6 +13,8 @@ public class ComboAndMagnification : MonoBehaviour
     // A four-beat phrase accepts input on its first three beats; the fourth is a rest.
     private readonly List<Keys> currentPhraseKeys = new(3);
     private readonly List<Keys[]> recordedPhrases = new();
+    private bool comboSavedThisPhrase;
+    private bool comboFailedThisPhrase;
 
     public IReadOnlyList<Keys[]> RecordedPhrases => recordedPhrases;
 
@@ -27,7 +29,7 @@ public class ComboAndMagnification : MonoBehaviour
         if (rhythmWheel != null)
         {
             rhythmWheel.OnJudged += RecordKeyInput;
-            rhythmWheel.OnFourthBeatStarted += CheckIncompleteCombo;
+            rhythmWheel.OnFourthBeatStarted += CompletePhrase;
         }
     }
 
@@ -36,7 +38,7 @@ public class ComboAndMagnification : MonoBehaviour
         if (rhythmWheel != null)
         {
             rhythmWheel.OnJudged -= RecordKeyInput;
-            rhythmWheel.OnFourthBeatStarted -= CheckIncompleteCombo;
+            rhythmWheel.OnFourthBeatStarted -= CompletePhrase;
         }
     }
 
@@ -46,7 +48,7 @@ public class ComboAndMagnification : MonoBehaviour
 
         if (judge == Judge.Miss)
         {
-            CheckIncompleteCombo();
+            FailCurrentPhrase();
             return;
         }
 
@@ -58,6 +60,7 @@ public class ComboAndMagnification : MonoBehaviour
         Keys[] phrase = currentPhraseKeys.ToArray();
         recordedPhrases.Add(phrase);
         currentPhraseKeys.Clear();
+        comboSavedThisPhrase = true;
 
         OnComboSaved?.Invoke(phrase[phrase.Length - 1]);
 
@@ -66,12 +69,23 @@ public class ComboAndMagnification : MonoBehaviour
             this);
     }
 
-    private void CheckIncompleteCombo()
+    private void CompletePhrase()
     {
-        if (currentPhraseKeys.Count == 0)
+        if (!comboSavedThisPhrase && !comboFailedThisPhrase)
+            Debug.Log("[ComboAndMagnification] Combo failed", this);
+
+        currentPhraseKeys.Clear();
+        comboSavedThisPhrase = false;
+        comboFailedThisPhrase = false;
+    }
+
+    private void FailCurrentPhrase()
+    {
+        if (comboSavedThisPhrase || comboFailedThisPhrase)
             return;
 
         Debug.Log("[ComboAndMagnification] Combo failed", this);
+        comboFailedThisPhrase = true;
         currentPhraseKeys.Clear();
     }
 }
