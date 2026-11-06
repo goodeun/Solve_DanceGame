@@ -9,6 +9,10 @@ public class RhythmWheelUI : MonoBehaviour
 {
     [SerializeField] private int BPM = 120;
 
+    [Header("Pulse Color Settings")]
+    [SerializeField] private Color normalPulseColor = Color.cyan;
+    [SerializeField] private Color fourthBeatPulseColor = Color.red;
+
     [SerializeField] private GameObject[] Key_Images = new GameObject[6];
 
     [SerializeField] private Image circlePulse;
@@ -18,22 +22,23 @@ public class RhythmWheelUI : MonoBehaviour
     [SerializeField] private bool isRhombus;
     [SerializeField] private bool isSixKeys;
 
-    [Header("Combined Outline")]
-    [Tooltip("Rhythm Wheel의 자식인 Combined Outline Image를 비워 두면 이름으로 자동 검색합니다.")]
-    [SerializeField] private bool enableCombinedOutline;
-    [SerializeField] private Image combinedOutline;
-    [SerializeField, Min(64)] private int outlineMaskResolution = 512;
-    [SerializeField, Min(1f)] private float centerMaskDiameter = 60f;
-
     [Header("Judgement Settings")]
     [SerializeField] private DanceSceneHUD danceHUD;
+    [Tooltip("판정 창 수치의 기준 BPM입니다. 실제 판정 창은 현재 BPM에 맞춰 비례 조정됩니다.")]
+    [SerializeField, Min(1)] private int judgementReferenceBPM = 120;
     [SerializeField, Min(0f)] private float justWindow = 0.05f;
     [SerializeField, Min(0f)] private float goodWindow = 0.10f;
     [SerializeField, Min(0f)] private float badWindow = 0.18f;
 
+    [Header("Fever Settings")]
+    [Tooltip("Just 판정 1회로 채울 피버 게이지 비율입니다.")]
+    [SerializeField, Range(0.01f, 1f)] private float feverGainPerJust = 0.1f;
+    [SerializeField, Min(0.1f)] private float feverDuration = 10f;
+
     public int Score { get; private set; }
     public int Combo { get; private set; }
     public event System.Action<Keys, Judge, float> OnJudged;
+    public event System.Action OnFourthBeatStarted;
 
     private PlayerInput playerInput;
     private readonly Dictionary<Keys, KeyImage> keyImagesByKey = new();
@@ -41,23 +46,19 @@ public class RhythmWheelUI : MonoBehaviour
     private static readonly int ProgressProperty = Shader.PropertyToID("_Progress");
     private Material circlePulseMaterial;
     private float pulseStartTime;
+    private bool isFourthBeat;
     private int lastJudgedBeat = int.MinValue;
-
-    private readonly List<RectTransform> outlineMaskKeys = new();
-    private readonly List<Material> outlineMaskMaterials = new();
-    private RenderTexture outlineMaskTexture;
-    private GameObject outlineMaskCanvasObject;
-    private Camera outlineMaskCamera;
-    private GameObject outlineMaskCameraObject;
+    private int lastAutoMissedBeat = -1;
+    private int lastObservedBeat = -1;
+    private float feverGauge;
+    private bool isFeverActive;
 
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
+
         if (danceHUD == null)
             danceHUD = FindFirstObjectByType<DanceSceneHUD>();
-
-        if (enableCombinedOutline)
-            SetupCombinedOutline();
 
         if (circlePulse != null && circlePulse.material != null)
         {
@@ -87,16 +88,26 @@ public class RhythmWheelUI : MonoBehaviour
         if (playerInput != null)
             playerInput.onActionTriggered += OnActionTriggered;
 
+        OnJudged += HandleFeverJudgement;
+
         pulseStartTime = Time.unscaledTime;
+        isFourthBeat = false;
         lastJudgedBeat = int.MinValue;
+        lastAutoMissedBeat = -1;
+        lastObservedBeat = -1;
         Score = 0;
         Combo = 0;
+        feverGauge = 0f;
+        isFeverActive = false;
+        UpdateFeverGaugeUI();
     }
 
     private void OnDisable()
     {
         if (playerInput != null)
             playerInput.onActionTriggered -= OnActionTriggered;
+
+        OnJudged -= HandleFeverJudgement;
     }
 
     private void OnActionTriggered(InputAction.CallbackContext context)
@@ -107,8 +118,14 @@ public class RhythmWheelUI : MonoBehaviour
         if (!System.Enum.TryParse(context.control.name, true, out Keys pressedKey))
             return;
 
-        if (keyImagesByKey.TryGetValue(pressedKey, out KeyImage keyImage))
-            keyImage.PlayPressAnimation();
+        if (IsFourthBeat())
+            return;
+
+        if (!IsKeyInputEnabled(pressedKey))
+            return;
+
+        KeyImage keyImage = keyImagesByKey[pressedKey];
+        keyImage.PlayPressAnimation();
 
         JudgeInput(pressedKey);
     }
@@ -119,7 +136,7 @@ public class RhythmWheelUI : MonoBehaviour
     /// </summary>
     public void JudgeInput(Keys pressedKey)
     {
-        if (BPM <= 0)
+        if (BPM <= 0 || IsFourthBeat() || !IsKeyInputEnabled(pressedKey))
             return;
 
         float beatDuration = 60f / BPM;
@@ -136,15 +153,35 @@ public class RhythmWheelUI : MonoBehaviour
         ApplyJudgement(pressedKey, judge, offset);
     }
 
+    private bool IsKeyInputEnabled(Keys pressedKey)
+    {
+        // A disabled key button must not be judged or score.
+        return keyImagesByKey.TryGetValue(pressedKey, out KeyImage keyImage)
+            && keyImage.gameObject.activeInHierarchy
+            && keyImage.enabled;
+    }
+
     private Judge GetJudge(float absoluteOffset)
     {
-        if (absoluteOffset <= justWindow)
+        // Window values are authored at the reference BPM so the judgement difficulty
+        // remains the same relative to each beat when BPM changes.
+        float bpmScale = (float)judgementReferenceBPM / BPM;
+        float scaledJustWindow = justWindow * bpmScale;
+        float scaledGoodWindow = goodWindow * bpmScale;
+        float scaledBadWindow = badWindow * bpmScale;
+
+        if (absoluteOffset <= scaledJustWindow)
             return Judge.Just;
-        if (absoluteOffset <= goodWindow)
+        if (absoluteOffset <= scaledGoodWindow)
             return Judge.Good;
-        if (absoluteOffset <= badWindow)
+        if (absoluteOffset <= scaledBadWindow)
             return Judge.Bad;
         return Judge.Miss;
+    }
+
+    private float GetScaledBadWindow()
+    {
+        return badWindow * ((float)judgementReferenceBPM / BPM);
     }
 
     private void ApplyJudgement(Keys pressedKey, Judge judge, float offset)
@@ -180,14 +217,104 @@ public class RhythmWheelUI : MonoBehaviour
         OnJudged?.Invoke(pressedKey, judge, offset);
     }
 
+    /// <summary>
+    /// 판정 이벤트에서 피버를 처리한다. Just 이외의 판정은 게이지에 영향을 주지 않는다.
+    /// </summary>
+    private void HandleFeverJudgement(Keys pressedKey, Judge judge, float offset)
+    {
+        if (judge != Judge.Just || isFeverActive)
+            return;
+
+        feverGauge = Mathf.Clamp01(feverGauge + feverGainPerJust);
+        UpdateFeverGaugeUI();
+
+        if (feverGauge < 1f)
+            return;
+
+        isFeverActive = true;
+        danceHUD?.RequestFeverTime(true, feverDuration);
+        StartCoroutine(ResetFeverAfterDuration());
+    }
+
+    private IEnumerator ResetFeverAfterDuration()
+    {
+        yield return new WaitForSeconds(feverDuration);
+
+        feverGauge = 0f;
+        isFeverActive = false;
+        UpdateFeverGaugeUI();
+    }
+
+    private void UpdateFeverGaugeUI()
+    {
+        if (danceHUD == null)
+            danceHUD = FindFirstObjectByType<DanceSceneHUD>();
+
+        danceHUD?.AddFeverGage(feverGauge);
+    }
+
     private void Update()
     {
-        if (circlePulseMaterial == null || BPM <= 0)
+        if (BPM <= 0)
             return;
 
         float beatDuration = 60f / BPM;
-        float beatProgress = Mathf.Repeat((Time.unscaledTime - pulseStartTime) / beatDuration, 1f);
-        circlePulseMaterial.SetFloat(ProgressProperty, (1f - beatProgress) * 0.5f);
+        float elapsed = Time.unscaledTime - pulseStartTime;
+        int currentBeat = Mathf.FloorToInt(elapsed / beatDuration);
+
+        NotifyFourthBeatStart(currentBeat);
+        TryApplyMissedBeats(elapsed, beatDuration);
+
+        if (circlePulseMaterial == null)
+            return;
+
+        float beatProgress = Mathf.Repeat(elapsed / beatDuration, 1f);
+
+        isFourthBeat = IsFourthBeat();
+
+        circlePulseMaterial.SetColor(
+            "_Ring_Color",
+            isFourthBeat ? fourthBeatPulseColor : normalPulseColor);
+
+        circlePulseMaterial.SetFloat(ProgressProperty, beatProgress * 0.5f);
+    }
+
+    private void TryApplyMissedBeats(float elapsed, float beatDuration)
+    {
+        // Wait until the Bad window has passed before resolving a beat with no input.
+        int latestExpiredBeat = Mathf.FloorToInt((elapsed - GetScaledBadWindow()) / beatDuration);
+
+        for (int beat = lastAutoMissedBeat + 1; beat <= latestExpiredBeat; beat++)
+        {
+            lastAutoMissedBeat = beat;
+
+            // The fourth beat is a rest, so it never produces a Miss.
+            if (beat < 0 || beat % 4 == 3 || beat == lastJudgedBeat)
+                continue;
+
+            ApplyJudgement(default, Judge.Miss, elapsed - (beat * beatDuration));
+        }
+    }
+
+    private void NotifyFourthBeatStart(int currentBeat)
+    {
+        for (int beat = lastObservedBeat + 1; beat <= currentBeat; beat++)
+        {
+            if (beat >= 0 && beat % 4 == 3)
+                OnFourthBeatStarted?.Invoke();
+        }
+
+        lastObservedBeat = currentBeat;
+    }
+
+    private bool IsFourthBeat()
+    {
+        if (BPM <= 0)
+            return false;
+
+        float beatDuration = 60f / BPM;
+        int currentBeat = Mathf.FloorToInt((Time.unscaledTime - pulseStartTime) / beatDuration);
+        return currentBeat % 4 == 3;
     }
 
     private void OnDestroy()
@@ -195,222 +322,6 @@ public class RhythmWheelUI : MonoBehaviour
         if (circlePulseMaterial != null)
             Destroy(circlePulseMaterial);
 
-        foreach (Material material in outlineMaskMaterials)
-            Destroy(material);
-
-        if (outlineMaskTexture != null)
-            outlineMaskTexture.Release();
-
-        if (outlineMaskCanvasObject != null)
-            Destroy(outlineMaskCanvasObject);
-
-        if (outlineMaskCameraObject != null)
-            Destroy(outlineMaskCameraObject);
-    }
-
-    private void LateUpdate()
-    {
-        if (!enableCombinedOutline)
-            return;
-
-        SyncOutlineMaskLayout();
-
-        if (outlineMaskCamera != null)
-        {
-            Canvas.ForceUpdateCanvases();
-            outlineMaskCamera.Render();
-
-        }
-    }
-
-    private void SetupCombinedOutline()
-    {
-        if (!Application.isPlaying)
-            return;
-
-
-        if (combinedOutline == null)
-        {
-            Transform outlineTransform = transform.Find("Combined Outline");
-            if (outlineTransform != null)
-                combinedOutline = outlineTransform.GetComponent<Image>();
-        }
-
-        Image sourceFill = null;
-        foreach (GameObject keyImageObject in Key_Images)
-        {
-            if (keyImageObject == null)
-                continue;
-
-            sourceFill = keyImageObject.GetComponentInChildren<Image>();
-            if (sourceFill != null)
-                break;
-        }
-
-        if (combinedOutline == null)
-        {
-            Debug.LogWarning("Combined Outline Image를 찾지 못했습니다.", this);
-            return;
-        }
-
-        // Canvas Image가 Sprite 없이 컬링되면 Shader Graph 자체가 실행되지 않는다.
-        // 전체 RT UV를 받는 기본 UI Sprite를 명시적으로 사용한다.
-        if (combinedOutline.sprite == null)
-            combinedOutline.sprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/UISprite.psd");
-
-        outlineMaskTexture = new RenderTexture(outlineMaskResolution, outlineMaskResolution, 0, RenderTextureFormat.ARGB32)
-        {
-            name = "Runtime Rhythm Wheel Outline Mask",
-            filterMode = FilterMode.Bilinear,
-            wrapMode = TextureWrapMode.Clamp
-        };
-        outlineMaskTexture.Create();
-
-        // 기존 Canvas Shader Graph가 쓰는 실제 프로퍼티에 런타임 마스크를 연결한다.
-        // Inspector의 Outline with Pixel 값도 이 머티리얼 하나에서 계속 조절된다.
-        Material outlineMaterial = combinedOutline.material;
-        outlineMaterial.SetTexture("_Mask_Texture", outlineMaskTexture);
-
-        const int MaskLayer = 31;
-        outlineMaskCanvasObject = new GameObject("Runtime Rhythm Wheel Outline Mask", typeof(Canvas));
-        SetLayerRecursively(outlineMaskCanvasObject, MaskLayer);
-
-        Canvas maskCanvas = outlineMaskCanvasObject.GetComponent<Canvas>();
-        maskCanvas.renderMode = RenderMode.WorldSpace;
-        maskCanvas.sortingOrder = short.MinValue;
-
-        RectTransform canvasRect = outlineMaskCanvasObject.GetComponent<RectTransform>();
-        canvasRect.sizeDelta = ((RectTransform)transform).sizeDelta;
-        canvasRect.localScale = Vector3.one * 0.01f;
-        canvasRect.position = transform.position;
-
-        outlineMaskCameraObject = new GameObject("Runtime Rhythm Wheel Outline Camera", typeof(Camera));
-        SetLayerRecursively(outlineMaskCameraObject, MaskLayer);
-
-        Camera maskCamera = outlineMaskCameraObject.GetComponent<Camera>();
-        maskCamera.transform.position = transform.position + new Vector3(0f, 0f, -10f);
-        maskCamera.orthographic = true;
-        maskCamera.orthographicSize = 0.5f;
-        maskCamera.clearFlags = CameraClearFlags.SolidColor;
-        maskCamera.backgroundColor = Color.clear;
-        maskCamera.cullingMask = 1 << MaskLayer;
-        maskCamera.targetTexture = outlineMaskTexture;
-        maskCamera.enabled = false;
-        maskCanvas.worldCamera = maskCamera;
-        outlineMaskCamera = maskCamera;
-
-        RectTransform maskRoot = new GameObject("Mask Shapes", typeof(RectTransform)).GetComponent<RectTransform>();
-        maskRoot.SetParent(outlineMaskCanvasObject.transform, false);
-        maskRoot.anchorMin = maskRoot.anchorMax = new Vector2(0.5f, 0.5f);
-        maskRoot.anchoredPosition = Vector2.zero;
-        maskRoot.sizeDelta = ((RectTransform)transform).sizeDelta;
-        maskRoot.localScale = Vector3.one;
-        SetLayerRecursively(maskRoot.gameObject, MaskLayer);
-
-        foreach (GameObject keyImageObject in Key_Images)
-        {
-            if (keyImageObject == null)
-                continue;
-
-            GameObject clone = Instantiate(keyImageObject, maskRoot);
-            clone.name = $"Mask {keyImageObject.name}";
-            SetLayerRecursively(clone, MaskLayer);
-
-            KeyImage clonedKeyImage = clone.GetComponent<KeyImage>();
-            if (clonedKeyImage != null)
-                clonedKeyImage.enabled = false;
-
-            foreach (TMPro.TextMeshProUGUI text in clone.GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
-                text.gameObject.SetActive(false);
-
-            foreach (Image image in clone.GetComponentsInChildren<Image>(true))
-            {
-                Material maskMaterial = new Material(image.material);
-                if (maskMaterial.HasProperty("_Fill_Color"))
-                    maskMaterial.SetColor("_Fill_Color", Color.white);
-                if (maskMaterial.HasProperty("_Line_Color"))
-                    maskMaterial.SetColor("_Line_Color", Color.white);
-
-                image.material = maskMaterial;
-                image.color = Color.white;
-                outlineMaskMaterials.Add(maskMaterial);
-            }
-
-            outlineMaskKeys.Add(clone.GetComponent<RectTransform>());
-        }
-
-        CreateCenterMask(maskRoot, MaskLayer);
-        Transform circleLine = transform.Find("Circle Line");
-        if (circleLine != null)
-            circleLine.gameObject.SetActive(false);
-
-        combinedOutline.gameObject.SetActive(true);
-        combinedOutline.transform.SetAsLastSibling();
-        SyncOutlineMaskLayout();
-    }
-
-    private void CreateCenterMask(RectTransform maskRoot, int maskLayer)
-    {
-        GameObject centerObject = new GameObject("Center Mask", typeof(RectTransform), typeof(Image));
-        centerObject.transform.SetParent(maskRoot, false);
-        SetLayerRecursively(centerObject, maskLayer);
-
-        RectTransform centerTransform = centerObject.GetComponent<RectTransform>();
-        centerTransform.anchorMin = centerTransform.anchorMax = new Vector2(0.5f, 0.5f);
-        centerTransform.anchoredPosition = Vector2.zero;
-        centerTransform.sizeDelta = Vector2.one * centerMaskDiameter;
-
-        Image centerImage = centerObject.GetComponent<Image>();
-        centerImage.sprite = CreateCircleSprite(128);
-        centerImage.color = Color.white;
-        centerImage.raycastTarget = false;
-    }
-
-    private void SyncOutlineMaskLayout()
-    {
-        if (!Application.isPlaying || outlineMaskKeys.Count != Key_Images.Length)
-            return;
-
-        for (int i = 0; i < Key_Images.Length; i++)
-        {
-            if (Key_Images[i] == null || outlineMaskKeys[i] == null)
-                continue;
-
-            RectTransform source = Key_Images[i].GetComponent<RectTransform>();
-            RectTransform target = outlineMaskKeys[i];
-            target.gameObject.SetActive(Key_Images[i].activeInHierarchy);
-            target.anchoredPosition = source.anchoredPosition;
-            target.localRotation = source.localRotation;
-            target.localScale = source.localScale;
-            target.sizeDelta = source.sizeDelta;
-        }
-    }
-
-    private static Sprite CreateCircleSprite(int size)
-    {
-        Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
-        {
-            filterMode = FilterMode.Bilinear,
-            wrapMode = TextureWrapMode.Clamp
-        };
-
-        float radius = size * 0.5f;
-        Vector2 center = new Vector2(radius - 0.5f, radius - 0.5f);
-        for (int y = 0; y < size; y++)
-        for (int x = 0; x < size; x++)
-        {
-            float alpha = Vector2.Distance(new Vector2(x, y), center) <= radius ? 1f : 0f;
-            texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
-        }
-        texture.Apply();
-        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
-    }
-
-    private static void SetLayerRecursively(GameObject target, int layer)
-    {
-        target.layer = layer;
-        foreach (Transform child in target.transform)
-            SetLayerRecursively(child.gameObject, layer);
     }
 
 }
