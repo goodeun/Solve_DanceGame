@@ -280,6 +280,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 357906265a1161e4bae8cde0c493146e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BubbleManager
+--- !u!1 &575787951 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1916173307848935117, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+  m_PrefabInstance: {fileID: 1487314785}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &575787952 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3852510976922060596, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+  m_PrefabInstance: {fileID: 1487314785}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 575787951}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e488864d3ea67e49b1dc79eeea710a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScoreUI
+--- !u!114 &575787956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 575787951}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdd1d5eae177eae41a6d315f503ef20f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScoreManager
+  multiplierUI: {fileID: 641995281}
+  scoreUI: {fileID: 575787952}
+  wheelUI: {fileID: 2109385598}
+  isFeverTime: 0
+  totalScore: 0
+  keyCount: 4
+  curPhase: 0
+--- !u!114 &641995281 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5309030006976827358, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+  m_PrefabInstance: {fileID: 1487314785}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b32d20d5226f2043badc2511501de3d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MultiplierUI
 --- !u!1001 &939047197
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -662,6 +708,7 @@ GameObject:
   - component: {fileID: 1196961591}
   - component: {fileID: 1196961590}
   - component: {fileID: 1196961589}
+  - component: {fileID: 1196961593}
   m_Layer: 0
   m_Name: TempPlayer
   m_TagString: Player
@@ -763,6 +810,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1196961593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1196961588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62e24ad6016e4ce45b5e2f544d27d4eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerManager
+  currentStats:
+    rhythm: 0
+    groove: 0
+    power: 0
+    style: 0
+    tenacity: 0
+    energe: 0
+    cleanliness: 0
+    condition: 0
 --- !u!1 &1258072575
 GameObject:
   m_ObjectHideFlags: 0
@@ -1026,7 +1094,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1916173307848935117, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 575787956}
   m_SourcePrefab: {fileID: 100100000, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
 --- !u!1 &1645624735
 GameObject:
@@ -1327,6 +1398,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
+--- !u!114 &2109385598 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 80314218047273927, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+  m_PrefabInstance: {fileID: 1487314785}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 665d58bda04efea42864bbbc669043ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelUI
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
