@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
+using Unity.Cinemachine;
 
 public class RhythmWheelUI : MonoBehaviour
 {
@@ -16,6 +17,14 @@ public class RhythmWheelUI : MonoBehaviour
     [SerializeField] private GameObject[] Key_Images = new GameObject[6];
 
     [SerializeField] private Image circlePulse;
+
+    [Header("Wheel Input Motion")]
+    [Tooltip("키 입력 시 Rhythm Wheel이 키 방향으로 이동할 거리입니다.")]
+    [SerializeField, Min(0f)] private float inputMoveDistance = 18f;
+    [SerializeField, Min(0.005f)] private float inputMoveOutDuration = 0.015f;
+    [SerializeField, Min(0.01f)] private float inputMoveReturnDuration = 0.16f;
+    [Tooltip("키 입력 시 카메라가 화면 방향으로 이동할 월드 거리입니다.")]
+    [SerializeField, Min(0f)] private float cameraInputMoveDistance = 0.25f;
 
     [Header("Key Settings")]
     [SerializeField] private bool isSquare = true;
@@ -47,11 +56,21 @@ public class RhythmWheelUI : MonoBehaviour
     public event System.Action OnPhraseCompleted;
 
     private PlayerInput playerInput;
+    private RectTransform wheelRectTransform;
+    private Vector2 defaultWheelAnchoredPosition;
+    private Coroutine inputMoveCoroutine;
+    private Camera inputCamera;
+    private Coroutine cameraInputMoveCoroutine;
+    private Vector2 cameraInputDirection;
+    private float cameraInputAmount;
     private readonly Dictionary<Keys, KeyImage> keyImagesByKey = new();
 
     private static readonly int ProgressProperty = Shader.PropertyToID("_Progress");
     private Material circlePulseMaterial;
     private float pulseStartTime;
+    private float lastMusicElapsed;
+    private double lastMusicSampleTime;
+    private bool hasMusicTimeSample;
     private bool isFourthBeat;
     private readonly HashSet<int> resolvedBeats = new();
     private int lastObservedBeat = -1;
@@ -62,6 +81,11 @@ public class RhythmWheelUI : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
+        wheelRectTransform = transform as RectTransform;
+        if (wheelRectTransform != null)
+            defaultWheelAnchoredPosition = wheelRectTransform.anchoredPosition;
+
+        inputCamera = Camera.main;
 
         if (musicClock == null)
             musicClock = FindFirstObjectByType<FmodMusicClock>();
@@ -105,6 +129,7 @@ public class RhythmWheelUI : MonoBehaviour
 
         OnJudged += HandleFeverJudgement;
         OnPhraseCompleted += StartQueuedFever;
+        CinemachineCore.CameraUpdatedEvent.AddListener(ApplyCameraInputOffset);
 
         pulseStartTime = Time.unscaledTime;
         isFourthBeat = false;
@@ -123,8 +148,27 @@ public class RhythmWheelUI : MonoBehaviour
         if (playerInput != null)
             playerInput.onActionTriggered -= OnActionTriggered;
 
+        if (inputMoveCoroutine != null)
+        {
+            StopCoroutine(inputMoveCoroutine);
+            inputMoveCoroutine = null;
+        }
+
+        if (wheelRectTransform != null)
+            wheelRectTransform.anchoredPosition = defaultWheelAnchoredPosition;
+
+        if (cameraInputMoveCoroutine != null)
+        {
+            StopCoroutine(cameraInputMoveCoroutine);
+            cameraInputMoveCoroutine = null;
+        }
+
+        cameraInputDirection = Vector2.zero;
+        cameraInputAmount = 0f;
+
         OnJudged -= HandleFeverJudgement;
         OnPhraseCompleted -= StartQueuedFever;
+        CinemachineCore.CameraUpdatedEvent.RemoveListener(ApplyCameraInputOffset);
 
     }
 
@@ -136,8 +180,12 @@ public class RhythmWheelUI : MonoBehaviour
         if (!System.Enum.TryParse(context.control.name, true, out Keys pressedKey))
             return;
 
+        PlayWheelInputMotion(pressedKey);
+
         if (IsJudgementLocked)
             return;
+
+        PlayCameraInputMotion(pressedKey);
 
         if (!IsKeyInputEnabled(pressedKey))
             return;
@@ -148,8 +196,103 @@ public class RhythmWheelUI : MonoBehaviour
         // Capture the music time once.  In particular, do not reject a press just
         // because FMOD advanced into the rest beat between the input update and
         // this callback.
-        if (JudgeInput(pressedKey, GetElapsedTime()))
+        if (JudgeInput(pressedKey, GetInputElapsedTime(context.time)))
             starPulse?.Play(BPM);
+    }
+
+    private void PlayWheelInputMotion(Keys pressedKey)
+    {
+        if (wheelRectTransform == null || !Application.isPlaying)
+            return;
+
+        if (inputMoveCoroutine != null)
+            StopCoroutine(inputMoveCoroutine);
+
+        wheelRectTransform.anchoredPosition = defaultWheelAnchoredPosition;
+        inputMoveCoroutine = StartCoroutine(PlayWheelInputMotionCoroutine(GetKeyDirection(pressedKey)));
+    }
+
+    private IEnumerator PlayWheelInputMotionCoroutine(Vector2 direction)
+    {
+        Vector2 targetPosition = defaultWheelAnchoredPosition + (direction.normalized * inputMoveDistance);
+        yield return MoveWheelAnchoredPosition(defaultWheelAnchoredPosition, targetPosition, inputMoveOutDuration);
+        yield return MoveWheelAnchoredPosition(targetPosition, defaultWheelAnchoredPosition, inputMoveReturnDuration);
+        inputMoveCoroutine = null;
+    }
+
+    private IEnumerator MoveWheelAnchoredPosition(Vector2 from, Vector2 to, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float progress = Mathf.Clamp01(elapsed / duration);
+            wheelRectTransform.anchoredPosition = Vector2.Lerp(from, to, Mathf.SmoothStep(0f, 1f, progress));
+            yield return null;
+        }
+
+        wheelRectTransform.anchoredPosition = to;
+    }
+
+    private static Vector2 GetKeyDirection(Keys key)
+    {
+        return key switch
+        {
+            Keys.W => Vector2.up,
+            Keys.A => Vector2.left,
+            Keys.S => Vector2.down,
+            Keys.D => Vector2.right,
+            Keys.Q => new Vector2(-1f, 1f),
+            Keys.E => new Vector2(1f, 1f),
+            _ => Vector2.zero
+        };
+    }
+
+    private void PlayCameraInputMotion(Keys pressedKey)
+    {
+        if (inputCamera == null)
+            inputCamera = Camera.main;
+
+        if (inputCamera == null || !Application.isPlaying)
+            return;
+
+        if (cameraInputMoveCoroutine != null)
+            StopCoroutine(cameraInputMoveCoroutine);
+
+        cameraInputDirection = GetKeyDirection(pressedKey).normalized;
+        cameraInputMoveCoroutine = StartCoroutine(PlayCameraInputMotionCoroutine());
+    }
+
+    private IEnumerator PlayCameraInputMotionCoroutine()
+    {
+        yield return AnimateCameraInputAmount(0f, 1f, inputMoveOutDuration);
+        yield return AnimateCameraInputAmount(1f, 0f, inputMoveReturnDuration);
+        cameraInputAmount = 0f;
+        cameraInputDirection = Vector2.zero;
+        cameraInputMoveCoroutine = null;
+    }
+
+    private IEnumerator AnimateCameraInputAmount(float from, float to, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float progress = Mathf.Clamp01(elapsed / duration);
+            cameraInputAmount = Mathf.SmoothStep(from, to, progress);
+            yield return null;
+        }
+    }
+
+    private void ApplyCameraInputOffset(CinemachineBrain brain)
+    {
+        if (cameraInputAmount <= 0f || inputCamera == null || brain == null || brain.OutputCamera != inputCamera)
+            return;
+
+        Transform cameraTransform = inputCamera.transform;
+        Vector3 worldDirection = (cameraTransform.right * cameraInputDirection.x)
+            + (cameraTransform.up * cameraInputDirection.y);
+        cameraTransform.position += worldDirection * (cameraInputMoveDistance * cameraInputAmount);
     }
 
     /// <summary>
@@ -176,21 +319,9 @@ public class RhythmWheelUI : MonoBehaviour
         if (currentBeat % 4 == 3)
             return false;
 
-        // During the Just grace at the start of a new beat, finish the previous
-        // unresolved input beat first. This keeps a key press at a beat boundary
-        // from being recorded as the new beat while the prior beat becomes Miss.
-        int previousBeat = currentBeat - 1;
-        bool canResolvePreviousBeat = previousBeat >= 0
-            && previousBeat % 4 != 3
-            && !resolvedBeats.Contains(previousBeat);
-
-        if (pulseOffset <= GetScaledJustWindow() && canResolvePreviousBeat)
-        {
-            currentBeat = previousBeat;
-        }
-        float offset = pulseOffset <= beatDuration * 0.5f
-            ? pulseOffset
-            : pulseOffset - beatDuration;
+        // The visible pulse moves from 0 to 0.5 during one beat.  Its 0.5
+        // endpoint is the beat marker and therefore the Just point.
+        float offset = beatDuration - pulseOffset;
 
         // A beat can only be resolved once.
         if (resolvedBeats.Contains(currentBeat))
@@ -332,6 +463,9 @@ public class RhythmWheelUI : MonoBehaviour
 
         float beatDuration = 60f / BPM;
         float elapsed = GetElapsedTime();
+        lastMusicElapsed = elapsed;
+        lastMusicSampleTime = Time.realtimeSinceStartupAsDouble;
+        hasMusicTimeSample = true;
         int currentBeat = Mathf.FloorToInt(elapsed / beatDuration);
         isFourthBeat = currentBeat % 4 == 3;
 
@@ -349,13 +483,18 @@ public class RhythmWheelUI : MonoBehaviour
         if (circlePulseMaterial == null)
             return;
 
+        // The visual pulse always travels smoothly from 0 to 0.5.
         float beatProgress = Mathf.Repeat(elapsed / beatDuration, 1f);
 
         circlePulseMaterial.SetColor(
             "_Ring_Color",
             isFourthBeat ? fourthBeatPulseColor : normalPulseColor);
 
-        circlePulseMaterial.SetFloat(ProgressProperty, beatProgress * 0.5f);
+        // Just is evaluated when this value reaches 0.5, immediately before
+        // the following pulse starts at zero.
+        circlePulseMaterial.SetFloat(
+            ProgressProperty,
+            beatProgress * 0.5f);
     }
 
     private void NotifyBeatTransitions(int currentBeat)
@@ -411,6 +550,17 @@ public class RhythmWheelUI : MonoBehaviour
             return elapsed;
 
         return Time.unscaledTime - pulseStartTime;
+    }
+
+    private float GetInputElapsedTime(double inputTime)
+    {
+        if (!hasMusicTimeSample)
+            return GetElapsedTime();
+
+        // Input System timestamps the physical key event. Estimate the FMOD
+        // timeline at that instant instead of using the later callback time.
+        double secondsSinceLastMusicSample = inputTime - lastMusicSampleTime;
+        return Mathf.Max(0f, lastMusicElapsed + (float)secondsSinceLastMusicSample);
     }
 
     private void OnDestroy()
