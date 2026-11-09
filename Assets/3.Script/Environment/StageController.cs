@@ -18,22 +18,22 @@ public class StageController : MonoBehaviour
     [SerializeField] private Transform[] rhombusAnchors = new Transform[4];
     [SerializeField] private Transform[] hexagonAnchors = new Transform[6];
 
-    public StagePhase currentPhase = StagePhase.Square;
+    public Stage currentPhase = Stage.Square;
 
     private void Awake()
     {
         mainDanceFloor=GetComponent<MainFloorController>();
     }
 
-    public void ChangePhase(StagePhase targetPhase)
+    public void ChangePhase(Stage targetPhase)
     {
         if (currentPhase == targetPhase) return;
 
-        if (targetPhase == StagePhase.Hexagon || targetPhase == StagePhase.Square)
+        if (targetPhase == Stage.Hexagon || targetPhase == Stage.Square)
         {
             mainDanceFloor.transform.DORotate(Vector3.zero, transitionDuration).SetEase(transitionEase);
         }
-        else if (targetPhase == StagePhase.Rhombus)
+        else if (targetPhase == Stage.Rhombus)
         {
             mainDanceFloor.transform.DORotate(new Vector3(0, 45, 0), transitionDuration).SetEase(transitionEase);
         }
@@ -41,13 +41,13 @@ public class StageController : MonoBehaviour
         // ∞¥ºÆ ¿Ãµø
         switch (targetPhase)
         {
-            case StagePhase.Square:
+            case Stage.Square:
                 MoveSeats(squareAnchors, 4);
                 break;
-            case StagePhase.Rhombus:
+            case Stage.Rhombus:
                 MoveSeats(rhombusAnchors, 4);
                 break;
-            case StagePhase.Hexagon:
+            case Stage.Hexagon:
                 MoveSeats(hexagonAnchors, 4);
                 AppearHiddenSeats(4, 5);
                 break;
@@ -104,17 +104,17 @@ public class StageController : MonoBehaviour
 
     public void DEBUG_ToSquare()
     {
-        ChangePhase(StagePhase.Square);
+        ChangePhase(Stage.Square);
     }
 
     public void DEBUG_ToRhomBus()
     {
-        ChangePhase(StagePhase.Rhombus);
+        ChangePhase(Stage.Rhombus);
     }
 
     public void DEBUG_To6Key()
     {
-        ChangePhase(StagePhase.Hexagon);
+        ChangePhase(Stage.Hexagon);
     }
 
     #endregion
