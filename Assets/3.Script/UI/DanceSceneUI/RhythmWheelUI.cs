@@ -35,6 +35,9 @@ public class RhythmWheelUI : MonoBehaviour
     [SerializeField, Range(0.01f, 1f)] private float feverGainPerJust = 0.1f;
     [SerializeField, Min(0.1f)] private float feverDuration = 10f;
 
+    [Header("Music Sync")]
+    [SerializeField] private FmodMusicClock musicClock;
+
     public int Score { get; private set; }
     public int Combo { get; private set; }
     public event System.Action<Keys, Judge, float> OnJudged;
@@ -57,6 +60,9 @@ public class RhythmWheelUI : MonoBehaviour
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
+
+        if (musicClock == null)
+            musicClock = FindFirstObjectByType<FmodMusicClock>();
 
         if (danceHUD == null)
             danceHUD = FindFirstObjectByType<DanceSceneHUD>();
@@ -144,7 +150,7 @@ public class RhythmWheelUI : MonoBehaviour
             return;
 
         float beatDuration = 60f / BPM;
-        float elapsed = Time.unscaledTime - pulseStartTime;
+        float elapsed = GetElapsedTime();
         int currentBeat = Mathf.FloorToInt(elapsed / beatDuration);
         float pulseOffset = elapsed - (currentBeat * beatDuration);
         float offset = pulseOffset <= beatDuration * 0.5f
@@ -261,7 +267,7 @@ public class RhythmWheelUI : MonoBehaviour
             return;
 
         float beatDuration = 60f / BPM;
-        float elapsed = Time.unscaledTime - pulseStartTime;
+        float elapsed = GetElapsedTime();
         int currentBeat = Mathf.FloorToInt(elapsed / beatDuration);
         isFourthBeat = currentBeat % 4 == 3;
 
@@ -328,8 +334,16 @@ public class RhythmWheelUI : MonoBehaviour
             return false;
 
         float beatDuration = 60f / BPM;
-        int currentBeat = Mathf.FloorToInt((Time.unscaledTime - pulseStartTime) / beatDuration);
+        int currentBeat = Mathf.FloorToInt(GetElapsedTime() / beatDuration);
         return currentBeat % 4 == 3;
+    }
+
+    private float GetElapsedTime()
+    {
+        if (musicClock != null && musicClock.TryGetElapsedSeconds(out float elapsed))
+            return elapsed;
+
+        return Time.unscaledTime - pulseStartTime;
     }
 
     private void OnDestroy()
