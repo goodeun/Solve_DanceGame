@@ -202,7 +202,7 @@ Transform:
   m_GameObject: {fileID: 1065013848659669637}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -6}
+  m_LocalPosition: {x: 0, y: 0.88, z: -12.12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -290,7 +290,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -559,6 +559,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FeverCamera
   feverUI: {fileID: 0}
   playerAnimator: {fileID: 0}
+  player: {fileID: 0}
   mainCameraBrain: {fileID: 3817788796180413484}
   defaultCamera: {fileID: 3383661678769244705}
   feverCameras:
@@ -1185,7 +1186,7 @@ Transform:
   m_GameObject: {fileID: 6583690670799039852}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -6}
+  m_LocalPosition: {x: 0, y: 0.88, z: -12.12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1261,7 +1262,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8984332490957107386}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.07441787, y: -0.162774, z: 0.012313061, w: 0.9837759}
+  m_LocalRotation: {x: 0, y: 0.69785386, z: 0, w: 0.71624017}
   m_LocalPosition: {x: 0.6773863, y: 0.32000047, z: -1.9909602}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
