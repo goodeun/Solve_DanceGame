@@ -14,6 +14,9 @@ public class FeverCamera : MonoBehaviour
     [SerializeField] private CinemachineCamera defaultCamera;
     [SerializeField] private CinemachineCamera[] feverCameras;
 
+    public bool IsCameraSequenceActive { get; private set; }
+    private Coroutine feverSequenceCoroutine;
+
     private void Start()
     {
         feverUI = FindAnyObjectByType<FeverUI>();
@@ -37,12 +40,16 @@ public class FeverCamera : MonoBehaviour
             feverCameras[i].LookAt = player;
         }
     }
-    public void FeverCameraOnAir(float currentFeverDuration)
+    public void FeverCameraOnAir(float currentFeverDuration, float returnBlendDuration)
     {
-        StartCoroutine(FeverSuccess_co(currentFeverDuration));
+        if (feverSequenceCoroutine != null)
+            StopCoroutine(feverSequenceCoroutine);
+
+        IsCameraSequenceActive = true;
+        feverSequenceCoroutine = StartCoroutine(FeverSuccess_co(currentFeverDuration, returnBlendDuration));
     }
 
-    private IEnumerator FeverSuccess_co(float duration)
+    private IEnumerator FeverSuccess_co(float duration, float returnBlendDuration)
     {
         //TODO 플레이어 애니메이터 연결
         //playerAnimator.SetTrigger("FeverStart");
@@ -58,7 +65,7 @@ public class FeverCamera : MonoBehaviour
 
             CinemachineSplineDolly dolly = feverCameras[i].GetComponent<CinemachineSplineDolly>();
 
-            float currentDuration = (i == feverCameras.Length - 1) ? (timePerCut + 2f) : timePerCut;
+            float currentDuration = timePerCut;
 
             if (dolly != null)
             {
@@ -76,7 +83,17 @@ public class FeverCamera : MonoBehaviour
         }
 
         mainCameraBrain.DefaultBlend.Style = CinemachineBlendDefinition.Styles.EaseInOut;
+        mainCameraBrain.DefaultBlend.Time = returnBlendDuration;
         defaultCamera.Priority = 20;
+
+        // Wait one frame for the priority change to start its blend, then keep
+        // judgements locked until the default camera is fully active again.
+        yield return null;
+        while (mainCameraBrain != null && mainCameraBrain.IsBlending)
+            yield return null;
+
+        IsCameraSequenceActive = false;
+        feverSequenceCoroutine = null;
     }
 
 }

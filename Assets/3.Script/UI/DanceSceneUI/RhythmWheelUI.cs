@@ -28,34 +28,36 @@ public class RhythmWheelUI : MonoBehaviour
     [SerializeField, Min(1)] private int judgementReferenceBPM = 120;
     [SerializeField, Min(0f)] private float justWindow = 0.05f;
     [SerializeField, Min(0f)] private float goodWindow = 0.10f;
-    [SerializeField, Min(0f)] private float badWindow = 0.18f;
 
     [Header("Fever Settings")]
     [Tooltip("Just 판정 1회로 채울 피버 게이지 비율입니다.")]
     [SerializeField, Range(0.01f, 1f)] private float feverGainPerJust = 0.1f;
-    [SerializeField, Min(0.1f)] private float feverDuration = 10f;
+    [Tooltip("피버 지속 시간입니다. 초가 아니라 박(beat) 수로 지정하며, 항상 4박 배수로 적용됩니다.")]
+    [SerializeField, Min(4f)] private float feverDuration = 12f;
 
     [Header("Music Sync")]
     [SerializeField] private FmodMusicClock musicClock;
+    [SerializeField] private StarPulseUI starPulse;
+    [SerializeField] private FeverCamera feverCamera;
 
     public int Score { get; private set; }
     public int Combo { get; private set; }
     public event System.Action<Keys, Judge, float> OnJudged;
     public event System.Action OnFourthBeatStarted;
+    public event System.Action OnPhraseCompleted;
 
     private PlayerInput playerInput;
     private readonly Dictionary<Keys, KeyImage> keyImagesByKey = new();
 
     private static readonly int ProgressProperty = Shader.PropertyToID("_Progress");
     private Material circlePulseMaterial;
-    private JudgementUI judgementUI;
     private float pulseStartTime;
     private bool isFourthBeat;
     private readonly HashSet<int> resolvedBeats = new();
     private int lastObservedBeat = -1;
-    private int lastJudgementVisibilityBeat = int.MinValue;
     private float feverGauge;
     private bool isFeverActive;
+    private bool isFeverQueued;
 
     private void Awake()
     {
@@ -64,10 +66,14 @@ public class RhythmWheelUI : MonoBehaviour
         if (musicClock == null)
             musicClock = FindFirstObjectByType<FmodMusicClock>();
 
+        if (starPulse == null)
+            starPulse = GetComponentInChildren<StarPulseUI>(true);
+
+        if (feverCamera == null)
+            feverCamera = FindFirstObjectByType<FeverCamera>();
+
         if (danceHUD == null)
             danceHUD = FindFirstObjectByType<DanceSceneHUD>();
-
-        judgementUI = FindFirstObjectByType<JudgementUI>();
 
         if (circlePulse != null && circlePulse.material != null)
         {
@@ -98,16 +104,17 @@ public class RhythmWheelUI : MonoBehaviour
             playerInput.onActionTriggered += OnActionTriggered;
 
         OnJudged += HandleFeverJudgement;
+        OnPhraseCompleted += StartQueuedFever;
 
         pulseStartTime = Time.unscaledTime;
         isFourthBeat = false;
         resolvedBeats.Clear();
         lastObservedBeat = -1;
-        lastJudgementVisibilityBeat = int.MinValue;
         Score = 0;
         Combo = 0;
         feverGauge = 0f;
         isFeverActive = false;
+        isFeverQueued = false;
         UpdateFeverGaugeUI();
     }
 
@@ -117,6 +124,7 @@ public class RhythmWheelUI : MonoBehaviour
             playerInput.onActionTriggered -= OnActionTriggered;
 
         OnJudged -= HandleFeverJudgement;
+        OnPhraseCompleted -= StartQueuedFever;
 
     }
 
@@ -128,7 +136,7 @@ public class RhythmWheelUI : MonoBehaviour
         if (!System.Enum.TryParse(context.control.name, true, out Keys pressedKey))
             return;
 
-        if (IsFourthBeat())
+        if (IsJudgementLocked)
             return;
 
         if (!IsKeyInputEnabled(pressedKey))
@@ -137,7 +145,11 @@ public class RhythmWheelUI : MonoBehaviour
         KeyImage keyImage = keyImagesByKey[pressedKey];
         keyImage.PlayPressAnimation();
 
-        JudgeInput(pressedKey);
+        // Capture the music time once.  In particular, do not reject a press just
+        // because FMOD advanced into the rest beat between the input update and
+        // this callback.
+        if (JudgeInput(pressedKey, GetElapsedTime()))
+            starPulse?.Play(BPM);
     }
 
     /// <summary>
@@ -146,24 +158,48 @@ public class RhythmWheelUI : MonoBehaviour
     /// </summary>
     public void JudgeInput(Keys pressedKey)
     {
-        if (BPM <= 0 || IsFourthBeat() || !IsKeyInputEnabled(pressedKey))
-            return;
+        JudgeInput(pressedKey, GetElapsedTime());
+    }
+
+    private bool JudgeInput(Keys pressedKey, float elapsed)
+    {
+        if (BPM <= 0 || !IsKeyInputEnabled(pressedKey))
+            return false;
 
         float beatDuration = 60f / BPM;
-        float elapsed = GetElapsedTime();
         int currentBeat = Mathf.FloorToInt(elapsed / beatDuration);
         float pulseOffset = elapsed - (currentBeat * beatDuration);
+
+        // The fourth beat is always a rest. Do not turn a rest-beat key press
+        // into a late third-beat input; it must not receive a judgement or play
+        // the associated star effect.
+        if (currentBeat % 4 == 3)
+            return false;
+
+        // During the Just grace at the start of a new beat, finish the previous
+        // unresolved input beat first. This keeps a key press at a beat boundary
+        // from being recorded as the new beat while the prior beat becomes Miss.
+        int previousBeat = currentBeat - 1;
+        bool canResolvePreviousBeat = previousBeat >= 0
+            && previousBeat % 4 != 3
+            && !resolvedBeats.Contains(previousBeat);
+
+        if (pulseOffset <= GetScaledJustWindow() && canResolvePreviousBeat)
+        {
+            currentBeat = previousBeat;
+        }
         float offset = pulseOffset <= beatDuration * 0.5f
             ? pulseOffset
             : pulseOffset - beatDuration;
 
         // A beat can only be resolved once.
         if (resolvedBeats.Contains(currentBeat))
-            return;
+            return false;
 
         Judge judge = GetJudge(Mathf.Abs(offset));
         resolvedBeats.Add(currentBeat);
         ApplyJudgement(pressedKey, judge, offset);
+        return true;
     }
 
     private bool IsKeyInputEnabled(Keys pressedKey)
@@ -181,15 +217,20 @@ public class RhythmWheelUI : MonoBehaviour
         float bpmScale = (float)judgementReferenceBPM / BPM;
         float scaledJustWindow = justWindow * bpmScale;
         float scaledGoodWindow = goodWindow * bpmScale;
-        float scaledBadWindow = badWindow * bpmScale;
 
         if (absoluteOffset <= scaledJustWindow)
             return Judge.Just;
         if (absoluteOffset <= scaledGoodWindow)
             return Judge.Good;
-        if (absoluteOffset <= scaledBadWindow)
-            return Judge.Bad;
-        return Judge.Miss;
+
+        // A pressed key is always a Bad at worst. Miss is reserved for the
+        // beat-resolution path where the player supplied no input at all.
+        return Judge.Bad;
+    }
+
+    private float GetScaledJustWindow()
+    {
+        return justWindow * ((float)judgementReferenceBPM / BPM);
     }
 
     private void ApplyJudgement(Keys pressedKey, Judge judge, float offset)
@@ -239,18 +280,41 @@ public class RhythmWheelUI : MonoBehaviour
         if (feverGauge < 1f)
             return;
 
-        isFeverActive = true;
-        danceHUD?.RequestFeverTime(true, feverDuration);
-        StartCoroutine(ResetFeverAfterDuration());
+        isFeverQueued = true;
     }
 
-    private IEnumerator ResetFeverAfterDuration()
+    private void StartQueuedFever()
     {
-        yield return new WaitForSeconds(feverDuration);
+        if (!isFeverQueued || isFeverActive || BPM <= 0)
+            return;
+
+        isFeverQueued = false;
+        isFeverActive = true;
+        float beatDuration = 60f / BPM;
+        float feverDurationSeconds = GetFeverDurationBeats() * beatDuration;
+        danceHUD?.RequestFeverTime(true, feverDurationSeconds, beatDuration);
+        StartCoroutine(ResetFeverAfterDuration(feverDurationSeconds));
+    }
+
+    private IEnumerator ResetFeverAfterDuration(float feverDurationSeconds)
+    {
+        yield return new WaitForSeconds(feverDurationSeconds);
 
         feverGauge = 0f;
         isFeverActive = false;
         UpdateFeverGaugeUI();
+    }
+
+    private float GetFeverDurationBeats()
+    {
+        // A fever always finishes on a full four-beat phrase. Round upward so a
+        // designer-entered value never makes the effect shorter than requested.
+        return Mathf.Max(4f, Mathf.Ceil(feverDuration / 4f) * 4f);
+    }
+
+    private void OnValidate()
+    {
+        feverDuration = GetFeverDurationBeats();
     }
 
     private void UpdateFeverGaugeUI()
@@ -271,9 +335,16 @@ public class RhythmWheelUI : MonoBehaviour
         int currentBeat = Mathf.FloorToInt(elapsed / beatDuration);
         isFourthBeat = currentBeat % 4 == 3;
 
-        UpdateJudgementVisibilityForBeat(currentBeat);
-
         NotifyBeatTransitions(currentBeat);
+        if (IsJudgementLocked)
+        {
+            MarkBeatAsExcluded(currentBeat);
+            MarkBeatAsExcluded(currentBeat - 1);
+        }
+        else
+        {
+            ResolvePreviousBeatAfterGrace(currentBeat, elapsed, beatDuration);
+        }
 
         if (circlePulseMaterial == null)
             return;
@@ -287,37 +358,14 @@ public class RhythmWheelUI : MonoBehaviour
         circlePulseMaterial.SetFloat(ProgressProperty, beatProgress * 0.5f);
     }
 
-    private void UpdateJudgementVisibilityForBeat(int currentBeat)
-    {
-        if (judgementUI == null)
-            return;
-
-        if (currentBeat == lastJudgementVisibilityBeat)
-            return;
-
-        lastJudgementVisibilityBeat = currentBeat;
-
-        if (judgementUI.gameObject.activeSelf)
-            judgementUI.gameObject.SetActive(false);
-
-        judgementUI.gameObject.SetActive(true);
-    }
-
     private void NotifyBeatTransitions(int currentBeat)
     {
         for (int beat = lastObservedBeat + 1; beat <= currentBeat; beat++)
         {
-            // Resolve each empty input beat when the following pulse starts.
-            // The rest beat (index 3) never has a pending input of its own.
-            if (beat >= 1 && beat % 4 != 0)
-            {
-                int previousBeat = beat - 1;
-                if (!resolvedBeats.Contains(previousBeat))
-                {
-                    resolvedBeats.Add(previousBeat);
-                    ApplyJudgement(default, Judge.Miss, 0f);
-                }
-            }
+            // A phrase finishes only after its fourth (rest) beat has elapsed.
+            // This is the first beat of the next four-beat loop.
+            if (beat > 0 && beat % 4 == 0)
+                OnPhraseCompleted?.Invoke();
 
             if (beat >= 0 && beat % 4 == 3)
             {
@@ -328,14 +376,33 @@ public class RhythmWheelUI : MonoBehaviour
         lastObservedBeat = currentBeat;
     }
 
-    private bool IsFourthBeat()
+    private void ResolvePreviousBeatAfterGrace(int currentBeat, float elapsed, float beatDuration)
     {
-        if (BPM <= 0)
-            return false;
+        if (currentBeat <= 0)
+            return;
 
-        float beatDuration = 60f / BPM;
-        int currentBeat = Mathf.FloorToInt(GetElapsedTime() / beatDuration);
-        return currentBeat % 4 == 3;
+        float currentBeatStart = currentBeat * beatDuration;
+        if (elapsed - currentBeatStart <= GetScaledJustWindow())
+            return;
+
+        int previousBeat = currentBeat - 1;
+        // The fourth beat is a rest and does not have an input to resolve.
+        if (previousBeat % 4 == 3)
+            return;
+
+        if (resolvedBeats.Add(previousBeat))
+            ApplyJudgement(default, Judge.Miss, 0f);
+    }
+
+    public bool IsJudgementLocked
+    {
+        get { return feverCamera != null && feverCamera.IsCameraSequenceActive; }
+    }
+
+    private void MarkBeatAsExcluded(int beat)
+    {
+        if (beat >= 0 && beat % 4 != 3)
+            resolvedBeats.Add(beat);
     }
 
     private float GetElapsedTime()

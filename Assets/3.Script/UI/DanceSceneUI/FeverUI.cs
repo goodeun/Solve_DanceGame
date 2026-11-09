@@ -15,11 +15,11 @@ public class FeverUI : MonoBehaviour
         feverSuccess_img.gameObject.SetActive(false);
         feverFailure_img.gameObject.SetActive(false);
     }
-    public void FeverSuccess(float feverDuration)
+    public void FeverSuccess(float feverDuration, float returnBlendDuration)
     {
         StartCoroutine(SuccessEffect_co(feverDuration));
 
-        FeverCameraGroup.FeverCameraOnAir(feverDuration);
+        FeverCameraGroup.FeverCameraOnAir(feverDuration, returnBlendDuration);
     }
 
     public void FeverFailure()
