@@ -15,10 +15,10 @@ MonoBehaviour:
   Path: fmodProject/Build/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639292956441313171
+  lastModified: 639298145683929396
   FileSizes:
   - Name: Desktop
-    Value: 760
+    Value: 844
   Exists: 1
 --- !u!114 &-5675125798337921528
 MonoBehaviour:
@@ -35,11 +35,38 @@ MonoBehaviour:
   Path: fmodProject/Build/Desktop/Bank A.bank
   Name: Bank A
   StudioPath: bank:/Bank A
-  lastModified: 639292956441292362
+  lastModified: 639298145683859583
   FileSizes:
   - Name: Desktop
-    Value: 494
+    Value: 2931040
   Exists: 1
+--- !u!114 &-2984132775536027127
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: 'event:/RetroVision - Puzzle (2024 Edit) [NCS Release]'
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: 'event:/RetroVision - Puzzle (2024 Edit) [NCS Release]'
+  Guid:
+    Data1: -1734495041
+    Data2: 1338000622
+    Data3: 678698125
+    Data4: 1092335240
+  Banks:
+  - {fileID: -5675125798337921528}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 173160
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56,13 +83,14 @@ MonoBehaviour:
   - {fileID: -6062457703301502991}
   - {fileID: -5675125798337921528}
   - {fileID: 8218238209796944386}
-  EditorEvents: []
+  EditorEvents:
+  - {fileID: -2984132775536027127}
   EditorParameters: []
   MasterBanks:
   - {fileID: 8218238209796944386}
   StringsBanks:
   - {fileID: -6062457703301502991}
-  cacheTime: 639292956441313171
+  cacheTime: 639298145683929396
   cacheVersion: 131637
 --- !u!114 &8218238209796944386
 MonoBehaviour:
@@ -79,7 +107,7 @@ MonoBehaviour:
   Path: fmodProject/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639292956441302734
+  lastModified: 639298145683907960
   FileSizes:
   - Name: Desktop
     Value: 1036

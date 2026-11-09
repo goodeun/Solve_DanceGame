@@ -71,6 +71,16 @@ public class ComboAndMagnification : MonoBehaviour
 
     private void CompletePhrase()
     {
+        // Input judgements are intentionally paused while the fever camera is
+        // playing, so a phrase that passes during that time cannot fail a combo.
+        if (rhythmWheel != null && rhythmWheel.IsJudgementLocked)
+        {
+            currentPhraseKeys.Clear();
+            comboSavedThisPhrase = false;
+            comboFailedThisPhrase = false;
+            return;
+        }
+
         if (!comboSavedThisPhrase && !comboFailedThisPhrase)
             Debug.Log("[ComboAndMagnification] Combo failed", this);
 

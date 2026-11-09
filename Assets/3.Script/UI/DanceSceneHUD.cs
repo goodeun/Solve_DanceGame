@@ -61,13 +61,13 @@ public class DanceSceneHUD : MonoBehaviour
         healthUI.Heal(healValue);
     }
 
-    public void RequestFeverTime(bool isFever, float feverDuration) // 피버 타임 얼마나 지속할지 bpm, 마디 계산해서 총 피버 duration 입력
+    public void RequestFeverTime(bool isFever, float feverDuration, float returnBlendDuration = 0.5f) // 피버 타임 얼마나 지속할지 bpm, 마디 계산해서 총 피버 duration 입력
                                                                     // isFever  true - 피버 진입 성공 | false - 피버 진입 실패
     {
         if (isFever)
         {
             StartCoroutine(HideHud(feverDuration));
-            feverUI.FeverSuccess(feverDuration);
+            feverUI.FeverSuccess(feverDuration, returnBlendDuration);
         }
         else
         {
