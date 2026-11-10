@@ -65,6 +65,10 @@ public class FloorSection : MonoBehaviour
         floorMat.DOKill();
         seq?.Kill();
 
+        // A key press can interrupt the combo-success tween while _Brightness
+        // is elevated. Reset it before playing the normal key-light response.
+        floorMat.SetFloat(brightID, 0f);
+
         if (!isActivated)
         {
             isActivated = true;
@@ -87,16 +91,18 @@ public class FloorSection : MonoBehaviour
     {
         isActivated = false;
         floorMat.DOKill();
+        floorMat.SetFloat(brightID, 0f);
 
         if (isComboSuccess)
         {
             seq?.Kill();
             seq = DOTween.Sequence();
 
-            seq.Append(floorMat.DOFloat(0.9f, brightID, 0.1f))
-                .Join(floorMat.DOColor(hdrColor, colorID, 0.2f))
-                .Append(floorMat.DOFloat(0f, brightID, 0.1f))
-                .Join(floorMat.DOColor(baseColor, colorID, 0.2f));
+            // Combo success is a quick confirmation flash, not a sustained glow.
+            seq.Append(floorMat.DOFloat(0.9f, brightID, 0.01f))
+                .Join(floorMat.DOColor(hdrColor, colorID, 0.01f))
+                .Append(floorMat.DOFloat(0f, brightID, 0.15f))
+                .Join(floorMat.DOColor(baseColor, colorID, 0.15f));
         }
         else
         {

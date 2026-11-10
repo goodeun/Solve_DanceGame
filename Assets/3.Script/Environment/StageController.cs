@@ -100,6 +100,23 @@ public class StageController : MonoBehaviour
         seats[seatIndex].transform.position = startPos;
     }
 
+    public void PlayKeyInputDrop(Keys key)
+    {
+        int seatIndex = key switch
+        {
+            Keys.Q => 0,
+            Keys.E => 1,
+            Keys.A => 2,
+            Keys.D => 3,
+            Keys.W => 4,
+            Keys.S => 5,
+            _ => -1
+        };
+
+        if (seatIndex >= 0 && seatIndex < seats.Length && seats[seatIndex] != null)
+            seats[seatIndex].PlayKeyInputDrop();
+    }
+
     #region µð¹ö±×
 
     public void DEBUG_ToSquare()

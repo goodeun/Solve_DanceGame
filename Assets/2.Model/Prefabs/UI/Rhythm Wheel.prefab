@@ -747,8 +747,7 @@ MonoBehaviour:
   isRhombus: 0
   isSixKeys: 0
   danceHUD: {fileID: 0}
-  judgementReferenceBPM: 120
-  justWindow: 0.3
+  justWindow: 0.1
   goodWindow: 0.3
   feverGainPerJust: 0.1
   feverDuration: 12

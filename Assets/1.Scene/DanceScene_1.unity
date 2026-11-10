@@ -760,6 +760,30 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 5.53
       objectReference: {fileID: 0}
+    - target: {fileID: 2206289789704875281, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDistance
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2206289789704875281, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDuration
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 2206289789704875281, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyReturnDuration
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4487362729536069040, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDistance
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4487362729536069040, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDuration
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 4487362729536069040, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyReturnDuration
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 4737450504873478763, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -767,6 +791,18 @@ PrefabInstance:
     - target: {fileID: 5977543513376890662, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: m_Name
       value: DanceSceneEnvironment
+      objectReference: {fileID: 0}
+    - target: {fileID: 6243542591494387580, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDistance
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6243542591494387580, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDuration
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 6243542591494387580, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyReturnDuration
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7088214369041737825, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: m_LocalPosition.y
@@ -839,6 +875,18 @@ PrefabInstance:
     - target: {fileID: 8472798212455235227, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8621549501666016111, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDistance
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8621549501666016111, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDuration
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 8621549501666016111, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyReturnDuration
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1800,6 +1848,14 @@ PrefabInstance:
       propertyPath: isSquare
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 80314218047273927, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+      propertyPath: isSixKeys
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 80314218047273927, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+      propertyPath: justWindow
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 279532984717208559, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_Name
       value: MasterCanvas
@@ -2174,7 +2230,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2265891772505541474, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
       propertyPath: m_RenderPostProcessing
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2350466665135569853, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
       propertyPath: m_LocalPosition.x

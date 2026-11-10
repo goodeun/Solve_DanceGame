@@ -33,14 +33,16 @@ public class RhythmWheelUI : MonoBehaviour
 
     [Header("Judgement Settings")]
     [SerializeField] private DanceSceneHUD danceHUD;
-    [Tooltip("판정 창 수치의 기준 BPM입니다. 실제 판정 창은 현재 BPM에 맞춰 비례 조정됩니다.")]
-    [SerializeField, Min(1)] private int judgementReferenceBPM = 120;
-    [SerializeField, Min(0f)] private float justWindow = 0.05f;
-    [SerializeField, Min(0f)] private float goodWindow = 0.10f;
+    [Tooltip("한 박 길이 대비 Just 판정 창의 비율입니다. 0.1은 한 박의 10%입니다.")]
+    [SerializeField, Range(0f, 1f)] private float justWindow = 0.1f;
+    [Tooltip("한 박 길이 대비 Good 판정 창의 비율입니다. 0.3은 한 박의 30%입니다.")]
+    [SerializeField, Range(0f, 1f)] private float goodWindow = 0.3f;
 
     [Header("Fever Settings")]
-    [Tooltip("Just 판정 1회로 채울 피버 게이지 비율입니다.")]
-    [SerializeField, Range(0.01f, 1f)] private float feverGainPerJust = 0.1f;
+    [Tooltip("3입력 콤보 1회 완성으로 채울 피버 게이지 비율입니다.")]
+    [SerializeField, Range(0.01f, 1f)] private float feverGainPerCombo = 0.1f;
+    [Tooltip("3입력 콤보를 완성하지 못했을 때 줄어들 피버 게이지 비율입니다.")]
+    [SerializeField, Range(0.01f, 1f)] private float feverLossPerFailedCombo = 0.1f;
     [Tooltip("피버 지속 시간입니다. 초가 아니라 박(beat) 수로 지정하며, 항상 4박 배수로 적용됩니다.")]
     [SerializeField, Min(4f)] private float feverDuration = 12f;
 
@@ -48,11 +50,15 @@ public class RhythmWheelUI : MonoBehaviour
     [SerializeField] private FmodMusicClock musicClock;
     [SerializeField] private StarPulseUI starPulse;
     [SerializeField] private FeverCamera feverCamera;
+    [SerializeField] private ComboAndMagnification comboAndMagnification;
 
     public int Score { get; private set; }
     public int Combo { get; private set; }
+    public float BeatDurationSeconds => BPM > 0 ? 60f / BPM : 0f;
     public event System.Action<Keys, Judge, float> OnJudged;
+    public event System.Action<int> OnBeatStarted;
     public event System.Action OnFourthBeatStarted;
+    public event System.Action OnFourthPulsePeak;
     public event System.Action OnPhraseCompleted;
 
     private PlayerInput playerInput;
@@ -74,6 +80,7 @@ public class RhythmWheelUI : MonoBehaviour
     private bool isFourthBeat;
     private readonly HashSet<int> resolvedBeats = new();
     private int lastObservedBeat = -1;
+    private int lastObservedPulseCycle = int.MinValue;
     private float feverGauge;
     private bool isFeverActive;
     private bool isFeverQueued;
@@ -95,6 +102,9 @@ public class RhythmWheelUI : MonoBehaviour
 
         if (feverCamera == null)
             feverCamera = FindFirstObjectByType<FeverCamera>();
+
+        if (comboAndMagnification == null)
+            comboAndMagnification = FindFirstObjectByType<ComboAndMagnification>();
 
         if (danceHUD == null)
             danceHUD = FindFirstObjectByType<DanceSceneHUD>();
@@ -127,7 +137,11 @@ public class RhythmWheelUI : MonoBehaviour
         if (playerInput != null)
             playerInput.onActionTriggered += OnActionTriggered;
 
-        OnJudged += HandleFeverJudgement;
+        if (comboAndMagnification != null)
+        {
+            comboAndMagnification.OnComboSaved += HandleComboSaved;
+            comboAndMagnification.OnComboFailed += HandleComboFailed;
+        }
         OnPhraseCompleted += StartQueuedFever;
         CinemachineCore.CameraUpdatedEvent.AddListener(ApplyCameraInputOffset);
 
@@ -135,6 +149,7 @@ public class RhythmWheelUI : MonoBehaviour
         isFourthBeat = false;
         resolvedBeats.Clear();
         lastObservedBeat = -1;
+        lastObservedPulseCycle = int.MinValue;
         Score = 0;
         Combo = 0;
         feverGauge = 0f;
@@ -166,7 +181,11 @@ public class RhythmWheelUI : MonoBehaviour
         cameraInputDirection = Vector2.zero;
         cameraInputAmount = 0f;
 
-        OnJudged -= HandleFeverJudgement;
+        if (comboAndMagnification != null)
+        {
+            comboAndMagnification.OnComboSaved -= HandleComboSaved;
+            comboAndMagnification.OnComboFailed -= HandleComboFailed;
+        }
         OnPhraseCompleted -= StartQueuedFever;
         CinemachineCore.CameraUpdatedEvent.RemoveListener(ApplyCameraInputOffset);
 
@@ -178,6 +197,13 @@ public class RhythmWheelUI : MonoBehaviour
             return;
 
         if (!System.Enum.TryParse(context.control.name, true, out Keys pressedKey))
+            return;
+
+        float inputElapsed = GetInputElapsedTime(context.time);
+
+        // The fourth beat is a rest. Ignore it before any wheel or key visual
+        // feedback is played, while leaving the judgement logic unchanged.
+        if (IsRestBeat(inputElapsed))
             return;
 
         PlayWheelInputMotion(pressedKey);
@@ -196,7 +222,7 @@ public class RhythmWheelUI : MonoBehaviour
         // Capture the music time once.  In particular, do not reject a press just
         // because FMOD advanced into the rest beat between the input update and
         // this callback.
-        if (JudgeInput(pressedKey, GetInputElapsedTime(context.time)))
+        if (JudgeInput(pressedKey, inputElapsed))
             starPulse?.Play(BPM);
     }
 
@@ -319,9 +345,9 @@ public class RhythmWheelUI : MonoBehaviour
         if (currentBeat % 4 == 3)
             return false;
 
-        // The visible pulse moves from 0 to 0.5 during one beat.  Its 0.5
-        // endpoint is the beat marker and therefore the Just point.
-        float offset = beatDuration - pulseOffset;
+        // The beat marker is the instant a new beat begins.  A key press at
+        // that downbeat is Just; presses later in the beat are increasingly late.
+        float offset = pulseOffset;
 
         // A beat can only be resolved once.
         if (resolvedBeats.Contains(currentBeat))
@@ -341,13 +367,22 @@ public class RhythmWheelUI : MonoBehaviour
             && keyImage.enabled;
     }
 
+    private bool IsRestBeat(float elapsed)
+    {
+        if (BPM <= 0)
+            return false;
+
+        int currentBeat = Mathf.FloorToInt(elapsed / (60f / BPM));
+        return currentBeat % 4 == 3;
+    }
+
     private Judge GetJudge(float absoluteOffset)
     {
-        // Window values are authored at the reference BPM so the judgement difficulty
-        // remains the same relative to each beat when BPM changes.
-        float bpmScale = (float)judgementReferenceBPM / BPM;
-        float scaledJustWindow = justWindow * bpmScale;
-        float scaledGoodWindow = goodWindow * bpmScale;
+        // Judgement windows are stored as a fraction of one beat, so their
+        // relative size remains identical at every BPM.
+        float beatDuration = 60f / BPM;
+        float scaledJustWindow = justWindow * beatDuration;
+        float scaledGoodWindow = goodWindow * beatDuration;
 
         if (absoluteOffset <= scaledJustWindow)
             return Judge.Just;
@@ -361,7 +396,7 @@ public class RhythmWheelUI : MonoBehaviour
 
     private float GetScaledJustWindow()
     {
-        return justWindow * ((float)judgementReferenceBPM / BPM);
+        return BPM > 0 ? justWindow * (60f / BPM) : 0f;
     }
 
     private void ApplyJudgement(Keys pressedKey, Judge judge, float offset)
@@ -397,21 +432,27 @@ public class RhythmWheelUI : MonoBehaviour
         OnJudged?.Invoke(pressedKey, judge, offset);
     }
 
-    /// <summary>
-    /// 판정 이벤트에서 피버를 처리한다. Just 이외의 판정은 게이지에 영향을 주지 않는다.
-    /// </summary>
-    private void HandleFeverJudgement(Keys pressedKey, Judge judge, float offset)
+    private void HandleComboSaved(Keys lastPressedKey)
     {
-        if (judge != Judge.Just || isFeverActive)
+        if (isFeverActive)
             return;
 
-        feverGauge = Mathf.Clamp01(feverGauge + feverGainPerJust);
+        feverGauge = Mathf.Clamp01(feverGauge + feverGainPerCombo);
         UpdateFeverGaugeUI();
 
         if (feverGauge < 1f)
             return;
 
         isFeverQueued = true;
+    }
+
+    private void HandleComboFailed()
+    {
+        if (isFeverActive)
+            return;
+
+        feverGauge = Mathf.Clamp01(feverGauge - feverLossPerFailedCombo);
+        UpdateFeverGaugeUI();
     }
 
     private void StartQueuedFever()
@@ -483,15 +524,22 @@ public class RhythmWheelUI : MonoBehaviour
         if (circlePulseMaterial == null)
             return;
 
-        // The visual pulse always travels smoothly from 0 to 0.5.
-        float beatProgress = Mathf.Repeat(elapsed / beatDuration, 1f);
+        // Keep the pulse's 0 -> 0.5 motion intact, but delay only its visual
+        // timeline by the Just window. This lets the preceding pulse reach 0.5
+        // during the current beat's Just window without changing judgement time.
+        float pulseElapsed = elapsed - GetScaledJustWindow();
+        float beatProgress = Mathf.Repeat(pulseElapsed / beatDuration, 1f);
+        NotifyPulsePeaks(Mathf.FloorToInt(pulseElapsed / beatDuration));
+        // This pulse completes on the following beat, so use that destination
+        // beat for its color. In particular, the first beat remains normal
+        // rather than inheriting the previous phrase's fourth-beat red.
+        int pulseTargetBeat = Mathf.FloorToInt(pulseElapsed / beatDuration) + 1;
+        bool isPulseFourthBeat = ((pulseTargetBeat % 4) + 4) % 4 == 3;
 
         circlePulseMaterial.SetColor(
             "_Ring_Color",
-            isFourthBeat ? fourthBeatPulseColor : normalPulseColor);
+            isPulseFourthBeat ? fourthBeatPulseColor : normalPulseColor);
 
-        // Just is evaluated when this value reaches 0.5, immediately before
-        // the following pulse starts at zero.
         circlePulseMaterial.SetFloat(
             ProgressProperty,
             beatProgress * 0.5f);
@@ -501,6 +549,9 @@ public class RhythmWheelUI : MonoBehaviour
     {
         for (int beat = lastObservedBeat + 1; beat <= currentBeat; beat++)
         {
+            if (beat >= 0)
+                OnBeatStarted?.Invoke(beat);
+
             // A phrase finishes only after its fourth (rest) beat has elapsed.
             // This is the first beat of the next four-beat loop.
             if (beat > 0 && beat % 4 == 0)
@@ -513,6 +564,25 @@ public class RhythmWheelUI : MonoBehaviour
         }
 
         lastObservedBeat = currentBeat;
+    }
+
+    private void NotifyPulsePeaks(int currentPulseCycle)
+    {
+        if (lastObservedPulseCycle == int.MinValue)
+        {
+            lastObservedPulseCycle = currentPulseCycle;
+            return;
+        }
+
+        for (int cycle = lastObservedPulseCycle + 1; cycle <= currentPulseCycle; cycle++)
+        {
+            // A cycle boundary is the moment its pulse reaches 0.5. The fourth
+            // target beat uses the red pulse and is the combo confirmation cue.
+            if (cycle >= 0 && cycle % 4 == 3)
+                OnFourthPulsePeak?.Invoke();
+        }
+
+        lastObservedPulseCycle = currentPulseCycle;
     }
 
     private void ResolvePreviousBeatAfterGrace(int currentBeat, float elapsed, float beatDuration)
