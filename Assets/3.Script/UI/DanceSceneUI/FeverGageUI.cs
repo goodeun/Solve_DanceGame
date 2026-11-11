@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,12 +7,12 @@ using DG.Tweening;
 
 public class FeverGageUI : MonoBehaviour
 {
-    [SerializeField] private Image feverGage_img;
+    [SerializeField] private Renderer feverGage_img;
     private float fillAmount_m;
 
     private void Awake()
     {
-        feverGage_img = GetComponent<Image>();
+        feverGage_img = GetComponent<Renderer>();
     }
 
     private void OnEnable()

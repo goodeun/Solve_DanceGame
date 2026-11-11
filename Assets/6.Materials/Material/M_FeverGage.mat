@@ -57,7 +57,7 @@ Material:
     m_Floats:
     - _AlphaClip: 0.5
     - _ColorMask: 15
-    - _FillAmount: 0.70000005
+    - _FillAmount: 0.53
     - _LineThickness: 0.0368
     - _NoiseStrength: 0
     - _QueueControl: 0
@@ -69,15 +69,16 @@ Material:
     - _StencilOp: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
+    - _Transparency: 0.657
     - _UIMaskSoftnessX: 1
     - _UIMaskSoftnessY: 1
     - _Wave_Frequency: 5.5
     - _Wave_Offset: 0.2
     m_Colors:
     - _ClipRect: {r: 0, g: 0, b: 0, a: 0}
-    - _ColorBottom: {r: 0.5613207, g: 0.6695104, b: 1, a: 1}
-    - _ColorTop: {r: 1, g: 0.31603768, b: 0.79179865, a: 1}
-    - _LineColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorBottom: {r: 0, g: 0.58265877, b: 1.9144521, a: 1}
+    - _ColorTop: {r: 7.9999995, g: 0.28235292, b: 6.180392, a: 1}
+    - _LineColor: {r: 16, g: 16, b: 16, a: 1}
     - _WaterColor: {r: 0.99056596, g: 0.28502128, b: 0.8379493, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

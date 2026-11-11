@@ -680,6 +680,11 @@ GameObject:
   - component: {fileID: 6024124593711664056}
   - component: {fileID: 5840876300083699231}
   - component: {fileID: 5351060673896333243}
+  - component: {fileID: 4663651165878372172}
+  - component: {fileID: 1439576557728000977}
+  - component: {fileID: 5067512302608347142}
+  - component: {fileID: 3588916084486506621}
+  - component: {fileID: 8639420948327383508}
   m_Layer: 5
   m_Name: Rhythm Wheel
   m_TagString: Untagged
@@ -728,32 +733,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 665d58bda04efea42864bbbc669043ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelUI
-  BPM: 120
-  normalPulseColor: {r: 0, g: 1, b: 1, a: 1}
-  fourthBeatPulseColor: {r: 1, g: 0, b: 0, a: 1}
-  Key_Images:
-  - {fileID: 4777808413754992731}
-  - {fileID: 6958210713751153811}
-  - {fileID: 3557364419154510293}
-  - {fileID: 1650607120643863109}
-  - {fileID: 840177340452345801}
-  - {fileID: 890898122548497281}
-  circlePulse: {fileID: 2694347590667093752}
-  inputMoveDistance: 30
-  inputMoveOutDuration: 0.005
-  inputMoveReturnDuration: 0.25
-  cameraInputMoveDistance: 0.12
-  isSquare: 0
-  isRhombus: 0
-  isSixKeys: 0
-  danceHUD: {fileID: 0}
-  justWindow: 0.1
-  goodWindow: 0.3
-  feverGainPerJust: 0.1
-  feverDuration: 12
-  musicClock: {fileID: 0}
-  starPulse: {fileID: 0}
-  feverCamera: {fileID: 0}
 --- !u!114 &5840876300083699231
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -801,6 +780,89 @@ MonoBehaviour:
   m_DefaultActionMap: Basic Keys
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &4663651165878372172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332927072827704353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 519254577d804b8aac78a61ef84a30c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelTiming
+  bpm: 120
+  musicClock: {fileID: 0}
+--- !u!114 &1439576557728000977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332927072827704353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb2ae695ef9941ebade730a37d8ef8e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelJudgement
+  justWindow: 0.1
+  goodWindow: 0.3
+  danceHUD: {fileID: 0}
+--- !u!114 &5067512302608347142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332927072827704353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a726fec25e9443285d4086e1dbe2c87, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelInput
+  keyImages:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  starPulse: {fileID: 0}
+--- !u!114 &3588916084486506621
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332927072827704353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9f8b91c0ed6423abed656dce0b935d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelPulseVisual
+  circlePulse: {fileID: 0}
+  normalPulseColor: {r: 0, g: 1, b: 1, a: 1}
+  fourthBeatPulseColor: {r: 1, g: 0, b: 0, a: 1}
+  visualJustOffset: 0.1
+--- !u!114 &8639420948327383508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332927072827704353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47ede2a07acd4dd9be02a8af706dc1fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelFever
+  gain: 0.1
+  loss: 0.1
+  durationBeats: 12
+  feverCamera: {fileID: 0}
+  combo: {fileID: 0}
+  hud: {fileID: 0}
 --- !u!1 &4600264017619410081
 GameObject:
   m_ObjectHideFlags: 0
