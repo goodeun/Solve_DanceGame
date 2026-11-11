@@ -51,7 +51,7 @@ public sealed class RhythmWheelInput : MonoBehaviour
     {
         if (!context.performed || !Enum.TryParse(context.control.name, true, out Keys key) || !keys.TryGetValue(key, out var image) || !image.isActiveAndEnabled) return;
         if (fever != null && fever.IsJudgementLocked) return;
-        float elapsed = timing.GetInputElapsedSeconds(context.time);
+        float elapsed = timing.SampleInputElapsedSeconds();
         // Resolve first.  This prevents a visible key/wheel response without a
         // matching score judgement, and lets RhythmWheelJudgement handle its
         // narrow third-beat-to-rest callback grace.

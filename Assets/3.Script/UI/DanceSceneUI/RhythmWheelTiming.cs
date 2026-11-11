@@ -9,8 +9,6 @@ public sealed class RhythmWheelTiming : MonoBehaviour
     [SerializeField] private FmodMusicClock musicClock;
 
     private float fallbackStartTime;
-    private float lastElapsed;
-    private double lastSampleTime;
     private int lastBeat = -1;
     private int lastPulseCycle = int.MinValue;
 
@@ -38,8 +36,6 @@ public sealed class RhythmWheelTiming : MonoBehaviour
     private void Update()
     {
         ElapsedSeconds = ReadElapsedSeconds();
-        lastElapsed = ElapsedSeconds;
-        lastSampleTime = Time.realtimeSinceStartupAsDouble;
 
         int beat = Mathf.FloorToInt(ElapsedSeconds / BeatDurationSeconds);
         for (int value = lastBeat + 1; value <= beat; value++)
@@ -51,9 +47,17 @@ public sealed class RhythmWheelTiming : MonoBehaviour
         lastBeat = beat;
     }
 
-    public float GetInputElapsedSeconds(double inputTime) => lastSampleTime == 0d
-        ? ReadElapsedSeconds()
-        : Mathf.Max(0f, lastElapsed + (float)(inputTime - lastSampleTime));
+    /// <summary>
+    /// Returns the FMOD timeline at the instant an input callback is handled.
+    /// Input System timestamps and Unity realtime timestamps are not guaranteed
+    /// to share an origin, so extrapolating one from the other can put a press
+    /// in the following beat.
+    /// </summary>
+    public float SampleInputElapsedSeconds()
+    {
+        float elapsed = ReadElapsedSeconds();
+        return Mathf.Max(0f, elapsed);
+    }
 
     public void NotifyPulseCycle(int cycle)
     {
