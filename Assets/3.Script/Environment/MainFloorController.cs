@@ -7,8 +7,37 @@ public class MainFloorController : MonoBehaviour
 {
     // 메인플로어 이동 및 비주얼 관리
     [SerializeField] private FloorSection[] floorSections;
+    [Header("Beat Settings")]
+    [SerializeField] private RhythmWheelUI rhythmWheel;
+    [SerializeField] private ComboAndMagnification comboAndMagnification;
+    [SerializeField] private StageController stageController;
 
     private bool isCombo = false;
+
+    private void Awake()
+    {
+        if (rhythmWheel == null)
+            rhythmWheel = FindFirstObjectByType<RhythmWheelUI>();
+
+        if (comboAndMagnification == null)
+            comboAndMagnification = FindFirstObjectByType<ComboAndMagnification>();
+
+        if (stageController == null)
+            stageController = GetComponent<StageController>();
+    }
+
+    private void OnEnable()
+    {
+        if (rhythmWheel != null)
+        {
+            rhythmWheel.OnJudged += HandleRhythmJudgement;
+            rhythmWheel.OnBeatStarted += HandleBeatStarted;
+            rhythmWheel.OnFourthPulsePeak += HandleFourthPulsePeak;
+        }
+
+        if (comboAndMagnification != null)
+            comboAndMagnification.OnComboSaved += HandleComboSaved;
+    }
 
     public void OnNoteHit(int floorIndex)
     {
@@ -26,28 +55,60 @@ public class MainFloorController : MonoBehaviour
 
     public void DEBUG_MusicOn()
     {
-        StartCoroutine(DEBUG_Beat_co());
+        TempEventManager.OnBeat_Temp?.Invoke();
     }
 
-    private IEnumerator DEBUG_Beat_co()
+    private void HandleBeatStarted(int beat)
     {
-        int turn=0;
+        TempEventManager.OnBeat_Temp?.Invoke();
+    }
 
-        while (true)
+    private void HandleFourthPulsePeak()
+    {
+        TempEventManager.OnMeasureEnd_Temp?.Invoke(isCombo);
+        isCombo = false;
+    }
+
+    private void OnDisable()
+    {
+        if (rhythmWheel != null)
         {
-            TempEventManager.OnBeat_Temp.Invoke();
-            if(turn!=0)
-            {
-                if (turn % 3 == 0)
-                {
-                    TempEventManager.OnMeasureEnd_Temp.Invoke(isCombo);
-                    isCombo = false;
-                }
-            }
-            turn++;
-            yield return new WaitForSeconds(1f);
+            rhythmWheel.OnJudged -= HandleRhythmJudgement;
+            rhythmWheel.OnBeatStarted -= HandleBeatStarted;
+            rhythmWheel.OnFourthPulsePeak -= HandleFourthPulsePeak;
         }
 
+        if (comboAndMagnification != null)
+            comboAndMagnification.OnComboSaved -= HandleComboSaved;
+
+    }
+
+    private void HandleComboSaved(Keys lastPressedKey)
+    {
+        isCombo = true;
+    }
+
+    private void HandleRhythmJudgement(Keys pressedKey, Judge judge, float offset)
+    {
+        if (judge == Judge.Miss)
+            return;
+
+        int floorIndex = pressedKey switch
+        {
+            Keys.Q => 0,
+            Keys.E => 1,
+            Keys.A => 2,
+            Keys.D => 3,
+            Keys.W => 4,
+            Keys.S => 5,
+            _ => -1
+        };
+
+        if (floorIndex >= 0)
+        {
+            OnNoteHit(floorIndex);
+            stageController?.PlayKeyInputDrop(pressedKey);
+        }
     }
 
     public void DEBUG_Combo_test()

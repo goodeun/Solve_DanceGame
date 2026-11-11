@@ -760,6 +760,30 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 5.53
       objectReference: {fileID: 0}
+    - target: {fileID: 2206289789704875281, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDistance
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2206289789704875281, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDuration
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 2206289789704875281, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyReturnDuration
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4487362729536069040, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDistance
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4487362729536069040, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDuration
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 4487362729536069040, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyReturnDuration
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 4737450504873478763, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -767,6 +791,18 @@ PrefabInstance:
     - target: {fileID: 5977543513376890662, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: m_Name
       value: DanceSceneEnvironment
+      objectReference: {fileID: 0}
+    - target: {fileID: 6243542591494387580, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDistance
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6243542591494387580, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDuration
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 6243542591494387580, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyReturnDuration
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7088214369041737825, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: m_LocalPosition.y
@@ -839,6 +875,18 @@ PrefabInstance:
     - target: {fileID: 8472798212455235227, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8621549501666016111, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDistance
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8621549501666016111, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyDropDuration
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 8621549501666016111, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: keyReturnDuration
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1794,11 +1842,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 80314218047273927, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: BPM
-      value: 60
+      value: 128
       objectReference: {fileID: 0}
     - target: {fileID: 80314218047273927, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: isSquare
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 80314218047273927, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+      propertyPath: isSixKeys
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 80314218047273927, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+      propertyPath: justWindow
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 279532984717208559, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_Name
@@ -2039,6 +2095,52 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &1776098164
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1776098166}
+  - component: {fileID: 1776098165}
+  m_Layer: 0
+  m_Name: FMOD Music Clock
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1776098165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776098164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fc4b0a9a4be4bc795d1688f4f33d818, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FmodMusicClock
+  musicEventPath: 'event:/RetroVision - Puzzle (2024 Edit) [NCS Release]'
+  beatOffsetSeconds: 0
+--- !u!4 &1776098166
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1776098164}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1953662185
 GameObject:
   m_ObjectHideFlags: 0
@@ -2128,7 +2230,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2265891772505541474, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
       propertyPath: m_RenderPostProcessing
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2350466665135569853, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2335,3 +2437,4 @@ SceneRoots:
   - {fileID: 1998264284}
   - {fileID: 939047197}
   - {fileID: 1487314785}
+  - {fileID: 1776098166}

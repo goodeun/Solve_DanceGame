@@ -739,13 +739,16 @@ MonoBehaviour:
   - {fileID: 840177340452345801}
   - {fileID: 890898122548497281}
   circlePulse: {fileID: 2694347590667093752}
+  inputMoveDistance: 30
+  inputMoveOutDuration: 0.005
+  inputMoveReturnDuration: 0.25
+  cameraInputMoveDistance: 0.12
   isSquare: 0
   isRhombus: 0
   isSixKeys: 0
   danceHUD: {fileID: 0}
-  judgementReferenceBPM: 120
-  justWindow: 0.05
-  goodWindow: 0.1
+  justWindow: 0.1
+  goodWindow: 0.3
   feverGainPerJust: 0.1
   feverDuration: 12
   musicClock: {fileID: 0}

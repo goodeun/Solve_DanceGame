@@ -6,6 +6,7 @@ public class ComboAndMagnification : MonoBehaviour
 {
     public event System.Action<Keys, Judge, float> OnJudged;
     public event System.Action<Keys> OnComboSaved;
+    public event System.Action OnComboFailed;
 
     [Header("4-Beat Input Recording")]
     [SerializeField] private RhythmWheelUI rhythmWheel;
@@ -82,7 +83,7 @@ public class ComboAndMagnification : MonoBehaviour
         }
 
         if (!comboSavedThisPhrase && !comboFailedThisPhrase)
-            Debug.Log("[ComboAndMagnification] Combo failed", this);
+            FailCurrentPhrase();
 
         currentPhraseKeys.Clear();
         comboSavedThisPhrase = false;
@@ -97,5 +98,6 @@ public class ComboAndMagnification : MonoBehaviour
         Debug.Log("[ComboAndMagnification] Combo failed", this);
         comboFailedThisPhrase = true;
         currentPhraseKeys.Clear();
+        OnComboFailed?.Invoke();
     }
 }
