@@ -4,18 +4,34 @@ using UnityEngine;
 
 public class BubbleManager : MonoBehaviour
 {
-    [SerializeField] private char key;
     [SerializeField] private Bubble bubble_pref;
 
     [SerializeField] private BoxCollider spawnArea;
 
-    [Header("¸»Ç³¼± Äİ¶óÀÌ´õ ¹æÇâ")]
+    [Header("ë§í’ì„  ì½œë¼ì´ë” ë°©í–¥")]
     [SerializeField] private bool IsColiderRotation = false;
+
+    [Header("Gameplay Spawn")]
+    [SerializeField] private bool spawnRandomBubblesDuringGameplay = true;
+    [SerializeField, Min(0f)] private float initialSpawnDelay = 1f;
+    [SerializeField, Min(0f)] private float randomSpawnDelay = 5f;
+    [SerializeField, Range(0f, 1f)] private float positiveChance = 0.8f;
+
+    [Header("Camera Visibility")]
+    [SerializeField] private bool keepSpawnInsideCameraView = true;
+    [SerializeField, Range(0f, 0.45f)] private float cameraViewportMargin = 0.08f;
+    [SerializeField] private Camera targetCamera;
 
     private List<Bubble> positiveBubbles = new List<Bubble>();
     private List<Bubble> negativeBubbles = new List<Bubble>();
+    private List<Bubble> persistentBubbles = new List<Bubble>();
 
     private Queue<Bubble> disableBubbles = new Queue<Bubble>();
+    private Camera cachedCamera;
+
+    // All seats share one spawn sequence: one new bubble at a time, placed
+    // at a randomly selected seat. The bubbles themselves remain active.
+    private static BubbleManager gameplaySpawnController;
 
     private void Start()
     {
@@ -25,22 +41,64 @@ public class BubbleManager : MonoBehaviour
             disableBubbles.Enqueue(b);
             b.gameObject.SetActive(false);
         }
+
+        if (spawnRandomBubblesDuringGameplay && gameplaySpawnController == null)
+        {
+            gameplaySpawnController = this;
+            StartCoroutine(SpawnRandomBubbles());
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (gameplaySpawnController == this)
+            gameplaySpawnController = null;
+    }
+
+    private IEnumerator SpawnRandomBubbles()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(initialSpawnDelay + Random.Range(0f, randomSpawnDelay));
+
+            BubbleManager[] seats = FindObjectsByType<BubbleManager>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            List<BubbleManager> eligibleSeats = new List<BubbleManager>();
+
+            foreach (BubbleManager seat in seats)
+                if (seat.spawnRandomBubblesDuringGameplay && seat.spawnArea != null)
+                    eligibleSeats.Add(seat);
+
+            if (eligibleSeats.Count == 0)
+                continue;
+
+            BubbleManager selectedSeat = eligibleSeats[Random.Range(0, eligibleSeats.Count)];
+            selectedSeat.AddBubble(
+                Random.value <= selectedSeat.positiveChance ? BubbleState.positive : BubbleState.negative,
+                true);
+        }
     }
 
     public void AddBubble(BubbleState state)
+    {
+        AddBubble(state, false);
+    }
+
+    private void AddBubble(BubbleState state, bool persistent)
     {
         Bubble additiveBubble;
 
         if (disableBubbles.Count <= 0)
         {
-            disableBubbles.Enqueue(Instantiate(bubble_pref, transform));
+            Bubble newBubble = Instantiate(bubble_pref, transform);
+            newBubble.gameObject.SetActive(false);
+            disableBubbles.Enqueue(newBubble);
         }
 
         additiveBubble = disableBubbles.Dequeue();
 
         if (!IsColiderRotation)
         {
-            // 1. ¸»Ç³¼± Ç×»ó Á¤¸é º¸´Â ¹æ½Ä
+            // 1. ë§í’ì„  í•­ìƒ ì •ë©´ ë³´ëŠ” ë°©ì‹
             Bounds bounds = spawnArea.bounds;
             float randomX = Random.Range(bounds.min.x, bounds.max.x);
             float randomY = Random.Range(bounds.min.y, bounds.max.y);
@@ -50,7 +108,7 @@ public class BubbleManager : MonoBehaviour
         }
         else
         {
-            // 2. ¸»Ç³¼± Äİ¶óÀÌ´õ ¹æÇâ º¸´Â ¹æ½Ä
+            // 2. ë§í’ì„  ì½œë¼ì´ë” ë°©í–¥ ë³´ëŠ” ë°©ì‹
             Vector3 center = spawnArea.center;
             Vector3 extents = spawnArea.size / 2f;
 
@@ -63,8 +121,9 @@ public class BubbleManager : MonoBehaviour
             additiveBubble.transform.rotation = spawnArea.transform.rotation;
         }
 
+        additiveBubble.transform.position = ClampSpawnPositionToCamera(additiveBubble.transform.position);
 
-        //TODO ÇÃ·¹ÀÌ¾î ÀüÃ¼ ½ºÅÈ °´Ã¼ °¡Á®¿Í¾ß ÇÔ
+        //TODO í”Œë ˆì´ì–´ ì „ì²´ ìŠ¤íƒ¯ ê°ì²´ ê°€ì ¸ì™€ì•¼ í•¨
         PlayerStats myStats = new PlayerStats { rhythm = 20, groove = 15, power = 10, style = 5, condition = 80 };
         string targetLine = DialogueManager.Instance.GetDialogue("Dance", state.ToString(), myStats);
 
@@ -73,17 +132,54 @@ public class BubbleManager : MonoBehaviour
         switch (state)
         {
             case BubbleState.positive:
-                positiveBubbles.Add(additiveBubble);
+                if (!persistent)
+                    positiveBubbles.Add(additiveBubble);
                 break;
             case BubbleState.negative:
-                negativeBubbles.Add(additiveBubble);
+                if (!persistent)
+                    negativeBubbles.Add(additiveBubble);
                 break;
         }
+
+        if (persistent)
+            persistentBubbles.Add(additiveBubble);
 
         additiveBubble.gameObject.SetActive(true);
     }
 
-    public int PopPositiveBubble() // ÅÍÁø ¸»Ç³¼± °¹¼ö ¹İÈ¯. Á¡¼ö·Î Ä¡È¯ ¹Ù¶÷
+    private Vector3 ClampSpawnPositionToCamera(Vector3 worldPosition)
+    {
+        if (!keepSpawnInsideCameraView)
+            return worldPosition;
+
+        cachedCamera ??= targetCamera != null ? targetCamera : Camera.main;
+        if (cachedCamera == null)
+            return worldPosition;
+
+        Vector3 viewportPosition = cachedCamera.WorldToViewportPoint(worldPosition);
+        if (viewportPosition.z <= 0f)
+            return worldPosition;
+
+        viewportPosition.x = Mathf.Clamp(viewportPosition.x, cameraViewportMargin, 1f - cameraViewportMargin);
+        viewportPosition.y = Mathf.Clamp(viewportPosition.y, cameraViewportMargin, 1f - cameraViewportMargin);
+        return cachedCamera.ViewportToWorldPoint(viewportPosition);
+    }
+
+    public void ClearPersistentBubbles()
+    {
+        foreach (Bubble bubble in persistentBubbles)
+        {
+            bubble.Despawn_Anim(() =>
+            {
+                bubble.gameObject.SetActive(false);
+                disableBubbles.Enqueue(bubble);
+            });
+        }
+
+        persistentBubbles.Clear();
+    }
+
+    public int PopPositiveBubble() // í„°ì§„ ë§í’ì„  ê°¯ìˆ˜ ë°˜í™˜. ì ìˆ˜ë¡œ ì¹˜í™˜ ë°”ëŒ
     {
         int poped = 0;
 
@@ -114,7 +210,7 @@ public class BubbleManager : MonoBehaviour
         negativeBubbles.Clear();
     }
 
-    #region µğ¹ö±×
+    #region ë””ë²„ê·¸
 
     public void DEBUG_AppearBubble()
     {

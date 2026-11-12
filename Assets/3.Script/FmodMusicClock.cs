@@ -6,6 +6,10 @@ public class FmodMusicClock : MonoBehaviour
 {
     [SerializeField] private string musicEventPath = "event:/RetroVision - Puzzle (2024 Edit) [NCS Release]";
     [SerializeField] private float beatOffsetSeconds;
+    [SerializeField, Min(1f)] private float bpm = 128f;
+
+    public float BPM => bpm;
+    public float BeatDurationSeconds => 60f / bpm;
 
     private EventInstance musicInstance;
 

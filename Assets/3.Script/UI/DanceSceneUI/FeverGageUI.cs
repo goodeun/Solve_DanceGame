@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,12 +7,14 @@ using DG.Tweening;
 
 public class FeverGageUI : MonoBehaviour
 {
-    [SerializeField] private Image feverGage_img;
+    [SerializeField] private Renderer feverGage_img;
+    [SerializeField, Range(0f, 1f)]
+    private float sphereFillCompensation = 1f;
     private float fillAmount_m;
 
     private void Awake()
     {
-        feverGage_img = GetComponent<Image>();
+        feverGage_img = GetComponent<Renderer>();
     }
 
     private void OnEnable()
@@ -21,16 +24,27 @@ public class FeverGageUI : MonoBehaviour
 
     public void UpdateFeverGage(float targetValue)
     {
-        fillAmount_m = targetValue;
+        fillAmount_m = Mathf.Clamp01(targetValue);
+        float visualFill = ToVisualFill(fillAmount_m);
 
         if(feverGage_img != null && feverGage_img.material != null)
         {
             feverGage_img.material.
-                DOFloat(targetValue, "_FillAmount", 0.2f).SetEase(Ease.OutQuad);
+                DOFloat(visualFill, "_FillAmount", 0.2f).SetEase(Ease.OutQuad);
         }
     }
 
-    #region µð¹ö±×
+    // A sphere's silhouette is narrow at the top and bottom. The shader's
+    // linear latitude fill therefore looks slow at both ends and fast at the
+    // centre. Inverse-sine mapping makes the visible fill edge move at a
+    // constant screen-space speed while keeping the gameplay value linear.
+    private float ToVisualFill(float logicalFill)
+    {
+        float sphereCorrected = 0.5f + Mathf.Asin(logicalFill * 2f - 1f) / Mathf.PI;
+        return Mathf.Lerp(logicalFill, sphereCorrected, sphereFillCompensation);
+    }
+
+    #region ë””ë²„ê·¸
     public void DEBUG_FeverGage()
     {
         StartCoroutine(DEBUG_feverGage_co());
