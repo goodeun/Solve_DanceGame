@@ -30,10 +30,10 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
         int currentBeat = Mathf.FloorToInt(timing.ElapsedSeconds / timing.BeatDurationSeconds);
         if (currentBeat <= 0) return;
         float elapsedIntoBeat = timing.ElapsedSeconds - currentBeat * timing.BeatDurationSeconds;
-        // A physical press at the third-beat boundary can be delivered by the
-        // Input System on the first rest-beat frame. Leave a small callback
-        // grace before turning that third beat into a Miss.
-        if (elapsedIntoBeat <= justWindow * timing.BeatDurationSeconds + inputCallbackGraceSeconds) return;
+        // A press belongs to the nearest beat boundary.  Keep the preceding
+        // beat open until the midpoint of this beat so its late Bad/Good side
+        // can still be judged before resolving it as a Miss.
+        if (elapsedIntoBeat <= timing.BeatDurationSeconds * .5f + inputCallbackGraceSeconds) return;
         int previousBeat = currentBeat - 1;
         if (previousBeat % 4 != 3 && resolvedBeats.Add(previousBeat)) Apply(default, Judge.Miss, 0f);
     }
@@ -44,18 +44,18 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
         int beat = Mathf.FloorToInt(elapsed / beatDuration);
         float offset = elapsed - beat * beatDuration;
 
-        // Input System can deliver a physical key event one frame after FMOD has
-        // crossed into the rest beat.  Do not discard that event before it gets a
-        // chance to resolve the preceding third beat.  It remains a late (Bad)
-        // third-beat judgement; presses later in the actual rest beat are still
-        // rejected exactly as before.
-        if (beat % 4 == 3)
+        // Judge against the nearest beat boundary.  This produces a symmetric
+        // Bad → Good → Just → Good → Bad timing band around every playable beat.
+        if (offset > beatDuration * .5f)
         {
-            if (offset > inputCallbackGraceSeconds) return false;
-            beat--;
-            if (beat < 0 || beat % 4 == 3) return false;
-            offset = beatDuration;
+            beat++;
+            offset -= beatDuration;
         }
+
+        // The fourth beat in each phrase remains a rest.  The timestamp-based
+        // input sampling in RhythmWheelTiming already handles callback delay.
+        if (beat % 4 == 3)
+            return false;
 
         if (!resolvedBeats.Add(beat)) return false;
         float absolute = Mathf.Abs(offset);

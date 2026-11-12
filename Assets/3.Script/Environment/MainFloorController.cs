@@ -5,7 +5,7 @@ using DG.Tweening;
 
 public class MainFloorController : MonoBehaviour
 {
-    // ¸ŞÀÎÇÃ·Î¾î ÀÌµ¿ ¹× ºñÁÖ¾ó °ü¸®
+    // ë©”ì¸í”Œë¡œì–´ ì´ë™ ë° ë¹„ì£¼ì–¼ ê´€ë¦¬
     [SerializeField] private FloorSection[] floorSections;
     [Header("Beat Settings")]
     [SerializeField] private RhythmWheelUI rhythmWheel;
@@ -49,7 +49,7 @@ public class MainFloorController : MonoBehaviour
         floorSections[floorIndex].ActiveLight();
     }
 
-    #region µğ¹ö±×
+    #region ë””ë²„ê·¸
 
     int colorIndex_temp = 0;
 
@@ -86,6 +86,7 @@ public class MainFloorController : MonoBehaviour
     private void HandleComboSaved(Keys lastPressedKey)
     {
         isCombo = true;
+        stageController?.ClearBubblesForComboKey(lastPressedKey);
     }
 
     private void HandleRhythmJudgement(Keys pressedKey, Judge judge, float offset)

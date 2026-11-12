@@ -14,6 +14,7 @@ public sealed class RhythmWheelInput : MonoBehaviour
     private RhythmWheelJudgement judgement;
     private RhythmWheelFever fever;
     private readonly Dictionary<Keys, KeyImage> keys = new();
+    private readonly HashSet<Keys> handledKeysThisFrame = new();
     [SerializeField] private float inputMoveDistance = 30f;
     [SerializeField] private float inputMoveOutDuration = .005f;
     [SerializeField] private float inputMoveReturnDuration = .25f;
@@ -47,11 +48,35 @@ public sealed class RhythmWheelInput : MonoBehaviour
     }
     private void OnEnable() { playerInput.onActionTriggered += Handle; CinemachineCore.CameraUpdatedEvent.AddListener(ApplyCameraOffset); }
     private void OnDisable() { playerInput.onActionTriggered -= Handle; CinemachineCore.CameraUpdatedEvent.RemoveListener(ApplyCameraOffset); }
+
+    private void Update()
+    {
+        // PlayerInput can temporarily stop dispatching an action while its map
+        // is being re-enabled.  Poll the physical keyboard as a same-frame
+        // fallback so a real key press is never lost during that transition.
+        var keyboard = Keyboard.current;
+        if (keyboard == null) return;
+        if (keyboard.wKey.wasPressedThisFrame) HandleKey(Keys.W, Time.realtimeSinceStartupAsDouble);
+        if (keyboard.aKey.wasPressedThisFrame) HandleKey(Keys.A, Time.realtimeSinceStartupAsDouble);
+        if (keyboard.sKey.wasPressedThisFrame) HandleKey(Keys.S, Time.realtimeSinceStartupAsDouble);
+        if (keyboard.dKey.wasPressedThisFrame) HandleKey(Keys.D, Time.realtimeSinceStartupAsDouble);
+        if (keyboard.qKey.wasPressedThisFrame) HandleKey(Keys.Q, Time.realtimeSinceStartupAsDouble);
+        if (keyboard.eKey.wasPressedThisFrame) HandleKey(Keys.E, Time.realtimeSinceStartupAsDouble);
+    }
+
+    private void LateUpdate() => handledKeysThisFrame.Clear();
+
     private void Handle(InputAction.CallbackContext context)
     {
-        if (!context.performed || !Enum.TryParse(context.control.name, true, out Keys key) || !keys.TryGetValue(key, out var image) || !image.isActiveAndEnabled) return;
+        if (context.performed && Enum.TryParse(context.control.name, true, out Keys key))
+            HandleKey(key, context.time);
+    }
+
+    private void HandleKey(Keys key, double inputTime)
+    {
+        if (!handledKeysThisFrame.Add(key) || !keys.TryGetValue(key, out var image) || !image.isActiveAndEnabled) return;
         if (fever != null && fever.IsJudgementLocked) return;
-        float elapsed = timing.SampleInputElapsedSeconds();
+        float elapsed = timing.SampleInputElapsedSeconds(inputTime);
         // Resolve first.  This prevents a visible key/wheel response without a
         // matching score judgement, and lets RhythmWheelJudgement handle its
         // narrow third-beat-to-rest callback grace.

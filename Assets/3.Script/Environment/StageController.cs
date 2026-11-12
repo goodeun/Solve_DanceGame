@@ -5,7 +5,7 @@ using DG.Tweening;
 
 public class StageController : MonoBehaviour
 {
-    // Àü °´¼® ÀÌµ¿ ·ÎÁ÷ ÄÁÆ®·Ñ
+    // ì „ ê°ì„ ì´ë™ ë¡œì§ ì»¨íŠ¸ë¡¤
 
     [SerializeField] private MainFloorController mainDanceFloor;
     [SerializeField] private StageVisual[] seats = new StageVisual[6];
@@ -38,7 +38,7 @@ public class StageController : MonoBehaviour
             mainDanceFloor.transform.DORotate(new Vector3(0, 45, 0), transitionDuration).SetEase(transitionEase);
         }
 
-        // °´¼® ÀÌµ¿
+        // ê°ì„ ì´ë™
         switch (targetPhase)
         {
             case Stage.Square:
@@ -102,22 +102,33 @@ public class StageController : MonoBehaviour
 
     public void PlayKeyInputDrop(Keys key)
     {
-        int seatIndex = key switch
-        {
-            Keys.Q => 0,
-            Keys.E => 1,
-            Keys.A => 2,
-            Keys.D => 3,
-            Keys.W => 4,
-            Keys.S => 5,
-            _ => -1
-        };
+        int seatIndex = GetSeatIndex(key);
 
         if (seatIndex >= 0 && seatIndex < seats.Length && seats[seatIndex] != null)
             seats[seatIndex].PlayKeyInputDrop();
     }
 
-    #region µð¹ö±×
+    public void ClearBubblesForComboKey(Keys key)
+    {
+        int seatIndex = GetSeatIndex(key);
+        if (seatIndex < 0 || seatIndex >= seats.Length || seats[seatIndex] == null)
+            return;
+
+        seats[seatIndex].GetComponentInChildren<BubbleManager>()?.ClearPersistentBubbles();
+    }
+
+    private static int GetSeatIndex(Keys key) => key switch
+    {
+        Keys.Q => 0,
+        Keys.E => 1,
+        Keys.A => 2,
+        Keys.D => 3,
+        Keys.W => 4,
+        Keys.S => 5,
+        _ => -1
+    };
+
+    #region ë””ë²„ê·¸
 
     public void DEBUG_ToSquare()
     {

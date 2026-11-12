@@ -48,14 +48,21 @@ public sealed class RhythmWheelTiming : MonoBehaviour
     }
 
     /// <summary>
-    /// Returns the FMOD timeline at the instant an input callback is handled.
-    /// Input System timestamps and Unity realtime timestamps are not guaranteed
-    /// to share an origin, so extrapolating one from the other can put a press
-    /// in the following beat.
+    /// Returns the music timeline at the instant a physical input occurred.
+    /// CallbackContext.time is relative to realtimeSinceStartup, so subtracting
+    /// its delivery delay prevents a press near a beat boundary from being
+    /// judged as a press in the following (possibly rest) beat.
     /// </summary>
-    public float SampleInputElapsedSeconds()
+    public float SampleInputElapsedSeconds(double inputTime)
     {
         float elapsed = ReadElapsedSeconds();
+        double deliveryDelay = Time.realtimeSinceStartupAsDouble - inputTime;
+
+        // Ignore invalid or implausibly old timestamps rather than turning a
+        // delayed application resume into an unrelated past judgement.
+        if (deliveryDelay >= 0d && deliveryDelay <= .25d)
+            elapsed -= (float)deliveryDelay;
+
         return Mathf.Max(0f, elapsed);
     }
 
