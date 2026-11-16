@@ -50,10 +50,10 @@ public class JudgementUI : MonoBehaviour
     public IEnumerator Anim_Judgement_co()
     {
         judgement_img.color = alpha;
-        transform.position = new Vector2(AncorePos.x, AncorePos.y - 20f);
+        transform.position = new Vector2(AncorePos.x - Random.Range(-100, 100), AncorePos.y - Random.Range(-100, 100));
 
         judgement_img.DOFade(1f, 0.1f);
-        transform.DOMove(AncorePos, 0.2f).SetEase(Ease.OutElastic);
+        transform.DOMove(new Vector2(AncorePos.x - Random.Range(-80, 80), AncorePos.y - Random.Range(-80, 80)), 0.2f).SetEase(Ease.OutElastic);
 
         yield return new WaitForSeconds(0.3f);
 

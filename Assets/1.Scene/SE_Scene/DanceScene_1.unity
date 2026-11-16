@@ -188,7 +188,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrowdPooling
   Pool_Prefab: {fileID: 639806922843785255, guid: e6e4ef48a896b7644bba342f3620762e, type: 3}
-  Pool_Count: 50
+  Pool_Count: 10
   atmosphereController: {fileID: 138011104}
   seatingCollider: {fileID: 560280763}
   positionJitter: 1
@@ -284,7 +284,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrowdPooling
   Pool_Prefab: {fileID: 639806922843785255, guid: e6e4ef48a896b7644bba342f3620762e, type: 3}
-  Pool_Count: 50
+  Pool_Count: 10
   atmosphereController: {fileID: 502730798}
   seatingCollider: {fileID: 1585174424}
   positionJitter: 1
@@ -838,7 +838,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrowdPooling
   Pool_Prefab: {fileID: 639806922843785255, guid: e6e4ef48a896b7644bba342f3620762e, type: 3}
-  Pool_Count: 50
+  Pool_Count: 10
   atmosphereController: {fileID: 1316257587}
   seatingCollider: {fileID: 989165540}
   positionJitter: 1
@@ -1098,7 +1098,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrowdPooling
   Pool_Prefab: {fileID: 639806922843785255, guid: e6e4ef48a896b7644bba342f3620762e, type: 3}
-  Pool_Count: 50
+  Pool_Count: 10
   atmosphereController: {fileID: 1700370357}
   seatingCollider: {fileID: 530119491}
   positionJitter: 1
@@ -1172,7 +1172,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrowdPooling
   Pool_Prefab: {fileID: 639806922843785255, guid: e6e4ef48a896b7644bba342f3620762e, type: 3}
-  Pool_Count: 50
+  Pool_Count: 10
   atmosphereController: {fileID: 1702730476}
   seatingCollider: {fileID: 2062199287}
   positionJitter: 1
@@ -1251,7 +1251,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CrowdPooling
   Pool_Prefab: {fileID: 639806922843785255, guid: e6e4ef48a896b7644bba342f3620762e, type: 3}
-  Pool_Count: 50
+  Pool_Count: 10
   atmosphereController: {fileID: 1948538482}
   seatingCollider: {fileID: 2109643371}
   positionJitter: 1

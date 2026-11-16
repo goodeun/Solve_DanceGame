@@ -14,7 +14,10 @@ public class ComboAndMagnification : MonoBehaviour
     // A four-beat phrase accepts input on its first three beats; the fourth is a rest.
     private readonly List<Keys> currentPhraseKeys = new(3);
     private readonly List<Judge> currentPhraseJudgements = new(3);
-    private readonly List<Keys[]> recordedPhrases = new();
+    // This is diagnostic/history data only.  Retaining every phrase turns a
+    // long editor session into an ever-growing allocation.
+    private const int MaxRecordedPhrases = 64;
+    private readonly List<Keys[]> recordedPhrases = new(MaxRecordedPhrases);
     private bool comboSavedThisPhrase;
     private bool comboFailedThisPhrase;
 
@@ -61,6 +64,8 @@ public class ComboAndMagnification : MonoBehaviour
             return;
 
         Keys[] phrase = currentPhraseKeys.ToArray();
+        if (recordedPhrases.Count == MaxRecordedPhrases)
+            recordedPhrases.RemoveAt(0);
         recordedPhrases.Add(phrase);
         currentPhraseKeys.Clear();
         comboSavedThisPhrase = true;
@@ -68,9 +73,6 @@ public class ComboAndMagnification : MonoBehaviour
         OnComboSaved?.Invoke(phrase[phrase.Length - 1]);
         ApplyPhraseMood(phrase[phrase.Length - 1]);
 
-        Debug.Log(
-            $"[ComboAndMagnification] 4박 키 입력 저장: {phrase[0]}, {phrase[1]}, {phrase[2]}",
-            this);
     }
 
     private void CompletePhrase()
@@ -100,7 +102,6 @@ public class ComboAndMagnification : MonoBehaviour
         if (comboSavedThisPhrase || comboFailedThisPhrase)
             return;
 
-        Debug.Log("[ComboAndMagnification] Combo failed", this);
         comboFailedThisPhrase = true;
         currentPhraseKeys.Clear();
         currentPhraseJudgements.Clear();
