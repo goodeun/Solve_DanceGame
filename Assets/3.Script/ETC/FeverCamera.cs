@@ -14,6 +14,10 @@ public class FeverCamera : MonoBehaviour
     [SerializeField] private CinemachineCamera defaultCamera;
     [SerializeField] private CinemachineCamera[] feverCameras;
 
+    [SerializeField] private string hiddenLayerName = "UI";
+    private int originalCullingMask;
+    private int hiddenLayerMask;
+
     public bool IsCameraSequenceActive { get; private set; }
     private Coroutine feverSequenceCoroutine;
 
@@ -26,6 +30,12 @@ public class FeverCamera : MonoBehaviour
         player = GameObject.FindWithTag("Player").transform;
 
         Setting();
+
+        if (Camera.main != null)
+        {
+            originalCullingMask = Camera.main.cullingMask;
+            hiddenLayerMask = 1 << LayerMask.NameToLayer(hiddenLayerName);
+        }
     }
 
     public void Setting()
@@ -58,6 +68,8 @@ public class FeverCamera : MonoBehaviour
 
         //TODO BPM 계산하여 카메라 연출
         float timePerCut = duration / feverCameras.Length;
+
+        Camera.main.cullingMask &= ~hiddenLayerMask;
 
         for (int i = 0; i < feverCameras.Length; i++)
         {
@@ -92,6 +104,7 @@ public class FeverCamera : MonoBehaviour
         while (mainCameraBrain != null && mainCameraBrain.IsBlending)
             yield return null;
 
+        Camera.main.cullingMask = originalCullingMask;
         IsCameraSequenceActive = false;
         feverSequenceCoroutine = null;
     }
