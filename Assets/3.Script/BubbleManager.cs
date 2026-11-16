@@ -16,22 +16,26 @@ public class BubbleManager : MonoBehaviour
     [SerializeField, Min(0f)] private float initialSpawnDelay = 1f;
     [SerializeField, Min(0f)] private float randomSpawnDelay = 5f;
     [SerializeField, Range(0f, 1f)] private float positiveChance = 0.8f;
+    [SerializeField, Min(1)] private int maxPersistentBubbles = 6;
+    [SerializeField, Min(0.1f)] private float persistentBubbleLifetime = 15f;
 
     [Header("Camera Visibility")]
     [SerializeField] private bool keepSpawnInsideCameraView = true;
     [SerializeField, Range(0f, 0.45f)] private float cameraViewportMargin = 0.08f;
     [SerializeField] private Camera targetCamera;
 
-    private List<Bubble> positiveBubbles = new List<Bubble>();
-    private List<Bubble> negativeBubbles = new List<Bubble>();
-    private List<Bubble> persistentBubbles = new List<Bubble>();
+    private readonly List<Bubble> positiveBubbles = new();
+    private readonly List<Bubble> negativeBubbles = new();
+    private readonly List<Bubble> persistentBubbles = new();
+    private readonly List<float> persistentBubbleExpiryTimes = new();
 
-    private Queue<Bubble> disableBubbles = new Queue<Bubble>();
+    private readonly Queue<Bubble> disableBubbles = new();
     private Camera cachedCamera;
 
     // All seats share one spawn sequence: one new bubble at a time, placed
     // at a randomly selected seat. The bubbles themselves remain active.
     private static BubbleManager gameplaySpawnController;
+    private static readonly List<BubbleManager> activeManagers = new();
 
     private void Start()
     {
@@ -49,32 +53,69 @@ public class BubbleManager : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        if (!activeManagers.Contains(this))
+            activeManagers.Add(this);
+    }
+
     private void OnDisable()
     {
+        activeManagers.Remove(this);
+
         if (gameplaySpawnController == this)
             gameplaySpawnController = null;
     }
 
+    private void Update()
+    {
+        for (int i = persistentBubbles.Count - 1; i >= 0; i--)
+        {
+            Bubble bubble = persistentBubbles[i];
+            if (bubble == null || !bubble.gameObject.activeSelf)
+            {
+                persistentBubbles.RemoveAt(i);
+                persistentBubbleExpiryTimes.RemoveAt(i);
+            }
+            else if (Time.time >= persistentBubbleExpiryTimes[i])
+            {
+                ReleasePersistentBubbleAt(i);
+            }
+        }
+    }
+
     private IEnumerator SpawnRandomBubbles()
     {
+        float nextSpawnTime = Time.time + initialSpawnDelay + Random.Range(0f, randomSpawnDelay);
+
         while (true)
         {
-            yield return new WaitForSeconds(initialSpawnDelay + Random.Range(0f, randomSpawnDelay));
-
-            BubbleManager[] seats = FindObjectsByType<BubbleManager>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-            List<BubbleManager> eligibleSeats = new List<BubbleManager>();
-
-            foreach (BubbleManager seat in seats)
-                if (seat.spawnRandomBubblesDuringGameplay && seat.spawnArea != null)
-                    eligibleSeats.Add(seat);
-
-            if (eligibleSeats.Count == 0)
+            yield return null;
+            if (Time.time < nextSpawnTime)
                 continue;
 
-            BubbleManager selectedSeat = eligibleSeats[Random.Range(0, eligibleSeats.Count)];
-            selectedSeat.AddBubble(
-                Random.value <= selectedSeat.positiveChance ? BubbleState.positive : BubbleState.negative,
-                true);
+            nextSpawnTime = Time.time + initialSpawnDelay + Random.Range(0f, randomSpawnDelay);
+
+            int eligibleCount = 0;
+            foreach (BubbleManager seat in activeManagers)
+                if (seat.spawnRandomBubblesDuringGameplay && seat.spawnArea != null)
+                    eligibleCount++;
+
+            if (eligibleCount == 0)
+                continue;
+
+            int targetIndex = Random.Range(0, eligibleCount);
+            foreach (BubbleManager seat in activeManagers)
+            {
+                if (!seat.spawnRandomBubblesDuringGameplay || seat.spawnArea == null)
+                    continue;
+
+                if (targetIndex-- > 0)
+                    continue;
+
+                seat.AddBubble(Random.value <= seat.positiveChance ? BubbleState.positive : BubbleState.negative, true);
+                break;
+            }
         }
     }
 
@@ -142,7 +183,14 @@ public class BubbleManager : MonoBehaviour
         }
 
         if (persistent)
+        {
+            int persistentLimit = Mathf.Max(1, maxPersistentBubbles);
+            while (persistentBubbles.Count >= persistentLimit)
+                ReleasePersistentBubbleAt(0);
+
             persistentBubbles.Add(additiveBubble);
+            persistentBubbleExpiryTimes.Add(Time.time + Mathf.Max(0.1f, persistentBubbleLifetime));
+        }
 
         additiveBubble.gameObject.SetActive(true);
     }
@@ -167,16 +215,24 @@ public class BubbleManager : MonoBehaviour
 
     public void ClearPersistentBubbles()
     {
-        foreach (Bubble bubble in persistentBubbles)
-        {
-            bubble.Despawn_Anim(() =>
-            {
-                bubble.gameObject.SetActive(false);
-                disableBubbles.Enqueue(bubble);
-            });
-        }
+        for (int i = persistentBubbles.Count - 1; i >= 0; i--)
+            ReleasePersistentBubbleAt(i);
+    }
 
-        persistentBubbles.Clear();
+    private void ReleasePersistentBubbleAt(int index)
+    {
+        Bubble bubble = persistentBubbles[index];
+        persistentBubbles.RemoveAt(index);
+        persistentBubbleExpiryTimes.RemoveAt(index);
+
+        if (bubble == null || !bubble.gameObject.activeSelf)
+            return;
+
+        bubble.Despawn_Anim(() =>
+        {
+            bubble.gameObject.SetActive(false);
+            disableBubbles.Enqueue(bubble);
+        });
     }
 
     public int PopPositiveBubble() // 터진 말풍선 갯수 반환. 점수로 치환 바람

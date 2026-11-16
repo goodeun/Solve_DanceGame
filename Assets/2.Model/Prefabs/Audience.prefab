@@ -61,7 +61,7 @@ Transform:
   m_GameObject: {fileID: 639806922843785255}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.8946228, z: 0, w: -0.44682223}
-  m_LocalPosition: {x: -26.69, y: 7.03, z: 17.96}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -160,6 +160,10 @@ MonoBehaviour:
   HeatingScore: 0
   BurningScore: 0
   ScoreOffset: 3
+  idleState: Base Layer.Idle
+  pointingState: Base Layer.Pointing Forward
+  jumpingState: Base Layer.Joyful Jump
+  actionSwitchInterval: 2
 --- !u!1 &941046114767260664
 GameObject:
   m_ObjectHideFlags: 0

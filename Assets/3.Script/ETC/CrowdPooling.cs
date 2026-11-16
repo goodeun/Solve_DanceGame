@@ -69,10 +69,17 @@ public class CrowdPooling : MonoBehaviour
         if (mainFloor == null || Objects == null)
             return;
 
-        foreach (GameObject audience in Objects)
+        for (int i = 0; i < Objects.Length; i++)
         {
+            GameObject audience = Objects[i];
             if (audience != null && audience.activeSelf)
+            {
+                // Seats move during phase transitions.  Reapply the
+                // deterministic collider-space position so the crowd follows
+                // its own seat and cannot accumulate at a stale world point.
+                audience.transform.position = GetPositionOnSeatingCollider(i);
                 FaceMainFloor(audience.transform);
+            }
         }
     }
 
@@ -91,17 +98,22 @@ public class CrowdPooling : MonoBehaviour
         if (seatingCollider == null)
             return transform.position;
 
+        // Build the grid in the BoxCollider's local space, then convert it to
+        // world space.  This keeps every audience member on the actual seat
+        // surface even when the seat object is rotated or scaled.
+        Vector3 size = seatingCollider.size;
+        Vector3 center = seatingCollider.center;
         int columns = Mathf.CeilToInt(Mathf.Sqrt(Pool_Count));
         int rows = Mathf.CeilToInt((float)Pool_Count / columns);
         int column = index % columns;
         int row = index / columns;
 
-        float x = ((column + 0.5f) / columns - 0.5f) * seatingCollider.size.x;
-        float z = ((row + 0.5f) / rows - 0.5f) * seatingCollider.size.z;
+        float x = ((column + 0.5f) / columns - 0.5f) * size.x;
+        float z = ((row + 0.5f) / rows - 0.5f) * size.z;
         x += (Mathf.PerlinNoise(index * 0.71f, 0.17f) - 0.5f) * positionJitter * 2f;
         z += (Mathf.PerlinNoise(index * 0.31f, 0.83f) - 0.5f) * positionJitter * 2f;
-        Vector3 localPosition = seatingCollider.center + new Vector3(x, seatingCollider.size.y * 0.5f, z);
 
+        Vector3 localPosition = center + new Vector3(x, size.y * 0.5f, z);
         return seatingCollider.transform.TransformPoint(localPosition);
     }
 

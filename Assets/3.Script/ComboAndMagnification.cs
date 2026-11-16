@@ -13,6 +13,7 @@ public class ComboAndMagnification : MonoBehaviour
 
     // A four-beat phrase accepts input on its first three beats; the fourth is a rest.
     private readonly List<Keys> currentPhraseKeys = new(3);
+    private readonly List<Judge> currentPhraseJudgements = new(3);
     private readonly List<Keys[]> recordedPhrases = new();
     private bool comboSavedThisPhrase;
     private bool comboFailedThisPhrase;
@@ -54,6 +55,7 @@ public class ComboAndMagnification : MonoBehaviour
         }
 
         currentPhraseKeys.Add(pressedKey);
+        currentPhraseJudgements.Add(judge);
 
         if (currentPhraseKeys.Count < 3)
             return;
@@ -64,6 +66,7 @@ public class ComboAndMagnification : MonoBehaviour
         comboSavedThisPhrase = true;
 
         OnComboSaved?.Invoke(phrase[phrase.Length - 1]);
+        ApplyPhraseMood(phrase[phrase.Length - 1]);
 
         Debug.Log(
             $"[ComboAndMagnification] 4박 키 입력 저장: {phrase[0]}, {phrase[1]}, {phrase[2]}",
@@ -72,11 +75,12 @@ public class ComboAndMagnification : MonoBehaviour
 
     private void CompletePhrase()
     {
-        // Input judgements are intentionally paused while the fever camera is
-        // playing, so a phrase that passes during that time cannot fail a combo.
-        if (rhythmWheel != null && rhythmWheel.IsJudgementLocked)
+        // Fever can overlap a phrase.  Keep its bonus window from producing a
+        // combo failure, while still allowing regular input scoring.
+        if (rhythmWheel != null && (rhythmWheel.IsJudgementLocked || rhythmWheel.IsFeverActive))
         {
             currentPhraseKeys.Clear();
+            currentPhraseJudgements.Clear();
             comboSavedThisPhrase = false;
             comboFailedThisPhrase = false;
             return;
@@ -86,6 +90,7 @@ public class ComboAndMagnification : MonoBehaviour
             FailCurrentPhrase();
 
         currentPhraseKeys.Clear();
+        currentPhraseJudgements.Clear();
         comboSavedThisPhrase = false;
         comboFailedThisPhrase = false;
     }
@@ -98,6 +103,18 @@ public class ComboAndMagnification : MonoBehaviour
         Debug.Log("[ComboAndMagnification] Combo failed", this);
         comboFailedThisPhrase = true;
         currentPhraseKeys.Clear();
+        currentPhraseJudgements.Clear();
         OnComboFailed?.Invoke();
+    }
+
+    private void ApplyPhraseMood(Keys phraseFinalKey)
+    {
+        AtmosphereController[] audienceBlocks = FindObjectsByType<AtmosphereController>(FindObjectsSortMode.None);
+        if (audienceBlocks.Length == 0)
+            return;
+
+        Judge[] phraseJudgements = currentPhraseJudgements.ToArray();
+        foreach (AtmosphereController audienceBlock in audienceBlocks)
+            audienceBlock.ApplyPhraseMood(phraseFinalKey, phraseJudgements);
     }
 }
