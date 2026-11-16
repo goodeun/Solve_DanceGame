@@ -34,22 +34,21 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
         if (fever != null && fever.IsActive)
             return;
 
-        int currentBeat = Mathf.FloorToInt(timing.ElapsedSeconds / timing.BeatDurationSeconds);
+        if (!timing.TryGetCurrentBeatTiming(timing.ElapsedSeconds, out int currentBeat, out float elapsedIntoBeat, out float beatDuration))
+            return;
         if (currentBeat <= 0) return;
-        float elapsedIntoBeat = timing.ElapsedSeconds - currentBeat * timing.BeatDurationSeconds;
         // A press belongs to the nearest beat boundary.  Keep the preceding
         // beat open until the midpoint of this beat so its late Bad/Good side
         // can still be judged before resolving it as a Miss.
-        if (elapsedIntoBeat <= timing.BeatDurationSeconds * .5f + inputCallbackGraceSeconds) return;
+        if (elapsedIntoBeat <= beatDuration * .5f + inputCallbackGraceSeconds) return;
         int previousBeat = currentBeat - 1;
         if (previousBeat % 4 != 3 && resolvedBeats.Add(previousBeat)) Apply(default, Judge.Miss, 0f);
     }
 
     public bool JudgeInput(Keys key, float elapsed)
     {
-        float beatDuration = timing.BeatDurationSeconds;
-        int beat = Mathf.FloorToInt(elapsed / beatDuration);
-        float offset = elapsed - beat * beatDuration;
+        if (!timing.TryGetCurrentBeatTiming(elapsed, out int beat, out float offset, out float beatDuration))
+            return false;
 
         // Judge against the nearest beat boundary.  This produces a symmetric
         // Bad → Good → Just → Good → Bad timing band around every playable beat.

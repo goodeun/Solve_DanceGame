@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="AudioFile" id="{7e087489-14b7-4373-b728-28bccf9f9eed}">
+		<property name="assetPath">
+			<value>Comet.mp3</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>192.05224489795918</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{53d0a260-eeea-45f3-8b57-419278651c33}</destination>
+		</relationship>
+	</object>
+</objects>

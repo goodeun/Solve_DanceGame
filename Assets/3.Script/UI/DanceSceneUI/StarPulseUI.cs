@@ -31,9 +31,9 @@ public class StarPulseUI : MonoBehaviour
         runtimeMaterial.SetFloat(RadiusProperty, endRadius);
     }
 
-    public void Play(int bpm)
+    public void Play(float beatDurationSeconds)
     {
-        if (runtimeMaterial == null || bpm <= 0)
+        if (runtimeMaterial == null || beatDurationSeconds <= 0f)
             return;
 
         if (pulseCoroutine != null)
@@ -43,7 +43,7 @@ public class StarPulseUI : MonoBehaviour
         runtimeMaterial.SetColor(MainColorProperty, selectedColor);
         runtimeMaterial.SetFloat(RadiusProperty, startRadius);
 
-        float durationSeconds = durationBeats * 60f / bpm;
+        float durationSeconds = durationBeats * beatDurationSeconds;
         pulseCoroutine = StartCoroutine(ShrinkRoutine(durationSeconds));
     }
 

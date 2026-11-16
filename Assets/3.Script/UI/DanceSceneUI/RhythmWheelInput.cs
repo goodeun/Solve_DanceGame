@@ -82,7 +82,7 @@ public sealed class RhythmWheelInput : MonoBehaviour
         // narrow third-beat-to-rest callback grace.
         if (!judgement.JudgeInput(key, elapsed)) return;
         PlayWheelMotion(key); PlayCameraMotion(key); image.PlayPressAnimation();
-        starPulse?.Play(Mathf.RoundToInt(60f / timing.BeatDurationSeconds));
+        starPulse?.Play(timing.BeatDurationSeconds);
     }
     private void PlayWheelMotion(Keys key) { if (wheel == null) return; if (wheelMotion != null) StopCoroutine(wheelMotion); wheelMotion = StartCoroutine(MoveWheel(Direction(key))); }
     private void PlayCameraMotion(Keys key) { inputCamera ??= Camera.main; if (inputCamera == null) return; if (cameraMotion != null) StopCoroutine(cameraMotion); cameraDirection = Direction(key).normalized; cameraMotion = StartCoroutine(MoveCamera()); }
