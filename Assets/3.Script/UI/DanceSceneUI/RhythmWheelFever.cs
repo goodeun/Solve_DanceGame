@@ -12,6 +12,7 @@ public sealed class RhythmWheelFever : MonoBehaviour
     private float gauge;
     private bool queued;
     private bool active;
+    public bool IsActive => active;
     public bool IsJudgementLocked => feverCamera != null && feverCamera.IsCameraSequenceActive;
     private void Awake() { timing = GetComponent<RhythmWheelTiming>(); combo ??= GetComponent<ComboAndMagnification>(); feverCamera ??= FindFirstObjectByType<FeverCamera>(); hud ??= FindFirstObjectByType<DanceSceneHUD>(); }
     private void OnEnable() { if (combo != null) { combo.OnComboSaved += Save; combo.OnComboFailed += Fail; } timing.PhraseCompleted += StartFever; }

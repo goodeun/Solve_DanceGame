@@ -11,6 +11,7 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
     [SerializeField, Min(0f)] private float inputCallbackGraceSeconds = .05f;
     [SerializeField] private DanceSceneHUD danceHUD;
     private RhythmWheelTiming timing;
+    private RhythmWheelFever fever;
     private readonly HashSet<int> resolvedBeats = new();
     public int Score { get; private set; }
     public int Combo { get; private set; }
@@ -20,6 +21,7 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
     private void Awake()
     {
         timing = GetComponent<RhythmWheelTiming>();
+        fever = GetComponent<RhythmWheelFever>();
         danceHUD ??= FindFirstObjectByType<DanceSceneHUD>();
     }
 
@@ -27,6 +29,11 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
 
     private void Update()
     {
+        // Fever keeps normal key scoring, but missed beats must not break the
+        // combo while its bonus window is active.
+        if (fever != null && fever.IsActive)
+            return;
+
         int currentBeat = Mathf.FloorToInt(timing.ElapsedSeconds / timing.BeatDurationSeconds);
         if (currentBeat <= 0) return;
         float elapsedIntoBeat = timing.ElapsedSeconds - currentBeat * timing.BeatDurationSeconds;

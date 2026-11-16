@@ -13,6 +13,7 @@ public sealed class RhythmWheelUI : MonoBehaviour
     public int Combo => judgement.Combo;
     public float BeatDurationSeconds => timing.BeatDurationSeconds;
     public bool IsJudgementLocked => fever.IsJudgementLocked;
+    public bool IsFeverActive => fever != null && fever.IsActive;
     public event Action<Keys, Judge, float> OnJudged;
     public event Action<int> OnBeatStarted;
     public event Action OnFourthBeatStarted;

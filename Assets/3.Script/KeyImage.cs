@@ -10,7 +10,6 @@ public enum Keys
     W, A, S, D, Q, E
 }
 
-[ExecuteAlways]
 public class KeyImage : MonoBehaviour
 {
     [SerializeField] public Keys key;
@@ -30,6 +29,16 @@ public class KeyImage : MonoBehaviour
     private void Awake()
     {
         defaultScale = transform.localScale;
+        RefreshVisuals();
+    }
+
+    private void OnValidate()
+    {
+        // Keep the prefab preview correct without running a Canvas/TMP update
+        // every editor frame.  ExecuteAlways previously made these assignments
+        // continuously while the Game view was open, which kept producing editor
+        // UI rebuild work even outside Play Mode.
+        RefreshVisuals();
     }
 
     private void OnDisable()
@@ -43,6 +52,15 @@ public class KeyImage : MonoBehaviour
 
     private void Update()
     {
+        if (!Application.isPlaying)
+            return;
+
+        SetTextRotation();
+        SetTextPosition();
+    }
+
+    private void RefreshVisuals()
+    {
         SetTextRotation();
         SetTextPosition();
         SetKeyText();
@@ -50,11 +68,17 @@ public class KeyImage : MonoBehaviour
 
     private void SetTextRotation()
     {
+        if (keyInfo == null)
+            return;
+
         keyInfo.transform.localEulerAngles = new Vector3(0, 0, -transform.localEulerAngles.z);
     }
 
     private void SetTextPosition()
     {
+        if (fill == null || keyInfo == null || fill.material == null)
+            return;
+
         Material mat = fill.material;
 
         keyInfo.transform.localPosition = 
@@ -67,6 +91,9 @@ public class KeyImage : MonoBehaviour
 
     private void SetKeyText()
     {
+        if (keyInfo == null)
+            return;
+
         keyInfo.text = key.ToString();
     }
 
