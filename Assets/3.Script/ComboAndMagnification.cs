@@ -5,6 +5,7 @@ using UnityEngine;
 public class ComboAndMagnification : MonoBehaviour
 {
     public event System.Action<Keys, Judge, float> OnJudged;
+    public event System.Action<Keys, int[], KeyCommand> OnForthBeat;
     public event System.Action<Keys> OnComboSaved;
     public event System.Action OnComboFailed;
 

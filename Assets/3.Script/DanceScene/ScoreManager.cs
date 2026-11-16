@@ -6,19 +6,20 @@ public class ScoreManager : MonoBehaviour
 {
     [SerializeField] private MultiplierUI multiplierUI;
     [SerializeField] private ScoreUI scoreUI;
-    [SerializeField] private RhythmWheelUI wheelUI;
+    [SerializeField] private ComboAndMagnification comboMagnificater;
 
-    // 배율 상한/하한선
+    // 배율 상한/하한선s
 
-    private const float MIN_MULTIPLIER = 0.5f;
+    private const float MIN_MULTIPLIER = 0.3f;
     private const float MAX_MULTIPLIER = 3.0f;
     private const float FEVER_MULTIPLIER = 3.0f; // 피버 고정 배율
 
     // 배율 상승/하강 폭 (임시)
     //TODO 상승폭 하강폭 밸런스 테스트하며 정하기.
     private const float PENALTY_PRESSED = -0.2f;
-    private const float BONUS_NEXT = 0.15f;
-    private const float BONUS_OTHER = 0.05f;
+    private const float PENALTY_BUBBLE = -0.01f;
+    private const float BONUS_NEXT = 0.1f;
+    private const float BONUS_OTHER = 0.03f;
 
     private readonly Keys[] squreOrder = { Keys.Q, Keys.E, Keys.D, Keys.A };
     private readonly Keys[] hexagonOrder = { Keys.Q, Keys.W, Keys.E, Keys.D, Keys.S, Keys.A };
@@ -38,17 +39,17 @@ public class ScoreManager : MonoBehaviour
 
     private void OnEnable()
     {
-        if (wheelUI != null)
+        if (comboMagnificater != null)
         {
-            wheelUI.OnJudged += ProcessHit;
+            comboMagnificater.OnJudged += ProcessHit;
         }
     }
 
     private void OnDisable()
     {
-        if (wheelUI != null)
+        if (comboMagnificater != null)
         {
-            wheelUI.OnJudged -= ProcessHit;
+            comboMagnificater.OnJudged -= ProcessHit;
         }
     }
 
@@ -154,6 +155,20 @@ public class ScoreManager : MonoBehaviour
         }
 
         multiplierUI?.UpdateUI(keyMultipliers, isFeverTime) ;
+    }
+
+    public void DecreaseMultipliers(int activeBubble)
+    {
+        foreach (Keys key in curKeyOrder)
+        {
+            keyMultipliers[key] = Mathf.Clamp(
+                keyMultipliers[key] + (PENALTY_BUBBLE * activeBubble),
+                MIN_MULTIPLIER,
+                MAX_MULTIPLIER
+                );
+        }
+
+        multiplierUI?.UpdateUI(keyMultipliers, isFeverTime);
     }
 
 
