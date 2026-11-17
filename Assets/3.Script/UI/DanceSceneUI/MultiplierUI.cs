@@ -4,16 +4,9 @@ using UnityEngine;
 using TMPro;
 
 [System.Serializable]
-public struct KeyMultiplierUIConfig
-{
-    public Keys key;
-    public TextMeshProUGUI multiplierText;
-}
-
-
 public class MultiplierUI : MonoBehaviour
 {
-    [SerializeField] private List<KeyMultiplierUIConfig> uIConfigs;
+    [SerializeField] private List<KeyImage> uIConfigs;
 
     private Dictionary<Keys, TextMeshProUGUI> uiDict = new Dictionary<Keys, TextMeshProUGUI>();
 
@@ -21,9 +14,9 @@ public class MultiplierUI : MonoBehaviour
     {
         foreach(var config in uIConfigs)
         {
-            if (config.multiplierText != null)
+            if (config.MagText != null)
             {
-                uiDict[config.key] = config.multiplierText;
+                uiDict[config.key] = config.MagText;
             }
         }
     }

@@ -18,6 +18,7 @@ public class KeyImage : MonoBehaviour
     [SerializeField] private Image fill;
     [SerializeField] private Image line;
     [SerializeField] private TextMeshProUGUI keyInfo;
+    [SerializeField] private TextMeshProUGUI magnificationText;
 
     private const float PressScale = 1.1f;
     private const float GrowDuration = 0.01f;
@@ -25,6 +26,9 @@ public class KeyImage : MonoBehaviour
 
     private Vector3 defaultScale;
     private Sequence pressSequence;
+
+    public TextMeshProUGUI KeyInfo => keyInfo;
+    public TextMeshProUGUI MagText => magnificationText;
 
     private void Awake()
     {

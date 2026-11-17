@@ -60,6 +60,22 @@ public class FloorSection : MonoBehaviour
         hdrColor = newColor * intensity;
     }
 
+    /// <summary>
+    /// Changes the idle and activated colours without competing with this
+    /// component's own floor-light tweens.
+    /// </summary>
+    public void SetPhaseColours(Color newBaseColor, Color newHdrColor)
+    {
+        if (floorMat == null)
+            return;
+
+        floorMat.DOKill();
+        seq?.Kill();
+        baseColor = newBaseColor;
+        hdrColor = newHdrColor;
+        floorMat.SetColor(colorID, baseColor);
+    }
+
     public void ActiveLight()
     {
         floorMat.DOKill();
