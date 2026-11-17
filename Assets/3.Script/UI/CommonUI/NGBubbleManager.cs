@@ -153,8 +153,8 @@ public class NGBubbleManager : MonoBehaviour
 
         stage = _stage;
 
-        int start = (stage == Stage.Square) ? 2 : 0;
-        int end = (stage == Stage.Square) ? 6 : 4;
+        int start = (stage == Stage.Square) ? 4 : 0;
+        int end = (stage == Stage.Square) ? 6 : 2;
 
         for (int i = start; i<end; i++)
         {
