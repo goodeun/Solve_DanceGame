@@ -22,7 +22,7 @@ public class PlayerManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         // TODO 임시 값, 일상 씬과 연동하여 불러오기.
-        currentStats = new PlayerStats { rhythm = 20, groove = 15, power = 10, style = 5, condition = 80 };
+        currentStats = new PlayerStats { rhythm = 2000, groove = 1600, power = 1500, style = 5, condition = 80 };
     }
 
 }

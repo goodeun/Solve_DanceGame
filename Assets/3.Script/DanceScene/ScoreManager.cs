@@ -8,14 +8,14 @@ public class ScoreManager : MonoBehaviour
     [SerializeField] private ScoreUI scoreUI;
     [SerializeField] private ComboAndMagnification comboMagnificater;
 
-    // ¹èÀ² »óÇÑ/ÇÏÇÑ¼±s
+    // ë°°ìœ¨ ìƒí•œ/í•˜í•œì„ s
 
     private const float MIN_MULTIPLIER = 0.3f;
     private const float MAX_MULTIPLIER = 3.0f;
-    private const float FEVER_MULTIPLIER = 3.0f; // ÇÇ¹ö °íÁ¤ ¹èÀ²
+    private const float FEVER_MULTIPLIER = 3.0f; // í”¼ë²„ ê³ ì • ë°°ìœ¨
 
-    // ¹èÀ² »ó½Â/ÇÏ°­ Æø (ÀÓ½Ã)
-    //TODO »ó½ÂÆø ÇÏ°­Æø ¹ë·±½º Å×½ºÆ®ÇÏ¸ç Á¤ÇÏ±â.
+    // ë°°ìœ¨ ìƒìŠ¹/í•˜ê°• í­ (ì„ì‹œ)
+    //TODO ìƒìŠ¹í­ í•˜ê°•í­ ë°¸ëŸ°ìŠ¤ í…ŒìŠ¤íŠ¸í•˜ë©° ì •í•˜ê¸°.
     private const float PENALTY_PRESSED = -0.2f;
     private const float PENALTY_BUBBLE = -0.01f;
     private const float BONUS_NEXT = 0.1f;
@@ -30,7 +30,9 @@ public class ScoreManager : MonoBehaviour
     public bool isFeverTime = false;
     public int totalScore = 0;
     public int keyCount = 4;
-    public Phase curPhase = Phase.Pop; // ÆäÀÌÁî Ä³½Ì
+    public Phase curPhase = Phase.Pop; // í˜ì´ì¦ˆ ìºì‹±
+
+    public int TotalScore => totalScore;
 
     private void Awake()
     {
@@ -76,14 +78,14 @@ public class ScoreManager : MonoBehaviour
                 break;
         }
 
-        // Á¡¼ö È¹µæ Ã³¸®
+        // ì ìˆ˜ íšë“ ì²˜ë¦¬
         if (judge != Judge.Miss)
         {
             float Multiplier = isFeverTime ? FEVER_MULTIPLIER : keyMultipliers[pressedKey];
             float curScore = (baseScore * judgementRate) * Multiplier;
 
             int styleStat = PlayerManager.Instance.currentStats.style;
-            float additionalScore = styleStat * 1.0f; // TODO ½ºÅ¸ÀÏ ½ºÅÈ Ãß°¡Á¡¼ö
+            float additionalScore = styleStat * 1.0f; // TODO ìŠ¤íƒ€ì¼ ìŠ¤íƒ¯ ì¶”ê°€ì ìˆ˜
 
             totalScore += Mathf.RoundToInt(curScore + additionalScore);
         }
@@ -109,6 +111,11 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    public void SetPhase(Phase phase)
+    {
+        curPhase = phase;
+    }
+
     public void SetStageMode(Stage stage)
     {
         curKeyOrder = (stage == Stage.Square) ? squreOrder : hexagonOrder;
@@ -129,7 +136,7 @@ public class ScoreManager : MonoBehaviour
 
         int pressedIndex = System.Array.IndexOf(curKeyOrder, pressedKey);
         int keyCount = curKeyOrder.Length;
-        int nextKeyIndex = (pressedIndex + 1) % keyCount; //½Ã°è¹æÇâ ´ÙÀ½ Å° ÀÎµ¦½º
+        int nextKeyIndex = (pressedIndex + 1) % keyCount; //ì‹œê³„ë°©í–¥ ë‹¤ìŒ í‚¤ ì¸ë±ìŠ¤
 
         float styleBouns = PlayerManager.Instance.currentStats.style * 0.01f;
 
@@ -154,7 +161,7 @@ public class ScoreManager : MonoBehaviour
             keyMultipliers[targetKey] = Mathf.Clamp(targetValue, MIN_MULTIPLIER, MAX_MULTIPLIER);
         }
 
-        multiplierUI?.UpdateUI(keyMultipliers, isFeverTime) ;
+        multiplierUI?.UpdateUI(keyMultipliers, isFeverTime);
     }
 
     public void DecreaseMultipliers(int activeBubble)

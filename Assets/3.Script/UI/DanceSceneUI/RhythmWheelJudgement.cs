@@ -10,10 +10,14 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float goodWindow = .3f;
     [SerializeField, Min(0f)] private float inputCallbackGraceSeconds = .05f;
     [SerializeField] private DanceSceneHUD danceHUD;
+
     private RhythmWheelTiming timing;
     private RhythmWheelFever fever;
+
     private readonly HashSet<int> resolvedBeats = new();
-    public int Score { get; private set; }
+    [SerializeField] private ScoreManager scoreManager;
+
+    public int Score => scoreManager != null ? scoreManager.TotalScore : 0;
     public int Combo { get; private set; }
     public float JustWindowSeconds => justWindow * timing.BeatDurationSeconds;
     public event Action<Keys, Judge, float> Judged;
@@ -22,10 +26,11 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
     {
         timing = GetComponent<RhythmWheelTiming>();
         fever = GetComponent<RhythmWheelFever>();
+        scoreManager ??= FindFirstObjectByType<ScoreManager>();
         danceHUD ??= FindFirstObjectByType<DanceSceneHUD>();
     }
 
-    private void OnEnable() { Score = 0; Combo = 0; resolvedBeats.Clear(); }
+    private void OnEnable() { Combo = 0; resolvedBeats.Clear(); }
 
     private void Update()
     {
@@ -51,7 +56,7 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
             return false;
 
         // Judge against the nearest beat boundary.  This produces a symmetric
-        // Bad → Good → Just → Good → Bad timing band around every playable beat.
+        // Bad ??Good ??Just ??Good ??Bad timing band around every playable beat.
         if (offset > beatDuration * .5f)
         {
             beat++;
@@ -63,21 +68,25 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
         if (beat % 4 == 3)
             return false;
 
-        if (!resolvedBeats.Add(beat)) return false;
+        if (!resolvedBeats.Add(beat)) 
+            return false;
+
         float absolute = Mathf.Abs(offset);
         Judge judge = absolute <= justWindow * beatDuration ? Judge.Just : absolute <= goodWindow * beatDuration ? Judge.Good : Judge.Bad;
+
         Apply(key, judge, offset);
+
         return true;
     }
 
     private void Apply(Keys key, Judge judge, float offset)
     {
-        if (judge == Judge.Just) { Score += 1000; Combo++; }
-        else if (judge == Judge.Good) { Score += 700; Combo++; }
-        else if (judge == Judge.Bad) { Score += 300; Combo = 0; }
-        else Combo = 0;
+        if (judge == Judge.Just || judge == Judge.Good)
+            Combo++;
+        else
+            Combo = 0;
+
         danceHUD?.JudgementEffect(judge);
-        danceHUD?.AddScore(Score);
         Judged?.Invoke(key, judge, offset);
     }
 }

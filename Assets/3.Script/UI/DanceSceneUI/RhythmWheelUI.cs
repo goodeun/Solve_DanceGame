@@ -19,13 +19,19 @@ public sealed class RhythmWheelUI : MonoBehaviour
     public event Action OnFourthBeatStarted;
     public event Action OnFourthPulsePeak;
     public event Action OnPhraseCompleted;
+
     private void Awake()
     {
         timing = GetComponent<RhythmWheelTiming>() ?? gameObject.AddComponent<RhythmWheelTiming>();
         judgement = GetComponent<RhythmWheelJudgement>() ?? gameObject.AddComponent<RhythmWheelJudgement>();
         fever = GetComponent<RhythmWheelFever>() ?? gameObject.AddComponent<RhythmWheelFever>();
-        if (GetComponent<RhythmWheelInput>() == null) gameObject.AddComponent<RhythmWheelInput>();
-        if (GetComponent<RhythmWheelPulseVisual>() == null) gameObject.AddComponent<RhythmWheelPulseVisual>();
+
+        if (GetComponent<RhythmWheelInput>() == null) 
+            gameObject.AddComponent<RhythmWheelInput>();
+
+        if (GetComponent<RhythmWheelPulseVisual>() == null) 
+            gameObject.AddComponent<RhythmWheelPulseVisual>();
+
         timing.BeatStarted += value => OnBeatStarted?.Invoke(value);
         timing.FourthBeatStarted += () => OnFourthBeatStarted?.Invoke();
         timing.FourthPulsePeak += () => OnFourthPulsePeak?.Invoke();
