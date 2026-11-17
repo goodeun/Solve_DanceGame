@@ -34,22 +34,21 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
         if (fever != null && fever.IsActive)
             return;
 
-        int currentBeat = Mathf.FloorToInt(timing.ElapsedSeconds / timing.BeatDurationSeconds);
-        if (currentBeat < 0) return; //< 판정 박자 밀림 수정 1 26.11.17
-        float elapsedIntoBeat = timing.ElapsedSeconds - currentBeat * timing.BeatDurationSeconds;
+        if (!timing.TryGetCurrentBeatTiming(timing.ElapsedSeconds, out int currentBeat, out float elapsedIntoBeat, out float beatDuration))
+            return;
+        if (currentBeat <= 0) return;
         // A press belongs to the nearest beat boundary.  Keep the preceding
         // beat open until the midpoint of this beat so its late Bad/Good side
         // can still be judged before resolving it as a Miss.
-        if (elapsedIntoBeat <= timing.BeatDurationSeconds * .5f + inputCallbackGraceSeconds) return;
-        //int previousBeat = currentBeat - 1; < 판정 박자 밀림 수정 2 26.11.17
-        if (currentBeat % 4 != 3 && resolvedBeats.Add(currentBeat)) Apply(default, Judge.Miss, 0f);
+        if (elapsedIntoBeat <= beatDuration * .5f + inputCallbackGraceSeconds) return;
+        int previousBeat = currentBeat - 1;
+        if (previousBeat % 4 != 3 && resolvedBeats.Add(previousBeat)) Apply(default, Judge.Miss, 0f);
     }
 
     public bool JudgeInput(Keys key, float elapsed)
     {
-        float beatDuration = timing.BeatDurationSeconds;
-        int beat = Mathf.FloorToInt(elapsed / beatDuration);
-        float offset = elapsed - beat * beatDuration;
+        if (!timing.TryGetCurrentBeatTiming(elapsed, out int beat, out float offset, out float beatDuration))
+            return false;
 
         // Judge against the nearest beat boundary.  This produces a symmetric
         // Bad → Good → Just → Good → Bad timing band around every playable beat.

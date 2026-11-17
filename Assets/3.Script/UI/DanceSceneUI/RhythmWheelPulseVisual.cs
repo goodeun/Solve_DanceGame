@@ -34,12 +34,19 @@ public sealed class RhythmWheelPulseVisual : MonoBehaviour
     private void Update()
     {
         if (runtimeMaterial == null) return;
-        float shifted = timing.ElapsedSeconds - judgement.JustWindowSeconds;
-        int cycle = Mathf.FloorToInt(shifted / timing.BeatDurationSeconds);
-        timing.NotifyPulseCycle(cycle);
-        int targetBeat = cycle + 1;
+        if (!timing.TryGetCurrentBeatTiming(timing.ElapsedSeconds, out int beat, out float offset, out float beatDuration))
+            return;
+
+        // FMOD supplies the current beat start; never reconstruct the phase
+        // by dividing the whole song time by the current BPM. Keep the
+        // original Just-window display lead, but apply it within this FMOD
+        // beat segment so the visual cue and judgement boundary stay aligned.
+        float shiftedOffset = offset - judgement.JustWindowSeconds;
+        int displayCycle = shiftedOffset >= 0f ? beat : beat - 1;
+        int targetBeat = displayCycle + 1;
+        timing.NotifyPulseCycle(displayCycle);
         runtimeMaterial.SetColor("_Ring_Color", ((targetBeat % 4) + 4) % 4 == 3 ? fourthBeatPulseColor : normalPulseColor);
-        runtimeMaterial.SetFloat(ProgressProperty, Mathf.Repeat(shifted / timing.BeatDurationSeconds, 1f) * .5f);
+        runtimeMaterial.SetFloat(ProgressProperty, Mathf.Repeat(shiftedOffset / beatDuration, 1f) * .5f);
     }
 
     private void OnDestroy()
