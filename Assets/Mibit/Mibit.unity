@@ -723,12 +723,6 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 100098, guid: a4b7308452429d5418b4f8b0cf2b7019, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 899848218}
-    - targetCorrespondingSourceObject: {fileID: 100098, guid: a4b7308452429d5418b4f8b0cf2b7019, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 899848219}
     - targetCorrespondingSourceObject: {fileID: 100000, guid: a4b7308452429d5418b4f8b0cf2b7019, type: 3}
       insertIndex: -1
       addedObject: {fileID: 860156155}
@@ -742,30 +736,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 899848220}
   m_SourcePrefab: {fileID: 100100000, guid: a4b7308452429d5418b4f8b0cf2b7019, type: 3}
---- !u!114 &899848218
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 899882770}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1427037861, guid: 4ecd63eff847044b68db9453ce219299, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &899848219
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 899882770}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 542108242, guid: 67cc4cb7839cd3741b63733d5adf0442, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1818360609 &899848220
 RotationConstraint:
   m_ObjectHideFlags: 0
@@ -806,11 +776,6 @@ RotationConstraint:
   m_Sources:
   - sourceTransform: {fileID: 899973906}
     weight: 1
---- !u!1 &899882770 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 100098, guid: a4b7308452429d5418b4f8b0cf2b7019, type: 3}
-  m_PrefabInstance: {fileID: 899848208}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &899882806 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100134, guid: a4b7308452429d5418b4f8b0cf2b7019, type: 3}
