@@ -36,13 +36,13 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
 
         if (!timing.TryGetCurrentBeatTiming(timing.ElapsedSeconds, out int currentBeat, out float elapsedIntoBeat, out float beatDuration))
             return;
-        if (currentBeat <= 0) return;
+        if (currentBeat < 0) return;
         // A press belongs to the nearest beat boundary.  Keep the preceding
         // beat open until the midpoint of this beat so its late Bad/Good side
         // can still be judged before resolving it as a Miss.
         if (elapsedIntoBeat <= beatDuration * .5f + inputCallbackGraceSeconds) return;
-        int previousBeat = currentBeat - 1;
-        if (previousBeat % 4 != 3 && resolvedBeats.Add(previousBeat)) Apply(default, Judge.Miss, 0f);
+        //int previousBeat = currentBeat - 1;
+        if (currentBeat % 4 != 3 && resolvedBeats.Add(currentBeat)) Apply(default, Judge.Miss, 0f);
     }
 
     public bool JudgeInput(Keys key, float elapsed)
