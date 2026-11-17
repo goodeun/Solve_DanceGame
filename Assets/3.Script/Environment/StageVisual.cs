@@ -16,30 +16,24 @@ public class StageVisual : MonoBehaviour
 
     private Tween keyInputTween;
     private Tween intensityTween;
-    private MaterialPropertyBlock upperPropertyBlock;
-    private MaterialPropertyBlock lowerPropertyBlock;
     private int emissionColorPropertyId;
-    private Color upperBaseEmissionColor;
-    private Color lowerBaseEmissionColor;
-    private bool hasUpperEmissionColor;
-    private bool hasLowerEmissionColor;
+    private Color upperEmissionBeforeAnimation;
+    private Color lowerEmissionBeforeAnimation;
+    private bool hasUpperEmission;
+    private bool hasLowerEmission;
 
     private void Awake()
     {
-        upperPropertyBlock = new MaterialPropertyBlock();
-        lowerPropertyBlock = new MaterialPropertyBlock();
         emissionColorPropertyId = Shader.PropertyToID(emissionColorProperty);
-        hasUpperEmissionColor = TryGetBaseEmissionColor(upperRenderer, out upperBaseEmissionColor);
-        hasLowerEmissionColor = TryGetBaseEmissionColor(lowerRenderer, out lowerBaseEmissionColor);
     }
 
     public void PlayKeyInputDrop()
     {
         keyInputTween?.Kill();
         intensityTween?.Kill();
-
-        SetEmissionColor(upperRenderer, upperPropertyBlock, upperBaseEmissionColor, hasUpperEmissionColor);
-        SetEmissionColor(lowerRenderer, lowerPropertyBlock, lowerBaseEmissionColor, hasLowerEmissionColor);
+        RestoreEmissionColours();
+        hasUpperEmission = TryGetEmissionColor(upperRenderer, out upperEmissionBeforeAnimation);
+        hasLowerEmission = TryGetEmissionColor(lowerRenderer, out lowerEmissionBeforeAnimation);
 
         Vector3 startPosition = transform.localPosition;
         keyInputTween = DOTween.Sequence()
@@ -50,23 +44,27 @@ public class StageVisual : MonoBehaviour
         intensityTween = DOTween.Sequence()
             .Append(DOVirtual.Float(0f, 1f, keyDropDuration, SetEmissionIntensity))
             .Append(DOVirtual.Float(1f, 0f, keyReturnDuration, SetEmissionIntensity).SetEase(Ease.OutQuad))
-            .OnComplete(() => intensityTween = null);
+            .OnComplete(() =>
+            {
+                RestoreEmissionColours();
+                intensityTween = null;
+            });
     }
 
-    private bool TryGetBaseEmissionColor(Renderer target, out Color emissionColor)
+    private bool TryGetEmissionColor(Renderer target, out Color emissionColor)
     {
         emissionColor = Color.black;
         if (target == null || target.sharedMaterial == null || !target.sharedMaterial.HasProperty(emissionColorPropertyId))
             return false;
 
-        emissionColor = target.sharedMaterial.GetColor(emissionColorPropertyId);
+        emissionColor = target.material.GetColor(emissionColorPropertyId);
         return true;
     }
 
     private void SetEmissionIntensity(float amount)
     {
-        SetEmissionColor(upperRenderer, upperPropertyBlock, ScaleEmission(upperBaseEmissionColor, amount), hasUpperEmissionColor);
-        SetEmissionColor(lowerRenderer, lowerPropertyBlock, ScaleEmission(lowerBaseEmissionColor, amount), hasLowerEmissionColor);
+        SetEmissionColor(upperRenderer, ScaleEmission(upperEmissionBeforeAnimation, amount), hasUpperEmission);
+        SetEmissionColor(lowerRenderer, ScaleEmission(lowerEmissionBeforeAnimation, amount), hasLowerEmission);
     }
 
     private Color ScaleEmission(Color baseColor, float amount)
@@ -76,14 +74,18 @@ public class StageVisual : MonoBehaviour
         return emissionColor;
     }
 
-    private void SetEmissionColor(Renderer target, MaterialPropertyBlock propertyBlock, Color emissionColor, bool canSetEmissionColor)
+    private void SetEmissionColor(Renderer target, Color emissionColor, bool canSetEmissionColor)
     {
         if (!canSetEmissionColor)
             return;
 
-        target.GetPropertyBlock(propertyBlock);
-        propertyBlock.SetColor(emissionColorPropertyId, emissionColor);
-        target.SetPropertyBlock(propertyBlock);
+        target.material.SetColor(emissionColorPropertyId, emissionColor);
+    }
+
+    private void RestoreEmissionColours()
+    {
+        SetEmissionColor(upperRenderer, upperEmissionBeforeAnimation, hasUpperEmission);
+        SetEmissionColor(lowerRenderer, lowerEmissionBeforeAnimation, hasLowerEmission);
     }
 
     private void OnDisable()
@@ -93,7 +95,6 @@ public class StageVisual : MonoBehaviour
         keyInputTween = null;
         intensityTween = null;
 
-        SetEmissionColor(upperRenderer, upperPropertyBlock, upperBaseEmissionColor, hasUpperEmissionColor);
-        SetEmissionColor(lowerRenderer, lowerPropertyBlock, lowerBaseEmissionColor, hasLowerEmissionColor);
+        RestoreEmissionColours();
     }
 }

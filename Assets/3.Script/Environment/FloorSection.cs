@@ -1,10 +1,8 @@
-using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
 public class FloorSection : MonoBehaviour
 {
-
     [Header("Tween Settings")]
     [SerializeField] private float fadeDuration = 0.5f;
     [SerializeField] private float burstDuration = 0.5f;
@@ -13,14 +11,10 @@ public class FloorSection : MonoBehaviour
 
     private bool isActivated = false;
 
-    private Color baseColor;
-    private Color hdrColor;
-
     private MeshRenderer floorMesh;
     private Material floorMat;
 
     private readonly int brightID = Shader.PropertyToID("_Brightness");
-    private readonly int colorID = Shader.PropertyToID("_Color");
     private readonly int scaleID = Shader.PropertyToID("_Scale");
 
     private Sequence seq;
@@ -34,46 +28,17 @@ public class FloorSection : MonoBehaviour
 
         floorMat = floorMesh.material;
 
-        baseColor = floorMat.GetColor(colorID);
-        hdrColor = baseColor * intensity;
-
-        floorMat.SetColor(colorID, baseColor);
-
     }
     private void OnEnable()
     {
-        TempEventManager.OnThemaColorChange_Temp += UpdateThemaColor;
         TempEventManager.OnMeasureEnd_Temp += HandleMeasureEnd;
         TempEventManager.OnBeat_Temp += ChangeScale;
     }
     private void OnDisable()
     {
-        TempEventManager.OnThemaColorChange_Temp -= UpdateThemaColor;
         TempEventManager.OnMeasureEnd_Temp -= HandleMeasureEnd;
         TempEventManager.OnBeat_Temp -= ChangeScale;
-    }
-
-    private void UpdateThemaColor(Color newColor)
-    {
-        floorMat.DOColor(newColor, colorID, 0.5f);
-        baseColor = newColor;
-        hdrColor = newColor * intensity;
-    }
-
-    /// <summary>
-    /// Changes the idle and activated colours without competing with this
-    /// component's own floor-light tweens.
-    /// </summary>
-    public void SetPhaseColours(Color newBaseColor, Color newHdrColor)
-    {
-        if (floorMat == null)
-            return;
-
-        floorMat.DOKill();
-        seq?.Kill();
-        baseColor = newBaseColor;
-        hdrColor = newHdrColor;
-        floorMat.SetColor(colorID, baseColor);
+        floorMat?.SetFloat(brightID, 0f);
     }
 
     public void ActiveLight()
@@ -88,18 +53,13 @@ public class FloorSection : MonoBehaviour
         if (!isActivated)
         {
             isActivated = true;
-            floorMat.DOColor(hdrColor,colorID, 0.1f);
+            floorMat.DOFloat(intensity, brightID, 0.1f);
         }
         else
         {
             seq = DOTween.Sequence();
-
-            Color subtitleThemeGlow = Color.Lerp(Color.white, baseColor, 0.5f) * intensity;
-
-            floorMat.SetColor(colorID, baseColor);
-
             seq.SetDelay(0.03f)
-                .Append(floorMat.DOColor(subtitleThemeGlow, colorID, 0.07f));
+                .Append(floorMat.DOFloat(intensity, brightID, 0.07f));
         }
     }
 
@@ -114,15 +74,12 @@ public class FloorSection : MonoBehaviour
             seq?.Kill();
             seq = DOTween.Sequence();
 
-            // Combo success is a quick confirmation flash, not a sustained glow.
-            seq.Append(floorMat.DOFloat(0.9f, brightID, 0.01f))
-                .Join(floorMat.DOColor(hdrColor, colorID, 0.01f))
-                .Append(floorMat.DOFloat(0f, brightID, 0.15f))
-                .Join(floorMat.DOColor(baseColor, colorID, 0.15f));
+            seq.Append(floorMat.DOFloat(intensity, brightID, 0.01f))
+                .Append(floorMat.DOFloat(0f, brightID, 0.15f));
         }
         else
         {
-            floorMat.DOColor(baseColor, colorID, 0.2f);
+            floorMat.DOFloat(0f, brightID, 0.2f);
         }
     }
 

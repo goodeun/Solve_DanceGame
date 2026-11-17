@@ -5,7 +5,7 @@ using UnityEngine.UI;
 /// Applies the selected music phase's colour theme to world renderers and UI images.
 /// A phase manager can update this component through SetPhase.
 /// </summary>
-public sealed class PhaseVisual : MonoBehaviour
+public sealed class PhaseController : MonoBehaviour
 {
     [SerializeField] private Phase phase = Phase.Pop;
     [SerializeField] private ScoreManager scoreManager;
@@ -30,12 +30,10 @@ public sealed class PhaseVisual : MonoBehaviour
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int ColorId = Shader.PropertyToID("_Color");
     private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
-    private MaterialPropertyBlock propertyBlock;
     public Phase CurrentPhase => phase;
 
     private void Awake()
     {
-        propertyBlock = new MaterialPropertyBlock();
         scoreManager ??= FindFirstObjectByType<ScoreManager>();
     }
 
@@ -45,9 +43,8 @@ public sealed class PhaseVisual : MonoBehaviour
         hipHopButton?.onClick.AddListener(SetHipHopPhase);
         technoButton?.onClick.AddListener(SetTechnoPhase);
 
-        // Preserve the authored HDR emission at startup. Visual material
-        // overrides are applied only after the player selects a phase.
         scoreManager?.SetPhase(phase);
+        Apply();
     }
 
     private void OnDisable()
@@ -70,7 +67,6 @@ public sealed class PhaseVisual : MonoBehaviour
 
     public void Apply()
     {
-        propertyBlock ??= new MaterialPropertyBlock();
         Color baseColour = GetBaseColour(phase);
         Color emissionColour = GetEmissionColour(phase);
 
@@ -103,33 +99,24 @@ public sealed class PhaseVisual : MonoBehaviour
         if (target == null)
             return;
 
-        // Main-floor quads own their _Color through FloorSection and DOTween.
-        // A renderer PropertyBlock would take priority over that material state,
-        // so give their phase colours to FloorSection instead.
-        if (target.TryGetComponent(out FloorSection floorSection))
-        {
-            target.SetPropertyBlock(null);
-            floorSection.SetPhaseColours(baseColour, emissionColour);
-            return;
-        }
-
         // Only slot 0 is part of the phase theme. Other material slots stay untouched.
         Material sharedMaterial = target.sharedMaterial;
         if (sharedMaterial == null)
             return;
 
-        target.GetPropertyBlock(propertyBlock);
-        if (sharedMaterial.HasProperty(BaseColorId))
-            propertyBlock.SetColor(BaseColorId, baseColour);
-        else if (sharedMaterial.HasProperty(ColorId))
-            propertyBlock.SetColor(ColorId, baseColour);
-        target.SetPropertyBlock(propertyBlock);
-
-        if (!sharedMaterial.HasProperty(EmissionColorId))
-            return;
-
         Material runtimeMaterial = target.material;
-        runtimeMaterial.EnableKeyword("_EMISSION");
-        runtimeMaterial.SetColor(EmissionColorId, emissionColour);
+        if (sharedMaterial.HasProperty(EmissionColorId))
+        {
+            runtimeMaterial.EnableKeyword("_EMISSION");
+            runtimeMaterial.SetColor(EmissionColorId, emissionColour);
+            return;
+        }
+
+        // Shaders without a separate Emission property (such as unlit light
+        // meshes) use their primary colour as the HDR display colour.
+        if (sharedMaterial.HasProperty(BaseColorId))
+            runtimeMaterial.SetColor(BaseColorId, emissionColour);
+        else if (sharedMaterial.HasProperty(ColorId))
+            runtimeMaterial.SetColor(ColorId, emissionColour);
     }
 }

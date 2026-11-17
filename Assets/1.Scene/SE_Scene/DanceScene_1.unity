@@ -495,7 +495,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 939047197}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 357906265a1161e4bae8cde0c493146e, type: 3}
   m_Name: 
@@ -659,9 +659,9 @@ MonoBehaviour:
   popColor: {r: 0.23529412, g: 1, b: 1, a: 1}
   hipHopColor: {r: 1, g: 1, b: 0.19607843, a: 1}
   technoColor: {r: 1, g: 0, b: 0.6544118, a: 1}
-  popEmissionColor: {r: 6.264151, g: 5.6969647, b: 1.3887504, a: 1}
-  hipHopEmissionColor: {r: 1.6642935, g: 6.228506, b: 6.4150944, a: 1}
-  technoEmissionColor: {r: 6.415095, g: 1.8458526, b: 4.812272, a: 1}
+  popEmissionColor: {r: 0.3525634, g: 1.5014288, b: 1.5660378, a: 1}
+  hipHopEmissionColor: {r: 1.6037737, g: 1.5022801, b: 0.419836, a: 1}
+  technoEmissionColor: {r: 1.6037737, g: 0.46146315, b: 1.203068, a: 1}
 --- !u!23 &696782518 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 7132363272897965668, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
