@@ -4,24 +4,23 @@ using UnityEngine;
 
 public class NGBubbleManager : MonoBehaviour
 {
-
+    [SerializeField] private ComboAndMagnification comboAndMagnification;
     [SerializeField] private ScoreManager scoreManager;
     [SerializeField] private NegativeBubble[] negativeBubble;
 
     private int point3chance = 10;
     private int point6chance = 5;
 
-    private Stage stage;
+    private Stage stage = Stage.Square;
 
     public int ActiveBubble { get; private set; } = 0;
 
-    private void Awake()
-    {
-        // 이벤트 구독
-    }
     private void Start()
     {
         scoreManager = FindAnyObjectByType<ScoreManager>();
+        comboAndMagnification = FindAnyObjectByType<ComboAndMagnification>();
+
+        comboAndMagnification.OnPhraseHandoff += observeBubble;
 
         float offset = 50f;
 
@@ -47,13 +46,13 @@ public class NGBubbleManager : MonoBehaviour
     }
     private void OnDestroy()
     {
-        // 이벤트 해제
+        comboAndMagnification.OnPhraseHandoff -= observeBubble;
     }
 
     private void observeBubble(Keys k, int just, int good, int bad, int miss, KeyCommand command)
     {
         // 이벤트 구독 후 갯수 새고 넘김
-        CreateBubble(bad + miss);
+        CreateBubble(miss);
 
         // 랜덤 기믹 출현
         int range = Random.Range(0, 100);
@@ -65,6 +64,9 @@ public class NGBubbleManager : MonoBehaviour
         {
             BubbleGimmick(3);
         }
+
+        RemoveBubble(command, k);
+        CaculateDecrease(ActiveBubble);
     }
 
     private void CreateBubble(int count)
@@ -81,7 +83,7 @@ public class NGBubbleManager : MonoBehaviour
 
     private void RemoveBubble(KeyCommand command, Keys key)
     {
-        if (command != KeyCommand.ABA) return;
+        if (command != KeyCommand.AAB) return;
 
         int index = 0;
 
@@ -128,9 +130,12 @@ public class NGBubbleManager : MonoBehaviour
     private bool GetBubble(out NegativeBubble bubble)
     {
         bubble = null;
+        int start = (stage == Stage.Square) ? 0 : 2;
+        int end = (stage == Stage.Square) ? 4 : 6;
 
         // 빈자리 계산 후 반환
-        for (int i = 0; i < negativeBubble.Length; i++)
+
+        for (int i = start; i < end; i++)
         {
             if (!negativeBubble[i].gameObject.activeSelf)
             {
@@ -145,7 +150,27 @@ public class NGBubbleManager : MonoBehaviour
     {
         negativeBubble[2].MoveAnchore(_stage);
         negativeBubble[3].MoveAnchore(_stage);
+
         stage = _stage;
+
+        int start = (stage == Stage.Square) ? 2 : 0;
+        int end = (stage == Stage.Square) ? 6 : 4;
+
+        for (int i = start; i<end; i++)
+        {
+            NegativeBubble b = negativeBubble[i];
+            if (b.gameObject.activeSelf)
+            {
+                b.DisableBubble();
+
+                if (!GetBubble(out NegativeBubble bubble))
+                {
+                    ActiveBubble--;
+                    continue;
+                }
+                bubble.gameObject.SetActive(true);
+            }
+        }
     }
 
     private void CaculateDecrease(int ActiveBubble)

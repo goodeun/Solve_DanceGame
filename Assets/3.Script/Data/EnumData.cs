@@ -7,4 +7,4 @@ public enum Stage
 public enum Phase { Pop, HipHop, Techno }
 public enum Judge { Just, Good, Bad, Miss }
 
-public enum KeyCommand { AAB, ABA, ABC }
+public enum KeyCommand { AAB, ABA, ABC, None }

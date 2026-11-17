@@ -27,6 +27,7 @@ public class NegativeBubble : MonoBehaviour
     private void OnEnable()
     {
         // TODO 등장 애니메이션
+        transform.DOKill();
         gameObject.transform.position = startPos;
         transform.DOMove(originPos, 0.2f);
     }
@@ -48,7 +49,6 @@ public class NegativeBubble : MonoBehaviour
         {
             originPos.y = 0;
             startPos.y = 0;
-
         }
         else
         {
@@ -61,7 +61,4 @@ public class NegativeBubble : MonoBehaviour
             gameObject.transform.DOMoveY(originPos.y, 0.2f).SetEase(Ease.OutBack);
         }
     }
-
-
-
 }
