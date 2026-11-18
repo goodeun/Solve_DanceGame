@@ -36,6 +36,9 @@ public class ScoreManager : MonoBehaviour
 
     private void Awake()
     {
+        comboMagnificater ??= FindFirstObjectByType<ComboAndMagnification>();
+        multiplierUI ??= FindFirstObjectByType<MultiplierUI>();
+        scoreUI ??= FindFirstObjectByType<ScoreUI>();
         SetStageMode(Stage.Square);
     }
 
@@ -44,6 +47,10 @@ public class ScoreManager : MonoBehaviour
         if (comboMagnificater != null)
         {
             comboMagnificater.OnJudged += ProcessHit;
+        }
+        else
+        {
+            Debug.LogError("ScoreManager: ComboAndMagnification was not found; score and multiplier updates are disabled.", this);
         }
     }
 
@@ -88,6 +95,7 @@ public class ScoreManager : MonoBehaviour
             float additionalScore = styleStat * 1.0f; // TODO 스타일 스탯 추가점수
 
             totalScore += Mathf.RoundToInt(curScore + additionalScore);
+            scoreUI?.ScoreUpdate(totalScore);
         }
 
         UpdateMultipliers(pressedKey);
