@@ -15,6 +15,10 @@ public sealed class RhythmWheelFever : MonoBehaviour
     private int feverEndBeat = -1;
     public bool IsActive => active;
     public bool IsJudgementLocked => feverCamera != null && feverCamera.IsCameraSequenceActive;
+
+    public event System.Action OnFeverStarted;
+    public event System.Action OnFeverEnded;
+
     private void Awake() { timing = GetComponent<RhythmWheelTiming>(); combo ??= GetComponent<ComboAndMagnification>(); feverCamera ??= FindFirstObjectByType<FeverCamera>(); hud ??= FindFirstObjectByType<DanceSceneHUD>(); }
     private void OnEnable() { if (combo != null) { combo.OnComboSaved += Save; combo.OnComboFailed += Fail; } timing.PhraseCompleted += StartFever; timing.BeatStarted += CheckFeverEnd; }
     private void OnDisable() { if (combo != null) { combo.OnComboSaved -= Save; combo.OnComboFailed -= Fail; } timing.PhraseCompleted -= StartFever; timing.BeatStarted -= CheckFeverEnd; }
@@ -29,11 +33,16 @@ public sealed class RhythmWheelFever : MonoBehaviour
         feverEndBeat = timing.CurrentBeat + beatCount;
         // This is display-only. Gameplay ends on the FMOD beat callback below.
         hud?.RequestFeverTime(true, beatCount * timing.BeatDurationSeconds, timing.BeatDurationSeconds);
+        OnFeverStarted?.Invoke();
     }
 
     private void CheckFeverEnd(int beat)
     {
-        if (!active || beat < feverEndBeat) return;
+        if (!active) return;
+
+        if (beat == feverEndBeat - 2) OnFeverEnded?.Invoke();
+
+        if(beat < feverEndBeat) return;
         feverEndBeat = -1;
         gauge = 0f;
         active = false;
