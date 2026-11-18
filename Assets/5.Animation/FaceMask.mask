@@ -1,0 +1,199 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: FaceMask
+  m_Mask: 00000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  m_Elements:
+  - m_Path: 
+    m_Weight: 1
+  - m_Path: Body
+    m_Weight: 0
+  - m_Path: Body/hips
+    m_Weight: 0
+  - m_Path: Body/hips/spine
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/neck
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/neck/head
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/neck/head/ear1.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/neck/head/ear1.L/ear2.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/neck/head/ear1.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/neck/head/ear1.R/ear2.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Index
+      Proximal.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Index
+      Proximal.L/Index Intermediate.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Index
+      Proximal.L/Index Intermediate.L/Index Distal.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Index
+      Proximal.L/Index Intermediate.L/Index Distal.L/Index Distal.L.001
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Little
+      Proximal.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Little
+      Proximal.L/Little Intermediate.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Little
+      Proximal.L/Little Intermediate.L/Little Distal.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Little
+      Proximal.L/Little Intermediate.L/Little Distal.L/Little Distal.L.001
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Middle
+      Proximal.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Middle
+      Proximal.L/Middle Intermediate.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Middle
+      Proximal.L/Middle Intermediate.L/Middle Distal.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Middle
+      Proximal.L/Middle Intermediate.L/Middle Distal.L/Middle Distal.L.001
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Ring
+      Proximal.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Ring
+      Proximal.L/Ring Intermediate.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Ring
+      Proximal.L/Ring Intermediate.L/Ring Distal.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Ring
+      Proximal.L/Ring Intermediate.L/Ring Distal.L/Ring Distal.L.001
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/robohand1.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/robohand2.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Thumb
+      Proximal.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Thumb
+      Proximal.L/Thumb Intermediate.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Thumb
+      Proximal.L/Thumb Intermediate.L/Thumb Distal.L
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.L/upper_arm.L/lower_arm.L/hand.L/Thumb
+      Proximal.L/Thumb Intermediate.L/Thumb Distal.L/Thumb Distal.L.001
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Index
+      Proximal.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Index
+      Proximal.R/Index Intermediate.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Index
+      Proximal.R/Index Intermediate.R/Index Distal.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Index
+      Proximal.R/Index Intermediate.R/Index Distal.R/Index Distal.R.001
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Little
+      Proximal.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Little
+      Proximal.R/Little Intermediate.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Little
+      Proximal.R/Little Intermediate.R/Little Distal.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Little
+      Proximal.R/Little Intermediate.R/Little Distal.R/Little Distal.R.001
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Middle
+      Proximal.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Middle
+      Proximal.R/Middle Intermediate.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Middle
+      Proximal.R/Middle Intermediate.R/Middle Distal.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Middle
+      Proximal.R/Middle Intermediate.R/Middle Distal.R/Middle Distal.R.001
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Ring
+      Proximal.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Ring
+      Proximal.R/Ring Intermediate.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Ring
+      Proximal.R/Ring Intermediate.R/Ring Distal.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Ring
+      Proximal.R/Ring Intermediate.R/Ring Distal.R/Ring Distal.R.001
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/robohand1.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/robohand2.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Thumb
+      Proximal.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Thumb
+      Proximal.R/Thumb Intermediate.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Thumb
+      Proximal.R/Thumb Intermediate.R/Thumb Distal.R
+    m_Weight: 0
+  - m_Path: Body/hips/spine/chest/shoulder.R/upper_arm.R/lower_arm.R/hand.R/Thumb
+      Proximal.R/Thumb Intermediate.R/Thumb Distal.R/Thumb Distal.R.001
+    m_Weight: 0
+  - m_Path: Body/hips/upper_leg.L
+    m_Weight: 0
+  - m_Path: Body/hips/upper_leg.L/lower_leg.L
+    m_Weight: 0
+  - m_Path: Body/hips/upper_leg.L/lower_leg.L/foot.L
+    m_Weight: 0
+  - m_Path: Body/hips/upper_leg.L/lower_leg.L/foot.L/toe.L
+    m_Weight: 0
+  - m_Path: Body/hips/upper_leg.R
+    m_Weight: 0
+  - m_Path: Body/hips/upper_leg.R/lower_leg.R
+    m_Weight: 0
+  - m_Path: Body/hips/upper_leg.R/lower_leg.R/foot.R
+    m_Weight: 0
+  - m_Path: Body/hips/upper_leg.R/lower_leg.R/foot.R/toe.R
+    m_Weight: 0
+  - m_Path: Body/hips/upper_leg_sub.L
+    m_Weight: 0
+  - m_Path: Body/hips/upper_leg_sub.R
+    m_Weight: 0
+  - m_Path: Mesh
+    m_Weight: 1
