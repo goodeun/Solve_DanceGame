@@ -33,7 +33,7 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
-  m_LockedProperties: 
+  m_LockedProperties: :m_DoubleSidedGI
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -76,9 +76,9 @@ Material:
     - _Wave_Offset: 0.2
     m_Colors:
     - _ClipRect: {r: 0, g: 0, b: 0, a: 0}
-    - _ColorBottom: {r: 0, g: 0.5437346, b: 1.7602254, a: 1}
-    - _ColorTop: {r: 1.9999999, g: 0.07058823, b: 1.545098, a: 1}
-    - _LineColor: {r: 16, g: 16, b: 16, a: 1}
+    - _ColorBottom: {r: 0, g: 1.7602257, b: 1.7359612, a: 1}
+    - _ColorTop: {r: 2, g: 0.09424078, b: 1.6153944, a: 1}
+    - _LineColor: {r: 28.51895, g: 28.51895, b: 28.51895, a: 1}
     - _WaterColor: {r: 0.99056596, g: 0.28502128, b: 0.8379493, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

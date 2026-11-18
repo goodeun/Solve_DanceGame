@@ -11,29 +11,28 @@ public class StageVisual : MonoBehaviour
     [Header("Key Input Light")]
     [SerializeField] private Renderer upperRenderer;
     [SerializeField] private Renderer lowerRenderer;
+    [SerializeField] private PhaseController phaseController;
     [SerializeField] private string emissionColorProperty = "_EmissionColor";
     [SerializeField, Min(1f)] private float emissionIntensityMultiplier = 2f;
 
     private Tween keyInputTween;
     private Tween intensityTween;
     private int emissionColorPropertyId;
-    private Color upperEmissionBeforeAnimation;
-    private Color lowerEmissionBeforeAnimation;
     private bool hasUpperEmission;
     private bool hasLowerEmission;
 
     private void Awake()
     {
         emissionColorPropertyId = Shader.PropertyToID(emissionColorProperty);
+        phaseController ??= FindFirstObjectByType<PhaseController>();
     }
 
     public void PlayKeyInputDrop()
     {
         keyInputTween?.Kill();
         intensityTween?.Kill();
-        RestoreEmissionColours();
-        hasUpperEmission = TryGetEmissionColor(upperRenderer, out upperEmissionBeforeAnimation);
-        hasLowerEmission = TryGetEmissionColor(lowerRenderer, out lowerEmissionBeforeAnimation);
+        hasUpperEmission = HasEmissionColor(upperRenderer);
+        hasLowerEmission = HasEmissionColor(lowerRenderer);
 
         Vector3 startPosition = transform.localPosition;
         keyInputTween = DOTween.Sequence()
@@ -46,7 +45,7 @@ public class StageVisual : MonoBehaviour
             .Append(DOVirtual.Float(1f, 0f, keyReturnDuration, SetEmissionIntensity).SetEase(Ease.OutQuad))
             .OnComplete(() =>
             {
-                RestoreEmissionColours();
+                RestoreCurrentPhaseColours();
                 intensityTween = null;
             });
     }
@@ -61,10 +60,28 @@ public class StageVisual : MonoBehaviour
         return true;
     }
 
+    private bool HasEmissionColor(Renderer target) =>
+        target != null && target.sharedMaterial != null && target.sharedMaterial.HasProperty(emissionColorPropertyId);
+
     private void SetEmissionIntensity(float amount)
     {
-        SetEmissionColor(upperRenderer, ScaleEmission(upperEmissionBeforeAnimation, amount), hasUpperEmission);
-        SetEmissionColor(lowerRenderer, ScaleEmission(lowerEmissionBeforeAnimation, amount), hasLowerEmission);
+        Color phaseColor = GetCurrentPhaseColor();
+        SetEmissionColor(upperRenderer, ScaleEmission(phaseColor, amount), hasUpperEmission);
+        SetEmissionColor(lowerRenderer, ScaleEmission(phaseColor, amount), hasLowerEmission);
+    }
+
+    private Color GetCurrentPhaseColor()
+    {
+        if (phaseController == null)
+            phaseController = FindFirstObjectByType<PhaseController>();
+
+        if (phaseController != null)
+            return phaseController.CurrentEmissionColor;
+
+        if (TryGetEmissionColor(upperRenderer, out Color currentColor))
+            return currentColor;
+
+        return Color.white;
     }
 
     private Color ScaleEmission(Color baseColor, float amount)
@@ -82,10 +99,11 @@ public class StageVisual : MonoBehaviour
         target.material.SetColor(emissionColorPropertyId, emissionColor);
     }
 
-    private void RestoreEmissionColours()
+    private void RestoreCurrentPhaseColours()
     {
-        SetEmissionColor(upperRenderer, upperEmissionBeforeAnimation, hasUpperEmission);
-        SetEmissionColor(lowerRenderer, lowerEmissionBeforeAnimation, hasLowerEmission);
+        Color currentPhaseColor = GetCurrentPhaseColor();
+        SetEmissionColor(upperRenderer, currentPhaseColor, hasUpperEmission);
+        SetEmissionColor(lowerRenderer, currentPhaseColor, hasLowerEmission);
     }
 
     private void OnDisable()
@@ -95,6 +113,6 @@ public class StageVisual : MonoBehaviour
         keyInputTween = null;
         intensityTween = null;
 
-        RestoreEmissionColours();
+        RestoreCurrentPhaseColours();
     }
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 /// <summary>
 /// Applies the selected music phase's colour theme to world renderers and UI images.
@@ -27,13 +28,22 @@ public sealed class PhaseController : MonoBehaviour
     [ColorUsage(true, true)] [SerializeField] private Color hipHopEmissionColor;
     [ColorUsage(true, true)] [SerializeField] private Color technoEmissionColor;
 
+    [Header("Transition")]
+    [SerializeField, Min(0f)] private float colorTransitionDuration = 1f;
+    [SerializeField] private Ease colorTransitionEase = Ease.InOutSine;
+
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int ColorId = Shader.PropertyToID("_Color");
     private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
+    private readonly System.Collections.Generic.List<Tween> activeColorTweens = new();
     public Phase CurrentPhase => phase;
+    public Color CurrentEmissionColor => GetEmissionColour(phase);
+
+    public static PhaseController Instance { get; private set; }
 
     private void Awake()
     {
+        Instance = this;
         scoreManager ??= FindFirstObjectByType<ScoreManager>();
     }
 
@@ -52,6 +62,9 @@ public sealed class PhaseController : MonoBehaviour
         popButton?.onClick.RemoveListener(SetPopPhase);
         hipHopButton?.onClick.RemoveListener(SetHipHopPhase);
         technoButton?.onClick.RemoveListener(SetTechnoPhase);
+        KillColorTweens();
+        if (Instance == this)
+            Instance = null;
     }
 
     public void SetPopPhase() => SetPhase(Phase.Pop);
@@ -62,20 +75,28 @@ public sealed class PhaseController : MonoBehaviour
     {
         phase = nextPhase;
         scoreManager?.SetPhase(nextPhase);
-        Apply();
+        Apply(true);
     }
 
-    public void Apply()
+    public void Apply() => Apply(false);
+
+    private void Apply(bool animated)
     {
         Color baseColour = GetBaseColour(phase);
         Color emissionColour = GetEmissionColour(phase);
+        KillColorTweens();
 
         foreach (Image image in images)
             if (image != null)
-                image.color = baseColour;
+            {
+                if (animated && colorTransitionDuration > 0f)
+                    activeColorTweens.Add(image.DOColor(baseColour, colorTransitionDuration).SetEase(colorTransitionEase));
+                else
+                    image.color = baseColour;
+            }
 
         foreach (Renderer target in renderers)
-            ApplyRendererColours(target, baseColour, emissionColour);
+            ApplyRendererColours(target, baseColour, emissionColour, animated);
     }
 
     private Color GetBaseColour(Phase targetPhase) => targetPhase switch
@@ -94,7 +115,7 @@ public sealed class PhaseController : MonoBehaviour
         _ => popEmissionColor
     };
 
-    private void ApplyRendererColours(Renderer target, Color baseColour, Color emissionColour)
+    private void ApplyRendererColours(Renderer target, Color baseColour, Color emissionColour, bool animated)
     {
         if (target == null)
             return;
@@ -108,15 +129,30 @@ public sealed class PhaseController : MonoBehaviour
         if (sharedMaterial.HasProperty(EmissionColorId))
         {
             runtimeMaterial.EnableKeyword("_EMISSION");
-            runtimeMaterial.SetColor(EmissionColorId, emissionColour);
+            AnimateColor(runtimeMaterial, EmissionColorId, emissionColour, animated);
             return;
         }
 
         // Shaders without a separate Emission property (such as unlit light
         // meshes) use their primary colour as the HDR display colour.
         if (sharedMaterial.HasProperty(BaseColorId))
-            runtimeMaterial.SetColor(BaseColorId, emissionColour);
+            AnimateColor(runtimeMaterial, BaseColorId, emissionColour, animated);
         else if (sharedMaterial.HasProperty(ColorId))
-            runtimeMaterial.SetColor(ColorId, emissionColour);
+            AnimateColor(runtimeMaterial, ColorId, emissionColour, animated);
+    }
+
+    private void AnimateColor(Material material, int propertyId, Color targetColor, bool animated)
+    {
+        if (animated && colorTransitionDuration > 0f)
+            activeColorTweens.Add(material.DOColor(targetColor, propertyId, colorTransitionDuration).SetEase(colorTransitionEase));
+        else
+            material.SetColor(propertyId, targetColor);
+    }
+
+    private void KillColorTweens()
+    {
+        foreach (Tween tween in activeColorTweens)
+            tween?.Kill();
+        activeColorTweens.Clear();
     }
 }
