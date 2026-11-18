@@ -1078,9 +1078,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fc4b0a9a4be4bc795d1688f4f33d818, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FmodMusicClock
+  phase: {fileID: 627529760}
   musicEventPath: 'event:/RetroVision - Puzzle (2024 Edit) [NCS Release]'
   beatOffsetSeconds: 0
   bpm: 128
+  technoEnterBpm: 120
+  technoExitBpm: 116
+  popEnterBpm: 80
+  popExitBpm: 76
+  currentBpmDisplay: 0
+  currentBarDisplay: 0
+  currentBeatDisplay: 0
 --- !u!4 &1190630429
 Transform:
   m_ObjectHideFlags: 0

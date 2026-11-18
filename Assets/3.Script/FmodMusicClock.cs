@@ -7,9 +7,22 @@ using UnityEngine;
 
 public class FmodMusicClock : MonoBehaviour
 {
+    [SerializeField] private PhaseController phase;
+
     [SerializeField] private string musicEventPath = "event:/RetroVision - Puzzle (2024 Edit) [NCS Release]";
     [SerializeField] private float beatOffsetSeconds;
     [SerializeField, Min(1f)] private float bpm = 128f;
+
+    [Header("Automatic Phase Thresholds")]
+    [SerializeField, Min(0f)] private float technoEnterBpm = 120f;
+    [SerializeField, Min(0f)] private float technoExitBpm = 116f;
+    [SerializeField, Min(0f)] private float popEnterBpm = 80f;
+    [SerializeField, Min(0f)] private float popExitBpm = 76f;
+
+    [Header("Runtime (Play Mode)")]
+    [SerializeField] private float currentBpmDisplay;
+    [SerializeField] private int currentBarDisplay;
+    [SerializeField] private int currentBeatDisplay;
 
     /// <summary>Tempo reported by FMOD's current timeline tempo marker.</summary>
     public float BPM => currentTempo > 0f ? currentTempo : bpm;
@@ -71,10 +84,34 @@ public class FmodMusicClock : MonoBehaviour
             CurrentBeat = data.Beat;
             CurrentBeatStartSeconds = data.PositionSeconds + beatOffsetSeconds;
             currentTempo = data.Tempo;
+            currentBpmDisplay = currentTempo > 0f ? currentTempo : bpm;
+            currentBarDisplay = data.Bar;
+            currentBeatDisplay = data.Beat;
             TimeSignatureUpper = data.Upper;
             TimeSignatureLower = data.Lower;
             TimelineBeat?.Invoke(data.Bar, data.Beat, data.Tempo, data.Upper, data.Lower);
+
+            UpdatePhaseFromBpm(currentBpmDisplay);
         }
+    }
+
+    private void UpdatePhaseFromBpm(float currentBpm)
+    {
+        if (phase == null || currentBpm <= 0f)
+            return;
+
+        Phase targetPhase = phase.CurrentPhase switch
+        {
+            Phase.Techno when currentBpm >= technoExitBpm => Phase.Techno,
+            Phase.Techno when currentBpm >= popExitBpm => Phase.Pop,
+            Phase.Pop when currentBpm > technoEnterBpm => Phase.Techno,
+            Phase.Pop when currentBpm >= popEnterBpm => Phase.Pop,
+            Phase.HipHop when currentBpm > popEnterBpm => Phase.Pop,
+            _ => Phase.HipHop
+        };
+
+        if (targetPhase != phase.CurrentPhase)
+            phase.SetPhase(targetPhase);
     }
 
     [AOT.MonoPInvokeCallback(typeof(FMOD.Studio.EVENT_CALLBACK))]
