@@ -532,6 +532,8 @@ MonoBehaviour:
   popEmissionColor: {r: 0.3525634, g: 1.5014288, b: 1.5660378, a: 1}
   hipHopEmissionColor: {r: 1.6037737, g: 1.5022801, b: 0.419836, a: 1}
   technoEmissionColor: {r: 1.6037737, g: 0.46146315, b: 1.203068, a: 1}
+  colorTransitionDuration: 0.2
+  colorTransitionEase: 4
 --- !u!23 &696782518 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 7132363272897965668, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
@@ -1747,11 +1749,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1623341167540710105, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_Color.g
-      value: 0.9903989
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1623341167540710105, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_Color.r
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1648173743522234132, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_Color.b
@@ -1775,11 +1777,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1891392437283749324, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_Color.g
-      value: 0.9706273
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1891392437283749324, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_Color.r
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1952522819886675899, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
