@@ -504,6 +504,7 @@ MonoBehaviour:
   - {fileID: 1861431062}
   - {fileID: 1251557560}
   - {fileID: 721441288}
+  - {fileID: 1714488040}
   - {fileID: 792661580}
   - {fileID: 131245123}
   - {fileID: 1569182682}
@@ -623,6 +624,18 @@ PrefabInstance:
       propertyPath: Pool_Prefab
       value: 
       objectReference: {fileID: 2607815191280041448, guid: e6e4ef48a896b7644bba342f3620762e, type: 3}
+    - target: {fileID: 725785978518189836, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: intensity
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 725785978518189836, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: legacyIntensity
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 725785978518189836, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: normalIntensity
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1887946646728223362, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: m_LocalPosition.y
       value: 6.39
@@ -639,6 +652,18 @@ PrefabInstance:
       propertyPath: emissionIntensityMultiplier
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 3129601085543499313, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: intensity
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129601085543499313, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: legacyIntensity
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129601085543499313, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: normalIntensity
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3441747722749406412, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: Pool_Prefab
       value: 
@@ -647,6 +672,18 @@ PrefabInstance:
       propertyPath: Pool_Prefab
       value: 
       objectReference: {fileID: 2607815191280041448, guid: e6e4ef48a896b7644bba342f3620762e, type: 3}
+    - target: {fileID: 3829307015648438619, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: intensity
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3829307015648438619, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: legacyIntensity
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3829307015648438619, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: normalIntensity
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3864106713496347494, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: Pool_Prefab
       value: 
@@ -709,7 +746,15 @@ PrefabInstance:
       objectReference: {fileID: 721441286}
     - target: {fileID: 7760263935369399895, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: intensity
-      value: 5
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7760263935369399895, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: legacyIntensity
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7760263935369399895, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: normalIntensity
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8081497784097947023, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: lowerRenderer
@@ -1880,6 +1925,11 @@ Camera:
 --- !u!23 &1664653401 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 7629693183583055243, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+  m_PrefabInstance: {fileID: 939047197}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1714488040 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 755778836208131331, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
   m_PrefabInstance: {fileID: 939047197}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &1777537301 stripped

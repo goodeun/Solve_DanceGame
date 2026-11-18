@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using DG.Tweening;
 
 public class FloorSection : MonoBehaviour
@@ -6,7 +7,12 @@ public class FloorSection : MonoBehaviour
     [Header("Tween Settings")]
     [SerializeField] private float fadeDuration = 0.5f;
     [SerializeField] private float burstDuration = 0.5f;
-    [SerializeField] public float intensity = 3.0f;
+    [Header("Brightness")]
+    [SerializeField, Min(0f)] private float normalIntensity = 3f;
+    [SerializeField, Min(0f)] private float inputIntensity = 5f;
+
+    [FormerlySerializedAs("intensity")]
+    [SerializeField, HideInInspector] private float legacyIntensity;
 
 
     private bool isActivated = false;
@@ -21,6 +27,10 @@ public class FloorSection : MonoBehaviour
 
     private void Awake()
     {
+        // Preserve existing prefab input brightness when migrating the old field.
+        if (legacyIntensity > 0f)
+            inputIntensity = legacyIntensity;
+
         if (floorMesh == null)
         {
             floorMesh = GetComponent<MeshRenderer>();
@@ -31,6 +41,7 @@ public class FloorSection : MonoBehaviour
     }
     private void OnEnable()
     {
+        floorMat?.SetFloat(brightID, normalIntensity);
         TempEventManager.OnMeasureEnd_Temp += HandleMeasureEnd;
         TempEventManager.OnBeat_Temp += ChangeScale;
     }
@@ -38,7 +49,7 @@ public class FloorSection : MonoBehaviour
     {
         TempEventManager.OnMeasureEnd_Temp -= HandleMeasureEnd;
         TempEventManager.OnBeat_Temp -= ChangeScale;
-        floorMat?.SetFloat(brightID, 0f);
+        floorMat?.SetFloat(brightID, normalIntensity);
     }
 
     public void ActiveLight()
@@ -46,20 +57,19 @@ public class FloorSection : MonoBehaviour
         floorMat.DOKill();
         seq?.Kill();
 
-        // A key press can interrupt the combo-success tween while _Brightness
-        // is elevated. Reset it before playing the normal key-light response.
-        floorMat.SetFloat(brightID, 0f);
+        // Start the key-light response from the floor's normal brightness.
+        floorMat.SetFloat(brightID, normalIntensity);
 
         if (!isActivated)
         {
             isActivated = true;
-            floorMat.DOFloat(intensity, brightID, 0.1f);
+            floorMat.DOFloat(inputIntensity, brightID, 0.1f);
         }
         else
         {
             seq = DOTween.Sequence();
             seq.SetDelay(0.03f)
-                .Append(floorMat.DOFloat(intensity, brightID, 0.07f));
+                .Append(floorMat.DOFloat(inputIntensity, brightID, 0.07f));
         }
     }
 
@@ -67,19 +77,19 @@ public class FloorSection : MonoBehaviour
     {
         isActivated = false;
         floorMat.DOKill();
-        floorMat.SetFloat(brightID, 0f);
+        floorMat.SetFloat(brightID, normalIntensity);
 
         if (isComboSuccess)
         {
             seq?.Kill();
             seq = DOTween.Sequence();
 
-            seq.Append(floorMat.DOFloat(intensity, brightID, 0.01f))
-                .Append(floorMat.DOFloat(0f, brightID, 0.15f));
+            seq.Append(floorMat.DOFloat(inputIntensity, brightID, 0.01f))
+                .Append(floorMat.DOFloat(normalIntensity, brightID, 0.15f));
         }
         else
         {
-            floorMat.DOFloat(0f, brightID, 0.2f);
+            floorMat.DOFloat(normalIntensity, brightID, 0.2f);
         }
     }
 
