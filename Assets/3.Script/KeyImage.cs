@@ -5,20 +5,21 @@ using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
 
-public enum Keys
-{
-    W, A, S, D, Q, E
-}
-
+[ExecuteAlways]
 public class KeyImage : MonoBehaviour
 {
-    [SerializeField] public Keys key;
+    [SerializeField] private Keys Sqarekey;
+    [SerializeField] private Keys Rhombuskey;
+
+    [SerializeField] private Keys CurrentKey;
+
+    public Keys key => CurrentKey;
 
     [Space(10)]
     [SerializeField] private Image fill;
-    [SerializeField] private Image line;
     [SerializeField] private TextMeshProUGUI keyInfo;
     [SerializeField] private TextMeshProUGUI magnificationText;
+    [SerializeField] private float offsetX;
 
     private const float PressScale = 1.1f;
     private const float GrowDuration = 0.01f;
@@ -32,6 +33,8 @@ public class KeyImage : MonoBehaviour
 
     private void Awake()
     {
+        CurrentKey = Sqarekey;
+
         defaultScale = transform.localScale;
         RefreshVisuals();
     }
@@ -59,18 +62,24 @@ public class KeyImage : MonoBehaviour
         if (!Application.isPlaying)
             return;
 
-        SetTextRotation();
-        SetTextPosition();
+        SetKeyTextRotation();
+        SetKeyTextPosition();
+
+        SetMagnificationTextRotation();
+        SetMagnificationTextPosition();
     }
 
     private void RefreshVisuals()
     {
-        SetTextRotation();
-        SetTextPosition();
+        SetKeyTextRotation();
+        SetKeyTextPosition();
         SetKeyText();
+
+        SetMagnificationTextRotation();
+        SetMagnificationTextPosition();
     }
 
-    private void SetTextRotation()
+    private void SetKeyTextRotation()
     {
         if (keyInfo == null)
             return;
@@ -78,7 +87,7 @@ public class KeyImage : MonoBehaviour
         keyInfo.transform.localEulerAngles = new Vector3(0, 0, -transform.localEulerAngles.z);
     }
 
-    private void SetTextPosition()
+    private void SetKeyTextPosition()
     {
         if (fill == null || keyInfo == null || fill.material == null)
             return;
@@ -93,12 +102,37 @@ public class KeyImage : MonoBehaviour
             );
     }
 
+    private void SetMagnificationTextRotation()
+    {
+        if (magnificationText == null)
+            return;
+
+        magnificationText.transform.localEulerAngles = new Vector3(0, 0, -transform.localEulerAngles.z);
+    }
+
+    private void SetMagnificationTextPosition()
+    {
+        if (magnificationText == null || keyInfo == null)
+            return;
+
+        Vector3 basePosition = keyInfo.rectTransform.position;
+
+        magnificationText.rectTransform.position =
+            basePosition + Vector3.right * offsetX;
+    }
+
     private void SetKeyText()
     {
         if (keyInfo == null)
             return;
 
-        keyInfo.text = key.ToString();
+        keyInfo.text = CurrentKey.ToString();
+    }
+
+    public void SetStageKey(Stage stage)
+    {
+        CurrentKey = stage == Stage.Square ? Sqarekey : Rhombuskey;
+        SetKeyText();
     }
 
     public void PlayPressAnimation()
