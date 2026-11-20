@@ -1536,7 +1536,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 673499850427170541, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: offsetX
-      value: 200
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 673499850427170541, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: Sqarekey
@@ -1571,6 +1571,10 @@ PrefabInstance:
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 1530402470141570680, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 1530402470141570680, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
@@ -1580,15 +1584,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1530402470141570680, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.50000006
+      value: -0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 1530402470141570680, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -136.60254
+      value: -50.000008
       objectReference: {fileID: 0}
     - target: {fileID: 1530402470141570680, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 50
+      value: 91.77189
       objectReference: {fileID: 0}
     - target: {fileID: 1623341167540710105, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_Color.b
@@ -1636,7 +1640,7 @@ PrefabInstance:
       objectReference: {fileID: 278933720}
     - target: {fileID: 2059291604910380755, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.50000006
+      value: -0.00000004371139
       objectReference: {fileID: 0}
     - target: {fileID: 2059291604910380755, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_LocalRotation.x
@@ -1647,12 +1651,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2059291604910380755, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2059291604910380755, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -136.60254
+      value: -108.076225
       objectReference: {fileID: 0}
     - target: {fileID: 2059291604910380755, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -50
+      value: 33.69566
       objectReference: {fileID: 0}
     - target: {fileID: 2081381431655160624, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_text
@@ -1676,7 +1684,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2737672572181924578, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: offsetX
-      value: 200
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 2737672572181924578, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: Sqarekey
@@ -1696,7 +1704,7 @@ PrefabInstance:
       objectReference: {fileID: 526788202}
     - target: {fileID: 3393344483058846863, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: offsetX
-      value: -200
+      value: -100
       objectReference: {fileID: 0}
     - target: {fileID: 3393344483058846863, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: Sqarekey
@@ -1748,7 +1756,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4275578891703109165, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.49999997
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 4275578891703109165, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_LocalRotation.x
@@ -1759,12 +1767,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4275578891703109165, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 4275578891703109165, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 136.60254
+      value: 50.000008
       objectReference: {fileID: 0}
     - target: {fileID: 4275578891703109165, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -50.000015
+      value: 91.77189
       objectReference: {fileID: 0}
     - target: {fileID: 4719437595470551982, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: scoreManager
@@ -1863,6 +1875,10 @@ PrefabInstance:
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7584146780566524190, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7584146780566524190, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
@@ -1871,12 +1887,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7584146780566524190, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7584146780566524190, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 86.60254
+      value: -58.076225
       objectReference: {fileID: 0}
     - target: {fileID: 7584146780566524190, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 50
+      value: 33.695656
       objectReference: {fileID: 0}
     - target: {fileID: 7770075859561050431, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_HorizontalAlignment
@@ -1884,7 +1904,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7855499218346323262, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: offsetX
-      value: -200
+      value: -100
       objectReference: {fileID: 0}
     - target: {fileID: 7855499218346323262, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: Sqarekey
