@@ -10,31 +10,40 @@ public class NegativeBubble : MonoBehaviour
     [SerializeField] private Image bubble_img;
 
     [SerializeField] private TextMeshProUGUI text;
+    private RectTransform rectTransform;
     private Vector2 originPos;
     private Vector2 startPos;
-    private float offsetY = 40f;
+    [SerializeField] private float offsetY = -40f;
 
     private void Awake()
     {
+        rectTransform = transform as RectTransform;
         bubble_img = GetComponentInChildren<Image>();
         text = GetComponentInChildren<TextMeshProUGUI>();
 
-        originPos = transform.position;
+        originPos = rectTransform != null ? rectTransform.anchoredPosition : (Vector2)transform.localPosition;
 
         gameObject.SetActive(false);
     }
 
     private void OnEnable()
     {
-        // TODO µîÀå ¾Ö´Ï¸ÞÀÌ¼Ç
         transform.DOKill();
-        gameObject.transform.position = startPos;
-        transform.DOMove(originPos, 0.2f);
+        if (rectTransform != null)
+        {
+            rectTransform.anchoredPosition = startPos;
+            rectTransform.DOAnchorPos(originPos, 0.2f);
+        }
+        else
+        {
+            transform.localPosition = startPos;
+            transform.DOLocalMove(originPos, 0.2f);
+        }
     }
 
     public void DisableBubble()
     {
-        // TODO ²¨Áö´Â ¾Ö´Ï¸ÞÀÌ¼Ç
+        // TODO ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ï¸ï¿½ï¿½Ì¼ï¿½
         gameObject.SetActive(false);
     }
 
@@ -43,7 +52,7 @@ public class NegativeBubble : MonoBehaviour
         startPos = originPos + offsetPos;
     }
 
-    public void MoveAnchore(Stage stage) // 3, 4 ¹ø ¸»Ç³¼±¸¸ ÇØ´ç
+    public void MoveAnchore(Stage stage) // 3, 4 ï¿½ï¿½ ï¿½ï¿½Ç³ï¿½ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½
     {
         if (stage == Stage.Rhombus)
         {
@@ -56,9 +65,12 @@ public class NegativeBubble : MonoBehaviour
             startPos.y = offsetY;
         }
 
-        if (gameObject.activeSelf)
-        {
-            gameObject.transform.DOMoveY(originPos.y, 0.2f).SetEase(Ease.OutBack);
-        }
+        transform.DOKill();
+        if (!gameObject.activeSelf) return;
+
+        if (rectTransform != null)
+            rectTransform.DOAnchorPos(originPos, 0.2f).SetEase(Ease.OutBack);
+        else
+            transform.DOLocalMove(originPos, 0.2f).SetEase(Ease.OutBack);
     }
 }

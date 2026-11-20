@@ -43,6 +43,7 @@ public class NGBubbleManager : MonoBehaviour
                 negativeBubble[i].Initialize(new Vector2(0, -offset));
             }
         }
+        MoveStage(stage);
     }
     private void OnDestroy()
     {
@@ -51,10 +52,10 @@ public class NGBubbleManager : MonoBehaviour
 
     private void observeBubble(Keys k, int just, int good, int bad, int miss, KeyCommand command)
     {
-        // ÀÌº¥Æ® ±¸µ¶ ÈÄ °¹¼ö »õ°í ³Ñ±è
+        // ï¿½Ìºï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ±ï¿½
         CreateBubble(miss);
 
-        // ·£´ý ±â¹Í ÃâÇö
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         int range = Random.Range(0, 100);
         if (range <= point6chance)
         {
@@ -133,7 +134,7 @@ public class NGBubbleManager : MonoBehaviour
         int start = (stage == Stage.Square) ? 0 : 2;
         int end = (stage == Stage.Square) ? 4 : 6;
 
-        // ºóÀÚ¸® °è»ê ÈÄ ¹ÝÈ¯
+        // ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½È¯
 
         for (int i = start; i < end; i++)
         {
@@ -146,7 +147,7 @@ public class NGBubbleManager : MonoBehaviour
         return false;
     }
 
-    private void MoveStage(Stage _stage)
+    public void MoveStage(Stage _stage)
     {
         negativeBubble[2].MoveAnchore(_stage);
         negativeBubble[3].MoveAnchore(_stage);
@@ -156,7 +157,7 @@ public class NGBubbleManager : MonoBehaviour
         int start = (stage == Stage.Square) ? 4 : 0;
         int end = (stage == Stage.Square) ? 6 : 2;
 
-        for (int i = start; i<end; i++)
+        for (int i = start; i < end; i++)
         {
             NegativeBubble b = negativeBubble[i];
             if (b.gameObject.activeSelf)
@@ -175,7 +176,7 @@ public class NGBubbleManager : MonoBehaviour
 
     private void CaculateDecrease(int ActiveBubble)
     {
-        // ¹èÀ² ÇÏ¶ô
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½Ï¶ï¿½
         scoreManager.DecreaseMultipliers(ActiveBubble);
     }
 

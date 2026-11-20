@@ -2117,6 +2117,7 @@ MonoBehaviour:
   rhythmwheel: {fileID: 0}
   comboAndMagnification: {fileID: 0}
   stageController: {fileID: 0}
+  ngBubbleManager: {fileID: 0}
   currentStage: 0
   squareRotations: []
   rhombusRotations: []
