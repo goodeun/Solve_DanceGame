@@ -961,7 +961,7 @@ Transform:
   m_GameObject: {fileID: 3223928181084600507}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 12, y: 3, z: 6}
+  m_LocalPosition: {x: 40, y: 7, z: 47}
   m_LocalScale: {x: 9, y: 1, z: 9}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1193,6 +1193,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageController
   mainDanceFloor: {fileID: 7646999327431327653}
+  rhythmWheelFormation: {fileID: 0}
   seats:
   - {fileID: 8621549501666016111}
   - {fileID: 6243542591494387580}
@@ -1211,23 +1212,8 @@ MonoBehaviour:
   - {fileID: 2736661004564342792}
   - {fileID: 3521722415724215579}
   - {fileID: 8573809496070950126}
-  squareSeatKeys:
-  - 4
-  - 5
-  - 1
-  - 3
-  rhombusSeatKeys:
-  - 0
-  - 3
-  - 1
-  - 2
-  hexagonAnchors:
-  - {fileID: 7632267521096896016}
-  - {fileID: 6290159961207159839}
-  - {fileID: 5090523833409680251}
-  - {fileID: 7573421324336907298}
-  - {fileID: 7005172912910458614}
-  - {fileID: 8573809496070950126}
+  squareSeatKeys: 04000000050000000100000003000000
+  rhombusSeatKeys: 00000000030000000100000002000000
   currentPhase: 0
 --- !u!114 &6500308213162556373
 MonoBehaviour:
@@ -2055,7 +2041,7 @@ Transform:
   m_GameObject: {fileID: 4929768821813768365}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 7.5, z: 14}
+  m_LocalPosition: {x: 0, y: 20, z: 44}
   m_LocalScale: {x: 9, y: 1, z: 9}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2808,7 +2794,7 @@ Transform:
   m_GameObject: {fileID: 7406420410109077149}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -12, y: 3, z: 6}
+  m_LocalPosition: {x: 0, y: 3, z: 42}
   m_LocalScale: {x: 9, y: 1, z: 9}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2870,7 +2856,7 @@ Transform:
   m_GameObject: {fileID: 8290092551574222450}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -2, z: 14}
+  m_LocalPosition: {x: -40, y: 7, z: 47}
   m_LocalScale: {x: 9, y: 1, z: 9}
   m_ConstrainProportionsScale: 0
   m_Children: []

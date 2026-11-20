@@ -220,9 +220,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fc4b0a9a4be4bc795d1688f4f33d818, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FmodMusicClock
+  phase: {fileID: 0}
   musicEventPath: 'event:/RetroVision - Puzzle (2024 Edit) [NCS Release]'
   beatOffsetSeconds: 0
   bpm: 128
+  technoEnterBpm: 120
+  technoExitBpm: 116
+  popEnterBpm: 80
+  popExitBpm: 76
+  currentBpmDisplay: 0
+  currentBarDisplay: 0
+  currentBeatDisplay: 0
 --- !u!4 &1190630429
 Transform:
   m_ObjectHideFlags: 0
@@ -404,6 +412,10 @@ PrefabInstance:
     - target: {fileID: 279532984717208559, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_Name
       value: MasterCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 4679198055817932634, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8794866762832581390, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchorMax.x
