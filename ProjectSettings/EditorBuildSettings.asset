@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/1.Scene/DanceScene_1_FMOD.unity
-    guid: d63f3b457a4e4c5ca47231075f7f2a2c
+    path: Assets/1.Scene/SE_Scene/DanceScene_1.unity
+    guid: 9202488441f26ec46b4b6d0c7df970ba
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

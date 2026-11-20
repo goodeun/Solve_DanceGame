@@ -7,7 +7,7 @@ using Unity.Cinemachine;
 [RequireComponent(typeof(PlayerInput), typeof(RhythmWheelTiming), typeof(RhythmWheelJudgement))]
 public sealed class RhythmWheelInput : MonoBehaviour
 {
-    [SerializeField] private GameObject[] keyImages = new GameObject[6];
+    [SerializeField] private GameObject[] keyImages = new GameObject[4];
     [SerializeField] private StarPulseUI starPulse;
 
     private PlayerInput playerInput;
@@ -35,6 +35,8 @@ public sealed class RhythmWheelInput : MonoBehaviour
 
     public event Action<Keys, Judge, float> Judged;
 
+    public GameObject[] Keyimages => keyImages;
+
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
@@ -49,13 +51,7 @@ public sealed class RhythmWheelInput : MonoBehaviour
         starPulse ??= GetComponentInChildren<StarPulseUI>(true);
         inputCamera = Camera.main;
 
-        foreach (var item in keyImages)
-            if (item != null && item.TryGetComponent(out KeyImage image))
-                keys[image.key] = image;
-
-        if (keys.Count == 0)
-            foreach (var image in GetComponentsInChildren<KeyImage>(true))
-                keys[image.key] = image;
+        RebuildKeyMap();
 
         judgement.Judged += (key, result, offset) => Judged?.Invoke(key, result, offset);
     }
@@ -202,4 +198,48 @@ public sealed class RhythmWheelInput : MonoBehaviour
         Keys.E => new Vector2(1, 1), 
         _ => Vector2.zero 
     };
+
+    public void RotateKeyimage(GameObject keyimage, float angle)
+    {
+        if (keyimage != null)
+            keyimage.transform.localEulerAngles = new Vector3(0, 0, angle);
+    }
+
+    public void SetKeyStage(Stage stage)
+    {
+        foreach (var item in keyImages)
+        {
+            if (item != null && item.TryGetComponent(out KeyImage image))
+                image.SetStageKey(stage);
+        }
+
+        RebuildKeyMap();
+    }
+
+    private void RebuildKeyMap()
+    {
+        keys.Clear();
+        if (keyImages == null || keyImages.Length == 0 || System.Array.Exists(keyImages, item => item == null))
+        {
+            var images = GetComponentsInChildren<KeyImage>(true);
+            keyImages = new GameObject[images.Length];
+            for (int i = 0; i < images.Length; i++)
+                keyImages[i] = images[i].gameObject;
+        }
+
+        foreach (var item in keyImages)
+        {
+            if (item == null || !item.TryGetComponent(out KeyImage image))
+                continue;
+
+            if (keys.ContainsKey(image.key))
+                Debug.LogError($"RhythmWheelInput: duplicate key mapping for {image.key}.", image);
+            else
+                keys.Add(image.key, image);
+        }
+
+        if (keys.Count == 0)
+            foreach (var image in GetComponentsInChildren<KeyImage>(true))
+                keys[image.key] = image;
+    }
 }

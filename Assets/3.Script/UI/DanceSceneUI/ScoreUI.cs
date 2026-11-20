@@ -24,34 +24,24 @@ public class ScoreUI : MonoBehaviour
     public void ScoreUpdate(int totalScore)
     {
         score_t.text = $"{totalScore:N0}";
-        ScorePlus(totalScore);
-    }
-
-    public void ScorePlus(int totalScore)
-    {
-        int additiveScore;
-
-        if (totalScore > cachingScore)
-        {
-            additiveScore = totalScore - cachingScore;
-            addScore_t.text = $"{additiveScore:N0}";
-
-            addScore_t.transform.position = addScore_ancore;
-            addScore_t.alpha = 0f;
-
-            seq.Kill();
-
-            seq = DOTween.Sequence();
-
-            seq.Append(addScore_t.transform.DOMove(new Vector2(addScore_ancore.x, addScore_ancore.y - 5f), 0.2f))
-                .Join(addScore_t.DOFade(1f, 0.2f))
-                .Append(addScore_t.DOFade(0f, 0.3f));
-        }
-
         cachingScore = totalScore;
     }
 
-    #region µð¹ö±×
+    public void ShowAddedScore(int addedScore)
+    {
+        if (addedScore <= 0) return;
+
+        addScore_t.text = $"{addedScore:N0}";
+        addScore_t.transform.position = addScore_ancore;
+        addScore_t.alpha = 0f;
+        seq.Kill();
+        seq = DOTween.Sequence();
+        seq.Append(addScore_t.transform.DOMove(new Vector2(addScore_ancore.x, addScore_ancore.y - 5f), 0.2f))
+            .Join(addScore_t.DOFade(1f, 0.2f))
+            .Append(addScore_t.DOFade(0f, 0.3f));
+    }
+
+    #region ï¿½ï¿½ï¿½ï¿½ï¿½
 
     public void DEBUG_ScoreUpdate()
     {

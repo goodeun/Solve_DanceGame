@@ -8,7 +8,8 @@ public class StageController : MonoBehaviour
     // 전 객석 이동 로직 컨트롤
 
     [SerializeField] private MainFloorController mainDanceFloor;
-    [SerializeField] private StageVisual[] seats = new StageVisual[6];
+    [SerializeField] private RhythmWheelFormation rhythmWheelFormation;
+    [SerializeField] private StageVisual[] seats = new StageVisual[4];
 
     [SerializeField] private float transitionDuration = 1.0f;
     [SerializeField] private float hiddenOffsetY = 5.0f;
@@ -16,20 +17,23 @@ public class StageController : MonoBehaviour
 
     [SerializeField] private Transform[] squareAnchors = new Transform[4];
     [SerializeField] private Transform[] rhombusAnchors = new Transform[4];
-    [SerializeField] private Transform[] hexagonAnchors = new Transform[6];
+    [Header("Seat key order by stage (same order as Seats)")]
+    [SerializeField] private Keys[] squareSeatKeys = { Keys.Q, Keys.E, Keys.A, Keys.D };
+    [SerializeField] private Keys[] rhombusSeatKeys = { Keys.W, Keys.D, Keys.A, Keys.S };
 
     public Stage currentPhase = Stage.Square;
 
     private void Awake()
     {
         mainDanceFloor=GetComponent<MainFloorController>();
+        rhythmWheelFormation ??= FindFirstObjectByType<RhythmWheelFormation>();
     }
 
     public void ChangePhase(Stage targetPhase)
     {
         if (currentPhase == targetPhase) return;
 
-        if (targetPhase == Stage.Hexagon || targetPhase == Stage.Square)
+        if (targetPhase == Stage.Square)
         {
             mainDanceFloor.transform.DORotate(Vector3.zero, transitionDuration).SetEase(transitionEase);
         }
@@ -47,13 +51,10 @@ public class StageController : MonoBehaviour
             case Stage.Rhombus:
                 MoveSeats(rhombusAnchors, 4);
                 break;
-            case Stage.Hexagon:
-                MoveSeats(hexagonAnchors, 4);
-                AppearHiddenSeats(4, 5);
-                break;
         }
 
         currentPhase = targetPhase;
+        rhythmWheelFormation?.ApplyStage(targetPhase);
     }
 
     private void MoveSeats(Transform[] targetAnchors, int activeSeatCount)
@@ -65,39 +66,6 @@ public class StageController : MonoBehaviour
                 seats[i].transform.DOMove(targetAnchors[i].position, transitionDuration).SetEase(transitionEase);
             }
         }
-    }
-
-    private void AppearHiddenSeats(int topIndex, int botIndex)
-    {
-        PrepareSeat(topIndex, 1f);
-        PrepareSeat(botIndex, -1f);
-
-        if (seats[topIndex] != null)
-        {
-            seats[topIndex].transform.DOMove(hexagonAnchors[topIndex].position, transitionDuration)
-                .SetEase(transitionEase);
-        }
-
-        if (seats[botIndex] != null)
-        {
-            seats[botIndex].transform.DOMove(hexagonAnchors[botIndex].position, transitionDuration)
-                .SetEase(transitionEase);
-        }
-    }
-
-    private void PrepareSeat(int seatIndex, float direction)
-    {
-        if (seats[seatIndex] == null || hexagonAnchors[seatIndex] == null)
-        {
-            return;
-        }
-
-        seats[seatIndex].gameObject.SetActive(true);
-
-        Vector3 startPos = hexagonAnchors[seatIndex].position;
-        startPos.y += Mathf.Abs(hiddenOffsetY) * direction;
-
-        seats[seatIndex].transform.position = startPos;
     }
 
     public void PlayKeyInputDrop(Keys key)
@@ -117,16 +85,20 @@ public class StageController : MonoBehaviour
         seats[seatIndex].GetComponentInChildren<BubbleManager>()?.ClearPersistentBubbles();
     }
 
-    private static int GetSeatIndex(Keys key) => key switch
+    private int GetSeatIndex(Keys key)
     {
-        Keys.Q => 0,
-        Keys.E => 1,
-        Keys.A => 2,
-        Keys.D => 3,
-        Keys.W => 4,
-        Keys.S => 5,
-        _ => -1
-    };
+        Keys[] stageKeys = currentPhase == Stage.Square ? squareSeatKeys : rhombusSeatKeys;
+        if (stageKeys == null)
+            return -1;
+
+        for (int i = 0; i < stageKeys.Length && i < seats.Length; i++)
+        {
+            if (stageKeys[i] == key)
+                return i;
+        }
+
+        return -1;
+    }
 
     #region 디버그
 
@@ -138,11 +110,6 @@ public class StageController : MonoBehaviour
     public void DEBUG_ToRhomBus()
     {
         ChangePhase(Stage.Rhombus);
-    }
-
-    public void DEBUG_To6Key()
-    {
-        ChangePhase(Stage.Hexagon);
     }
 
     #endregion

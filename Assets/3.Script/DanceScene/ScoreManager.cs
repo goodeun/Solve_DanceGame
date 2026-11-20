@@ -94,8 +94,10 @@ public class ScoreManager : MonoBehaviour
             int styleStat = PlayerManager.Instance.currentStats.style;
             float additionalScore = styleStat * 1.0f; // TODO 스타일 스탯 추가점수
 
-            totalScore += Mathf.RoundToInt(curScore + additionalScore);
+            int addedScore = Mathf.RoundToInt(curScore + additionalScore);
+            totalScore += addedScore;
             scoreUI?.ScoreUpdate(totalScore);
+            scoreUI?.ShowAddedScore(addedScore);
         }
 
         UpdateMultipliers(pressedKey);

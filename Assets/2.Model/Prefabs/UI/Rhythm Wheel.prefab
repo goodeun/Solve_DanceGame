@@ -55,7 +55,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -184,7 +184,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9becbef035658144faf7c421dc478a7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::KeyImage
   key: 0
   fill: {fileID: 2183266275245115584}
@@ -238,7 +238,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9becbef035658144faf7c421dc478a7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::KeyImage
   key: 2
   fill: {fileID: 3630616049675262119}
@@ -299,7 +299,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 2100000, guid: cb10dcfc126fc314d928b3751be86678, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -374,7 +374,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 2100000, guid: cb10dcfc126fc314d928b3751be86678, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -449,7 +449,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 2100000, guid: cb10dcfc126fc314d928b3751be86678, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -517,7 +517,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9becbef035658144faf7c421dc478a7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::KeyImage
   key: 5
   fill: {fileID: 6152889138937171250}
@@ -579,7 +579,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 2100000, guid: 482aa24e8b8a5c14ea9c7ffaf9f0277b, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -609,7 +609,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6b70b5b7fc74a1ab3f4fd4207bb1ee6, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::StarPulseUI
   durationBeats: 1
   startRadius: 2
@@ -662,7 +662,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9becbef035658144faf7c421dc478a7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::KeyImage
   key: 3
   fill: {fileID: 1021081172228987100}
@@ -685,6 +685,7 @@ GameObject:
   - component: {fileID: 5067512302608347142}
   - component: {fileID: 3588916084486506621}
   - component: {fileID: 8639420948327383508}
+  - component: {fileID: 9012345678901234567}
   m_Layer: 5
   m_Name: Rhythm Wheel
   m_TagString: Untagged
@@ -731,7 +732,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 665d58bda04efea42864bbbc669043ef, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelUI
 --- !u!114 &5840876300083699231
 MonoBehaviour:
@@ -743,7 +744,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d03b674fd6ea7174ea82d8c5882b7e24, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ComboAndMagnification
   rhythmWheel: {fileID: 6024124593711664056}
 --- !u!114 &5351060673896333243
@@ -756,7 +757,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
   m_Actions: {fileID: -944628639613478452, guid: c6ea80d55268ca54d9a7ab099b4d755e, type: 3}
   m_NotificationBehavior: 3
@@ -790,7 +791,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 519254577d804b8aac78a61ef84a30c0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelTiming
   bpm: 120
   musicClock: {fileID: 0}
@@ -804,7 +805,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eb2ae695ef9941ebade730a37d8ef8e7, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelJudgement
   justWindow: 0.1
   goodWindow: 0.3
@@ -819,7 +820,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8a726fec25e9443285d4086e1dbe2c87, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelInput
   keyImages:
   - {fileID: 0}
@@ -839,7 +840,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9f8b91c0ed6423abed656dce0b935d8, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelPulseVisual
   circlePulse: {fileID: 0}
   normalPulseColor: {r: 0, g: 1, b: 1, a: 1}
@@ -855,7 +856,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 47ede2a07acd4dd9be02a8af706dc1fa, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelFever
   gain: 0.1
   loss: 0.1
@@ -918,7 +919,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 2100000, guid: cb10dcfc126fc314d928b3751be86678, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -986,7 +987,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9becbef035658144faf7c421dc478a7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::KeyImage
   key: 4
   fill: {fileID: 2120134117129164989}
@@ -1047,7 +1048,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1183,7 +1184,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1319,7 +1320,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 2100000, guid: cb10dcfc126fc314d928b3751be86678, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1394,7 +1395,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 2100000, guid: cb10dcfc126fc314d928b3751be86678, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1469,7 +1470,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 2100000, guid: 7357596c21eb33c4b972f9327aaa31a4, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1544,7 +1545,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1680,7 +1681,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 2100000, guid: 4e4ddd6f1e106e148a47490fe3d5d008, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1748,7 +1749,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9becbef035658144faf7c421dc478a7f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::KeyImage
   key: 1
   fill: {fileID: 2562846194971996857}
@@ -1809,7 +1810,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -1945,7 +1946,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 2100000, guid: 1817ee4e218eec044a489b8efc0e4d9d, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -2020,7 +2021,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -2101,3 +2102,21 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &9012345678901234567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4332927072827704353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b008da8c21f7e046b5fff29631b79f5, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RhythmWheelFormation
+  rhythmwheel: {fileID: 0}
+  comboAndMagnification: {fileID: 0}
+  stageController: {fileID: 0}
+  currentStage: 0
+  squareRotations: []
+  rhombusRotations: []
