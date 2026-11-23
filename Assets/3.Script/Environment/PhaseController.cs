@@ -97,6 +97,12 @@ public sealed class PhaseController : MonoBehaviour
 
         foreach (Renderer target in renderers)
             ApplyRendererColours(target, baseColour, emissionColour, animated);
+
+        // Seat input flashes keep their brightness animation, but need their
+        // restore colour rebased to this phase so completion cannot restore a
+        // stale emission colour captured before the phase changed.
+        foreach (StageVisual seat in FindObjectsByType<StageVisual>(FindObjectsSortMode.None))
+            seat.OnPhaseColorChanged(emissionColour);
     }
 
     private Color GetBaseColour(Phase targetPhase) => targetPhase switch

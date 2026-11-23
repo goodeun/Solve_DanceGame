@@ -24,6 +24,8 @@ public class StageVisual : MonoBehaviour
 
     private bool hasUpperEmission;
     private bool hasLowerEmission;
+    private Color currentPhaseEmissionColor;
+    private bool hasPhaseEmissionColor;
 
     private void Awake()
     {
@@ -54,13 +56,61 @@ public class StageVisual : MonoBehaviour
             });
     }
 
+    /// <summary>
+    /// Rebase an active input flash when the global phase theme changes. The
+    /// running flash keeps its progress, but its eventual restore uses the new
+    /// phase colour instead of the colour captured before the transition.
+    /// </summary>
+    public void OnPhaseColorChanged(Color phaseEmissionColor)
+    {
+        currentPhaseEmissionColor = phaseEmissionColor;
+        hasPhaseEmissionColor = true;
+
+        if (hasUpperEmission)
+            upperEmissionBeforeAnimation = phaseEmissionColor;
+        if (hasLowerEmission)
+            lowerEmissionBeforeAnimation = phaseEmissionColor;
+
+        if (intensityTween != null && intensityTween.IsActive())
+        {
+            float upperAmount = 0f;
+            float lowerAmount = 0f;
+            // The current flash is represented by the live material colour;
+            // preserve its brightness while changing the underlying hue.
+            if (hasUpperEmission && TryGetEmissionColor(upperRenderer, out Color upperCurrent))
+                upperAmount = GetIntensityAmount(upperCurrent, phaseEmissionColor);
+            if (hasLowerEmission && TryGetEmissionColor(lowerRenderer, out Color lowerCurrent))
+                lowerAmount = GetIntensityAmount(lowerCurrent, phaseEmissionColor);
+
+            SetEmissionColor(upperRenderer, ScaleEmission(phaseEmissionColor, upperAmount), hasUpperEmission);
+            SetEmissionColor(lowerRenderer, ScaleEmission(phaseEmissionColor, lowerAmount), hasLowerEmission);
+        }
+    }
+
+    private float GetIntensityAmount(Color current, Color baseColor)
+    {
+        float currentMagnitude = new Vector3(current.r, current.g, current.b).magnitude;
+        float baseMagnitude = new Vector3(baseColor.r, baseColor.g, baseColor.b).magnitude;
+        float multiplierRange = emissionIntensityMultiplier - 1f;
+        if (baseMagnitude <= Mathf.Epsilon || multiplierRange <= Mathf.Epsilon)
+            return 0f;
+
+        return Mathf.Clamp01((currentMagnitude / baseMagnitude - 1f) / multiplierRange);
+    }
+
     private bool TryGetEmissionColor(Renderer target, out Color emissionColor)
     {
         emissionColor = Color.black;
         if (target == null || target.sharedMaterial == null || !target.sharedMaterial.HasProperty(emissionColorPropertyId))
             return false;
 
+        MaterialPropertyBlock block = new MaterialPropertyBlock();
+        target.GetPropertyBlock(block);
         emissionColor = target.material.GetColor(emissionColorPropertyId);
+        if (block.HasProperty(emissionColorPropertyId))
+            emissionColor = block.GetColor(emissionColorPropertyId);
+        else if (hasPhaseEmissionColor)
+            emissionColor = currentPhaseEmissionColor;
         return true;
     }
 
@@ -82,7 +132,10 @@ public class StageVisual : MonoBehaviour
         if (!canSetEmissionColor)
             return;
 
-        target.material.SetColor(emissionColorPropertyId, emissionColor);
+        MaterialPropertyBlock block = new MaterialPropertyBlock();
+        target.GetPropertyBlock(block);
+        block.SetColor(emissionColorPropertyId, emissionColor);
+        target.SetPropertyBlock(block);
     }
 
     private void RestoreEmissionColours()
