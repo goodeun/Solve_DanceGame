@@ -9,7 +9,7 @@ public enum Stage
     Rhombus, // 마름모 배치 W A S D
 }
 
-public enum Phase { Pop, HipHop, Techno }
+public enum Phase { Pop, HipHop, Techno, Villain }
 
 public enum Judge { Just, Good, Bad, Miss }
 
