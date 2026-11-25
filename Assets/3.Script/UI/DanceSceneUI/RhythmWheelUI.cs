@@ -9,6 +9,7 @@ public sealed class RhythmWheelUI : MonoBehaviour
     private RhythmWheelTiming timing;
     private RhythmWheelJudgement judgement;
     private RhythmWheelFever fever;
+    private RhythmWheelInput input;
     public int Score => judgement.Score;
     public int Combo => judgement.Combo;
     public float BeatDurationSeconds => timing.BeatDurationSeconds;
@@ -25,9 +26,7 @@ public sealed class RhythmWheelUI : MonoBehaviour
         timing = GetComponent<RhythmWheelTiming>() ?? gameObject.AddComponent<RhythmWheelTiming>();
         judgement = GetComponent<RhythmWheelJudgement>() ?? gameObject.AddComponent<RhythmWheelJudgement>();
         fever = GetComponent<RhythmWheelFever>() ?? gameObject.AddComponent<RhythmWheelFever>();
-
-        if (GetComponent<RhythmWheelInput>() == null) 
-            gameObject.AddComponent<RhythmWheelInput>();
+        input = GetComponent<RhythmWheelInput>() ?? gameObject.AddComponent<RhythmWheelInput>();
 
         if (GetComponent<RhythmWheelPulseVisual>() == null) 
             gameObject.AddComponent<RhythmWheelPulseVisual>();
@@ -39,4 +38,5 @@ public sealed class RhythmWheelUI : MonoBehaviour
         judgement.Judged += (key, result, offset) => OnJudged?.Invoke(key, result, offset);
     }
     public void JudgeInput(Keys key) => judgement.JudgeInput(key, timing.ElapsedSeconds);
+    public void SetInputLocked(bool isLocked) => input.SetInputLocked(isLocked);
 }

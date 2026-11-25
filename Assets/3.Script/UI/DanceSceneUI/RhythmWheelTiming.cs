@@ -49,7 +49,12 @@ public sealed class RhythmWheelTiming : MonoBehaviour
 
     private void Update()
     {
-        ElapsedSeconds = ReadElapsedSeconds();
+        if (musicClock == null 
+            || !musicClock.IsStarted
+            || musicClock.IsPaused
+            || !musicClock.TryGetElapsedSeconds(out float elapsed)) return;
+
+        ElapsedSeconds = elapsed;
 
         // When FMOD is active, HandleTimelineBeat drives this accurately across
         // tempo changes. Keep the elapsed-time calculation only as a fallback.

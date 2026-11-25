@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class FmodMusicClock : MonoBehaviour
 {
+    [SerializeField] private bool autoStart = true;
+
     [SerializeField] private PhaseController phase;
 
     [SerializeField] private string musicEventPath = "event:/RetroVision - Puzzle (2024 Edit) [NCS Release]";
@@ -41,6 +43,9 @@ public class FmodMusicClock : MonoBehaviour
     private FMOD.Studio.EVENT_CALLBACK timelineCallback;
     private float currentTempo;
 
+    public bool IsStarted { get; private set; }  = false;
+    public bool IsPaused { get; private set; } = false;
+
     private readonly struct TimelineBeatData
     {
         public readonly int Bar;
@@ -68,16 +73,24 @@ public class FmodMusicClock : MonoBehaviour
             musicInstance = RuntimeManager.CreateInstance(musicEventPath);
             timelineCallback = HandleTimelineCallback;
             musicInstance.setCallback(timelineCallback, EVENT_CALLBACK_TYPE.TIMELINE_BEAT);
-            musicInstance.start();
         }
         catch (EventNotFoundException)
         {
             Debug.LogError($"FMOD music event was not found: {musicEventPath}", this);
         }
     }
+    private void Start()
+    {
+        if(autoStart)
+        {
+            StartMusic();
+        }
+    }
 
     private void Update()
     {
+        if (!IsStarted || !musicInstance.isValid() || IsPaused) return;
+
         while (pendingTimelineBeats.TryDequeue(out TimelineBeatData data))
         {
             CurrentBar = data.Bar;
@@ -93,6 +106,23 @@ public class FmodMusicClock : MonoBehaviour
 
             UpdatePhaseFromBpm(currentBpmDisplay);
         }
+    }
+
+    public void StartMusic()
+    {
+        if (IsStarted || !musicInstance.isValid()) return;
+
+        musicInstance.start();
+        IsStarted = true;
+        IsPaused = false;
+    }
+
+    public void SetPause(bool paused)
+    {
+        if (!IsStarted || !musicInstance.isValid()) return;
+
+        musicInstance.setPaused(paused);
+        IsPaused = paused;
     }
 
     private void UpdatePhaseFromBpm(float currentBpm)

@@ -37,6 +37,8 @@ public sealed class RhythmWheelInput : MonoBehaviour
 
     public GameObject[] Keyimages => keyImages;
 
+    public bool isInputLocked { get; private set; } = false;
+
     private void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
@@ -103,6 +105,8 @@ public sealed class RhythmWheelInput : MonoBehaviour
 
     private void HandleKey(Keys key, double inputTime)
     {
+        if (isInputLocked) return;
+
         if (!handledKeysThisFrame.Add(key) || !keys.TryGetValue(key, out var image) || !image.isActiveAndEnabled) 
             return;
 
@@ -241,5 +245,23 @@ public sealed class RhythmWheelInput : MonoBehaviour
         if (keys.Count == 0)
             foreach (var image in GetComponentsInChildren<KeyImage>(true))
                 keys[image.key] = image;
+    }
+
+
+    public void SetInputLocked(bool isLocked)
+    {
+        isInputLocked = isLocked;
+
+        if (!isLocked) return;
+
+        if(wheelMotion!=null) StopCoroutine(wheelMotion);
+        if(cameraMotion!=null) StopCoroutine(cameraMotion);
+
+        wheelMotion = null;
+        cameraMotion = null;
+
+        if (wheel != null) wheel.anchoredPosition = origin;
+
+        cameraAmount = 0f;
     }
 }
