@@ -13,11 +13,16 @@ public class StageVisual : MonoBehaviour
     [SerializeField] private Renderer lowerRenderer;
     [SerializeField] private string emissionColorProperty = "_EmissionColor";
     [SerializeField, Min(1f)] private float emissionIntensityMultiplier = 2f;
+    [SerializeField, Min(0)] private int rivalPointThreshold = 100;
+    [SerializeField, Min(0)] private int playerPointThreshold = 200;
+    [SerializeField, Min(0)] private int maxPlayerPoints = 300;
 
     private Tween keyInputTween;
     private Tween intensityTween;
 
     private int emissionColorPropertyId;
+    private int upperColorPropertyId;
+    private int lowerColorPropertyId;
 
     private Color upperEmissionBeforeAnimation;
     private Color lowerEmissionBeforeAnimation;
@@ -26,19 +31,35 @@ public class StageVisual : MonoBehaviour
     private bool hasLowerEmission;
     private Color currentPhaseEmissionColor;
     private bool hasPhaseEmissionColor;
+    private int playerPoints;
+
+    public event System.Action<StageVisual> OnPlayerPointsChanged;
+
+    public Renderer[] Glow => new[] { upperRenderer, lowerRenderer };
+    public int PlayerPoints => playerPoints;
 
     private void Awake()
     {
         emissionColorPropertyId = Shader.PropertyToID(emissionColorProperty);
+        upperColorPropertyId = ResolveColorProperty(upperRenderer);
+        lowerColorPropertyId = ResolveColorProperty(lowerRenderer);
+        hasUpperEmission = upperColorPropertyId != 0;
+        hasLowerEmission = lowerColorPropertyId != 0;
     }
 
     public void PlayKeyInputDrop()
     {
         keyInputTween?.Kill();
         intensityTween?.Kill();
-        RestoreEmissionColours();
-        hasUpperEmission = TryGetEmissionColor(upperRenderer, out upperEmissionBeforeAnimation);
-        hasLowerEmission = TryGetEmissionColor(lowerRenderer, out lowerEmissionBeforeAnimation);
+        // Every seat should return to the active phase colour, matching the
+        // brightness applied by PhaseController when the game starts.
+        if (!hasPhaseEmissionColor)
+        {
+            if (hasUpperEmission)
+                upperEmissionBeforeAnimation = GetMaterialEmission(upperRenderer);
+            if (hasLowerEmission)
+                lowerEmissionBeforeAnimation = GetMaterialEmission(lowerRenderer);
+        }
 
         Vector3 startPosition = transform.localPosition;
         keyInputTween = DOTween.Sequence()
@@ -56,6 +77,60 @@ public class StageVisual : MonoBehaviour
             });
     }
 
+    public void AddPlayerPoints(int points)
+    {
+        if (points <= 0)
+            return;
+
+        playerPoints = Mathf.Min(maxPlayerPoints, playerPoints + points);
+        OnPlayerPointsChanged?.Invoke(this);
+    }
+
+    public void RemovePlayerPoints(int points)
+    {
+        if (points <= 0 || playerPoints <= 0)
+            return;
+
+        playerPoints = Mathf.Max(0, playerPoints - points);
+        OnPlayerPointsChanged?.Invoke(this);
+    }
+
+    public Color GetRivalPhaseColor(Color rivalColor, Color neutralColor, Color playerColor)
+    {
+        if (playerPoints < rivalPointThreshold)
+            return rivalColor;
+        if (playerPoints < playerPointThreshold)
+            return neutralColor;
+        return playerColor;
+    }
+
+    public void SetGlowColor(Color color)
+    {
+        // Emission alpha is used as a strength channel by some project
+        // shaders; a serialized HDR color with alpha 0 otherwise blacks out.
+        color.a = 1f;
+        currentPhaseEmissionColor = color;
+        hasPhaseEmissionColor = true;
+        upperEmissionBeforeAnimation = color;
+        lowerEmissionBeforeAnimation = color;
+
+        foreach (Renderer glow in Glow)
+        {
+            int colorProperty = GetColorPropertyId(glow);
+            if (colorProperty == 0)
+                continue;
+
+            Color appliedColor = color;
+            if (intensityTween != null && intensityTween.IsActive())
+            {
+                Color current = TryGetGlowColor(glow, out Color liveColor) ? liveColor : color;
+                float amount = GetIntensityAmount(current, color);
+                appliedColor = ScaleEmission(color, amount);
+            }
+            SetGlowRendererColor(glow, appliedColor);
+        }
+    }
+
     /// <summary>
     /// Rebase an active input flash when the global phase theme changes. The
     /// running flash keeps its progress, but its eventual restore uses the new
@@ -67,9 +142,17 @@ public class StageVisual : MonoBehaviour
         hasPhaseEmissionColor = true;
 
         if (hasUpperEmission)
+        {
             upperEmissionBeforeAnimation = phaseEmissionColor;
+            if (intensityTween == null || !intensityTween.IsActive())
+                SetGlowRendererColor(upperRenderer, phaseEmissionColor);
+        }
         if (hasLowerEmission)
+        {
             lowerEmissionBeforeAnimation = phaseEmissionColor;
+            if (intensityTween == null || !intensityTween.IsActive())
+                SetGlowRendererColor(lowerRenderer, phaseEmissionColor);
+        }
 
         if (intensityTween != null && intensityTween.IsActive())
         {
@@ -77,13 +160,13 @@ public class StageVisual : MonoBehaviour
             float lowerAmount = 0f;
             // The current flash is represented by the live material colour;
             // preserve its brightness while changing the underlying hue.
-            if (hasUpperEmission && TryGetEmissionColor(upperRenderer, out Color upperCurrent))
+            if (hasUpperEmission && TryGetGlowColor(upperRenderer, out Color upperCurrent))
                 upperAmount = GetIntensityAmount(upperCurrent, phaseEmissionColor);
-            if (hasLowerEmission && TryGetEmissionColor(lowerRenderer, out Color lowerCurrent))
+            if (hasLowerEmission && TryGetGlowColor(lowerRenderer, out Color lowerCurrent))
                 lowerAmount = GetIntensityAmount(lowerCurrent, phaseEmissionColor);
 
-            SetEmissionColor(upperRenderer, ScaleEmission(phaseEmissionColor, upperAmount), hasUpperEmission);
-            SetEmissionColor(lowerRenderer, ScaleEmission(phaseEmissionColor, lowerAmount), hasLowerEmission);
+            SetGlowRendererColor(upperRenderer, ScaleEmission(phaseEmissionColor, upperAmount));
+            SetGlowRendererColor(lowerRenderer, ScaleEmission(phaseEmissionColor, lowerAmount));
         }
     }
 
@@ -98,26 +181,60 @@ public class StageVisual : MonoBehaviour
         return Mathf.Clamp01((currentMagnitude / baseMagnitude - 1f) / multiplierRange);
     }
 
-    private bool TryGetEmissionColor(Renderer target, out Color emissionColor)
+    private int ResolveColorProperty(Renderer target)
     {
-        emissionColor = Color.black;
-        if (target == null || target.sharedMaterial == null || !target.sharedMaterial.HasProperty(emissionColorPropertyId))
+        if (target == null || target.sharedMaterial == null)
+            return 0;
+
+        // Some project shaders expose a separate emissive tint under this
+        // property instead of Unity's standard _EmissionColor.
+        int toonEmissionColorId = Shader.PropertyToID("_Emissive_Color");
+        if (target.sharedMaterial.HasProperty(toonEmissionColorId))
+            return toonEmissionColorId;
+        int emissiveColorId = Shader.PropertyToID("_EmissiveColor");
+        if (target.sharedMaterial.HasProperty(emissiveColorId))
+            return emissiveColorId;
+        if (target.sharedMaterial.HasProperty(emissionColorPropertyId))
+            return emissionColorPropertyId;
+        int baseColorId = Shader.PropertyToID("_BaseColor");
+        if (target.sharedMaterial.HasProperty(baseColorId))
+            return baseColorId;
+        int colorId = Shader.PropertyToID("_Color");
+        return target.sharedMaterial.HasProperty(colorId) ? colorId : 0;
+    }
+
+    private int GetColorPropertyId(Renderer target) => target == upperRenderer
+        ? upperColorPropertyId
+        : target == lowerRenderer ? lowerColorPropertyId : 0;
+
+    private bool TryGetGlowColor(Renderer target, out Color color)
+    {
+        color = Color.black;
+        int propertyId = GetColorPropertyId(target);
+        if (propertyId == 0 || target == null || target.sharedMaterial == null)
             return false;
 
         MaterialPropertyBlock block = new MaterialPropertyBlock();
         target.GetPropertyBlock(block);
-        emissionColor = target.material.GetColor(emissionColorPropertyId);
-        if (block.HasProperty(emissionColorPropertyId))
-            emissionColor = block.GetColor(emissionColorPropertyId);
+        color = target.material.GetColor(propertyId);
+        if (block.HasProperty(propertyId))
+            color = block.GetColor(propertyId);
         else if (hasPhaseEmissionColor)
-            emissionColor = currentPhaseEmissionColor;
+            color = currentPhaseEmissionColor;
         return true;
+    }
+
+    private Color GetMaterialEmission(Renderer target)
+    {
+        return TryGetGlowColor(target, out Color color) ? color : Color.black;
     }
 
     private void SetEmissionIntensity(float amount)
     {
-        SetEmissionColor(upperRenderer, ScaleEmission(upperEmissionBeforeAnimation, amount), hasUpperEmission);
-        SetEmissionColor(lowerRenderer, ScaleEmission(lowerEmissionBeforeAnimation, amount), hasLowerEmission);
+        if (hasUpperEmission)
+            SetGlowRendererColor(upperRenderer, ScaleEmission(upperEmissionBeforeAnimation, amount));
+        if (hasLowerEmission)
+            SetGlowRendererColor(lowerRenderer, ScaleEmission(lowerEmissionBeforeAnimation, amount));
     }
 
     private Color ScaleEmission(Color baseColor, float amount)
@@ -127,21 +244,22 @@ public class StageVisual : MonoBehaviour
         return emissionColor;
     }
 
-    private void SetEmissionColor(Renderer target, Color emissionColor, bool canSetEmissionColor)
+    private void SetGlowRendererColor(Renderer target, Color color)
     {
-        if (!canSetEmissionColor)
+        int propertyId = GetColorPropertyId(target);
+        if (propertyId == 0 || target == null)
             return;
 
         MaterialPropertyBlock block = new MaterialPropertyBlock();
         target.GetPropertyBlock(block);
-        block.SetColor(emissionColorPropertyId, emissionColor);
+        block.SetColor(propertyId, color);
         target.SetPropertyBlock(block);
     }
 
     private void RestoreEmissionColours()
     {
-        SetEmissionColor(upperRenderer, upperEmissionBeforeAnimation, hasUpperEmission);
-        SetEmissionColor(lowerRenderer, lowerEmissionBeforeAnimation, hasLowerEmission);
+        SetGlowRendererColor(upperRenderer, upperEmissionBeforeAnimation);
+        SetGlowRendererColor(lowerRenderer, lowerEmissionBeforeAnimation);
     }
 
     private void OnDisable()

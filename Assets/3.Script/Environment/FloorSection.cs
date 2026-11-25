@@ -21,7 +21,9 @@ public class FloorSection : MonoBehaviour
     private Material floorMat;
     private PhaseController phaseController;
     private Color baseEmissionColor;
+    private Color baseFloorColor;
     private Color currentPhaseEmissionColor;
+    private bool hasSeatEmissionColor;
 
     private readonly int brightID = Shader.PropertyToID("_Brightness");
     private readonly int scaleID = Shader.PropertyToID("_Scale");
@@ -43,6 +45,9 @@ public class FloorSection : MonoBehaviour
         phaseController = FindFirstObjectByType<PhaseController>();
         baseEmissionColor = floorMat.HasProperty(Shader.PropertyToID("_EmissionColor"))
             ? floorMat.GetColor(Shader.PropertyToID("_EmissionColor"))
+            : Color.white;
+        baseFloorColor = floorMat.HasProperty(Shader.PropertyToID("_Color"))
+            ? floorMat.GetColor(Shader.PropertyToID("_Color"))
             : Color.white;
         UpdatePhaseColor();
 
@@ -119,17 +124,38 @@ public class FloorSection : MonoBehaviour
         if (phaseController == null || floorMat == null)
             return;
 
-        currentPhaseEmissionColor = phaseController.CurrentEmissionColor;
+        if (!hasSeatEmissionColor)
+            currentPhaseEmissionColor = phaseController.CurrentEmissionColor;
         int emissionColorId = Shader.PropertyToID("_EmissionColor");
         if (floorMat.HasProperty(emissionColorId))
             floorMat.SetColor(emissionColorId, currentPhaseEmissionColor);
+        int floorColorId = Shader.PropertyToID("_Color");
+        if (floorMat.HasProperty(floorColorId))
+            floorMat.SetColor(floorColorId, currentPhaseEmissionColor);
+    }
+
+    public void SetSeatEmissionColor(Color color)
+    {
+        currentPhaseEmissionColor = color;
+        hasSeatEmissionColor = true;
+        int emissionColorId = Shader.PropertyToID("_EmissionColor");
+        if (floorMat != null && floorMat.HasProperty(emissionColorId))
+            floorMat.SetColor(emissionColorId, currentPhaseEmissionColor);
+        int floorColorId = Shader.PropertyToID("_Color");
+        if (floorMat != null && floorMat.HasProperty(floorColorId))
+            floorMat.SetColor(floorColorId, currentPhaseEmissionColor);
     }
 
     private void OnDestroy()
     {
-        if (floorMat == null || !floorMat.HasProperty(Shader.PropertyToID("_EmissionColor")))
+        if (floorMat == null)
             return;
 
-        floorMat.SetColor(Shader.PropertyToID("_EmissionColor"), baseEmissionColor);
+        int emissionColorId = Shader.PropertyToID("_EmissionColor");
+        if (floorMat.HasProperty(emissionColorId))
+            floorMat.SetColor(emissionColorId, baseEmissionColor);
+        int floorColorId = Shader.PropertyToID("_Color");
+        if (floorMat.HasProperty(floorColorId))
+            floorMat.SetColor(floorColorId, baseFloorColor);
     }
 }

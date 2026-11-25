@@ -5,6 +5,7 @@ using DG.Tweening;
 
 public class StageController : MonoBehaviour
 {
+    public static StageController Instance { get; private set; }
     // 전 객석 이동 로직 컨트롤
 
     [SerializeField] private MainFloorController mainDanceFloor;
@@ -25,8 +26,21 @@ public class StageController : MonoBehaviour
 
     private void Awake()
     {
+        Instance = this;
         mainDanceFloor=GetComponent<MainFloorController>();
         rhythmWheelFormation ??= FindFirstObjectByType<RhythmWheelFormation>();
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
+    public StageVisual GetSeatForKey(Keys key)
+    {
+        int seatIndex = GetSeatIndex(key);
+        return seatIndex >= 0 && seatIndex < seats.Length ? seats[seatIndex] : null;
     }
 
     public void ChangePhase(Stage targetPhase)

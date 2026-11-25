@@ -57,12 +57,12 @@ public class BubbleManager : MonoBehaviour
     {
         if (!activeManagers.Contains(this))
             activeManagers.Add(this);
+
     }
 
     private void OnDisable()
     {
         activeManagers.Remove(this);
-
         if (gameplaySpawnController == this)
             gameplaySpawnController = null;
     }
@@ -82,6 +82,7 @@ public class BubbleManager : MonoBehaviour
                 ReleasePersistentBubbleAt(i);
             }
         }
+
     }
 
     private IEnumerator SpawnRandomBubbles()

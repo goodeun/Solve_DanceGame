@@ -7,6 +7,11 @@ public class NGBubbleManager : MonoBehaviour
     [SerializeField] private ComboAndMagnification comboAndMagnification;
     [SerializeField] private ScoreManager scoreManager;
     [SerializeField] private NegativeBubble[] negativeBubble;
+    [SerializeField, Min(0)] private int pointsLostPerBubblePerBeat = 10;
+    [SerializeField, Min(0)] private int villainFeverPointsPerBeat = 10;
+
+    private FmodMusicClock musicClock;
+    private RhythmWheelFever fever;
 
     private int point3chance = 10;
     private int point6chance = 5;
@@ -19,8 +24,19 @@ public class NGBubbleManager : MonoBehaviour
     {
         scoreManager = FindAnyObjectByType<ScoreManager>();
         comboAndMagnification = FindAnyObjectByType<ComboAndMagnification>();
+        musicClock = FindAnyObjectByType<FmodMusicClock>();
+        fever = FindAnyObjectByType<RhythmWheelFever>();
 
-        comboAndMagnification.OnPhraseHandoff += observeBubble;
+        if (comboAndMagnification != null)
+            comboAndMagnification.OnPhraseHandoff += observeBubble;
+        if (musicClock != null)
+            musicClock.TimelineBeat += HandleTimelineBeat;
+        if (fever != null)
+        {
+            fever.OnFeverStarted += HandleFeverStarted;
+            if (fever.IsActive)
+                ClearAllNegativeBubbles();
+        }
 
         float offset = 50f;
 
@@ -47,11 +63,67 @@ public class NGBubbleManager : MonoBehaviour
     }
     private void OnDestroy()
     {
-        comboAndMagnification.OnPhraseHandoff -= observeBubble;
+        if (comboAndMagnification != null)
+            comboAndMagnification.OnPhraseHandoff -= observeBubble;
+        if (musicClock != null)
+            musicClock.TimelineBeat -= HandleTimelineBeat;
+        if (fever != null)
+            fever.OnFeverStarted -= HandleFeverStarted;
+    }
+
+    private void HandleFeverStarted() => ClearAllNegativeBubbles();
+
+    private void ClearAllNegativeBubbles()
+    {
+        if (negativeBubble != null)
+            foreach (NegativeBubble bubble in negativeBubble)
+                if (bubble != null && bubble.gameObject.activeSelf)
+                    bubble.DisableBubble();
+
+        ActiveBubble = 0;
+    }
+
+    private void HandleTimelineBeat(int bar, int beatInBar, float tempo, int upper, int lower)
+    {
+        PhaseController phaseController = PhaseController.Instance;
+        if (phaseController == null || phaseController.CurrentPhase != Phase.Villain)
+            return;
+
+        if (fever != null && fever.IsActive)
+            phaseController.AddPointsToAllSeats(villainFeverPointsPerBeat);
+
+        StageController stageController = StageController.Instance;
+        if (stageController == null || negativeBubble == null)
+            return;
+
+        for (int i = 0; i < negativeBubble.Length; i++)
+        {
+            if (negativeBubble[i] == null || !negativeBubble[i].gameObject.activeInHierarchy)
+                continue;
+
+            Keys key = i switch
+            {
+                0 => Keys.Q,
+                1 => Keys.E,
+                2 => Keys.A,
+                3 => Keys.D,
+                4 => Keys.W,
+                5 => Keys.S,
+                _ => (Keys)(-1)
+            };
+
+            if ((int)key < 0)
+                continue;
+
+            stageController.GetSeatForKey(key)?.RemovePlayerPoints(pointsLostPerBubblePerBeat);
+        }
     }
 
     private void observeBubble(Keys k, int just, int good, int bad, int miss, KeyCommand command)
     {
+        if (fever != null && fever.IsActive)
+            return;
+
         // �̺�Ʈ ���� �� ���� ���� �ѱ�
         CreateBubble(miss);
 

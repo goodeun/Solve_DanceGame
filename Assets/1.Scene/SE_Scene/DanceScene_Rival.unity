@@ -141,11 +141,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
---- !u!23 &131245123 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 1157658976343194579, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
-  m_PrefabInstance: {fileID: 939047197}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &172039811
 GameObject:
   m_ObjectHideFlags: 0
@@ -301,6 +296,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d934c325402d4848aafc53772394de9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StageController
+--- !u!114 &251477371 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6243542591494387580, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+  m_PrefabInstance: {fileID: 939047197}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f949ed2b97ce3e409a01dbc2ad3cf74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StageVisual
 --- !u!114 &278933720 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7646999327431327653, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
@@ -674,7 +680,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9350f8c60734595429382a3c766317ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PhaseController
-  phase: 2
+  phase: 3
   scoreManager: {fileID: 932935787}
   renderers:
   - {fileID: 718809897}
@@ -682,14 +688,11 @@ MonoBehaviour:
   - {fileID: 1251557560}
   - {fileID: 721441288}
   - {fileID: 1714488040}
-  - {fileID: 792661580}
-  - {fileID: 131245123}
-  - {fileID: 1569182682}
-  - {fileID: 1830791417}
-  - {fileID: 1011575990}
-  - {fileID: 696782518}
-  - {fileID: 1797068168}
-  - {fileID: 1664653401}
+  seats:
+  - {fileID: 666682446}
+  - {fileID: 251477371}
+  - {fileID: 1376593436}
+  - {fileID: 1620473737}
   images:
   - {fileID: 1995896185}
   - {fileID: 544874595}
@@ -709,13 +712,22 @@ MonoBehaviour:
   popEmissionColor: {r: 0.3525634, g: 1.5014288, b: 1.5660378, a: 1}
   hipHopEmissionColor: {r: 1.6037737, g: 1.5022801, b: 0.419836, a: 1}
   technoEmissionColor: {r: 1.6037737, g: 0.46146315, b: 1.203068, a: 1}
+  villainEmissionColor: {r: 6.113208, g: 0.3748667, b: 0.3748667, a: 0}
+  neutralEmissionColor: {r: 6.0076156, g: 0.42506707, b: 6.0076156, a: 0}
+  playerEmissionColor: {r: 0, g: 0.74010885, b: 6.037736, a: 0}
   colorTransitionDuration: 0.2
   colorTransitionEase: 4
---- !u!23 &696782518 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 7132363272897965668, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+--- !u!114 &666682446 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8621549501666016111, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
   m_PrefabInstance: {fileID: 939047197}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f949ed2b97ce3e409a01dbc2ad3cf74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StageVisual
 --- !u!23 &718809897 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 7832771883100993201, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
@@ -724,11 +736,6 @@ MeshRenderer:
 --- !u!23 &721441288 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 411878706731841935, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
-  m_PrefabInstance: {fileID: 939047197}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &792661580 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 5357348645254929016, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
   m_PrefabInstance: {fileID: 939047197}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &877849237 stripped
@@ -782,6 +789,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DanceSceneEnvironment
       objectReference: {fileID: 0}
+    - target: {fileID: 6243542591494387580, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+      propertyPath: upperRenderer
+      value: 
+      objectReference: {fileID: 1569182682}
     - target: {fileID: 6468989862633362600, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
       propertyPath: 'Objects.Array.data[7]'
       value: 
@@ -846,11 +857,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab163014dd34f6f47acdce3bc498e269, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FeverUI
---- !u!23 &1011575990 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 4085550026465300431, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
-  m_PrefabInstance: {fileID: 939047197}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1060495395
 GameObject:
   m_ObjectHideFlags: 0
@@ -1016,6 +1022,7 @@ MonoBehaviour:
   musicEventPath: 'event:/RetroVision - Puzzle (2024 Edit) [NCS Release]'
   beatOffsetSeconds: 0
   bpm: 128
+  autoPhaseFromBpm: 0
   technoEnterBpm: 120
   technoExitBpm: 116
   popEnterBpm: 80
@@ -1290,6 +1297,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9becbef035658144faf7c421dc478a7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KeyImage
+--- !u!114 &1376593436 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2206289789704875281, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+  m_PrefabInstance: {fileID: 939047197}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f949ed2b97ce3e409a01dbc2ad3cf74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StageVisual
 --- !u!1 &1387954498
 GameObject:
   m_ObjectHideFlags: 0
@@ -1600,11 +1618,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1530402470141570680, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -50.000015
+      value: -50.00003
       objectReference: {fileID: 0}
     - target: {fileID: 1530402470141570680, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 100.36232
+      value: 233.69571
       objectReference: {fileID: 0}
     - target: {fileID: 1623341167540710105, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_Color.b
@@ -1668,7 +1686,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2059291604910380755, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -116.66667
+      value: -250
       objectReference: {fileID: 0}
     - target: {fileID: 2059291604910380755, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1800,11 +1818,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4275578891703109165, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 50.000015
+      value: 50.00003
       objectReference: {fileID: 0}
     - target: {fileID: 4275578891703109165, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 100.36234
+      value: 233.69568
       objectReference: {fileID: 0}
     - target: {fileID: 4719437595470551982, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: scoreManager
@@ -1948,11 +1966,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7584146780566524190, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -66.66667
+      value: -200
       objectReference: {fileID: 0}
     - target: {fileID: 7584146780566524190, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 33.69566
+      value: 33.69565
       objectReference: {fileID: 0}
     - target: {fileID: 7746378213391986093, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: offsetY
@@ -2065,6 +2083,17 @@ MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 7466412888761422915, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
   m_PrefabInstance: {fileID: 939047197}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1620473737 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4487362729536069040, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
+  m_PrefabInstance: {fileID: 939047197}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f949ed2b97ce3e409a01dbc2ad3cf74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StageVisual
 --- !u!20 &1625869453 stripped
 Camera:
   m_CorrespondingSourceObject: {fileID: 5958413510951315021, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
@@ -2127,11 +2156,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2f5f057bb5e13fa47943020f7b8b3b60, type: 3}
---- !u!23 &1664653401 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 7629693183583055243, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
-  m_PrefabInstance: {fileID: 939047197}
-  m_PrefabAsset: {fileID: 0}
 --- !u!23 &1714488040 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 755778836208131331, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
@@ -2284,11 +2308,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1790003853}
   m_CullTransparentMesh: 1
---- !u!23 &1797068168 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 3805200143794037973, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
-  m_PrefabInstance: {fileID: 939047197}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1811348089
 GameObject:
   m_ObjectHideFlags: 0
@@ -2425,11 +2444,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1811348089}
   m_CullTransparentMesh: 1
---- !u!23 &1830791417 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 4229674098482076957, guid: c5f41ba45700a7c4b858250056fe9f39, type: 3}
-  m_PrefabInstance: {fileID: 939047197}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1855952940 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7770075859561050431, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
@@ -2853,6 +2867,14 @@ PrefabInstance:
     - target: {fileID: 407747869046373223, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
       propertyPath: m_LocalPosition.y
       value: 7.19
+      objectReference: {fileID: 0}
+    - target: {fileID: 2265891772505541474, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
+      propertyPath: m_Dithering
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2265891772505541474, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2350466665135569853, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
       propertyPath: m_LocalPosition.x

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
@@ -11,6 +12,8 @@ public sealed class PhaseController : MonoBehaviour
     [SerializeField] private Phase phase = Phase.Pop;
     [SerializeField] private ScoreManager scoreManager;
     [SerializeField] private Renderer[] renderers;
+    [SerializeField] private StageVisual[] seats;
+    [SerializeField] private MainFloorController mainFloorController;
     [SerializeField] private Image[] images;
 
     [Header("Phase Buttons")]
@@ -27,6 +30,11 @@ public sealed class PhaseController : MonoBehaviour
     [ColorUsage(true, true)] [SerializeField] private Color popEmissionColor;
     [ColorUsage(true, true)] [SerializeField] private Color hipHopEmissionColor;
     [ColorUsage(true, true)] [SerializeField] private Color technoEmissionColor;
+
+    [Header("Villain HDR Emission Colours")]
+    [ColorUsage(true, true)] [SerializeField] private Color villainEmissionColor;
+    [ColorUsage(true, true)] [SerializeField] private Color neutralEmissionColor;
+    [ColorUsage(true, true)] [SerializeField] private Color playerEmissionColor;
 
     [Header("Transition")]
     [SerializeField, Min(0f)] private float colorTransitionDuration = 1f;
@@ -45,6 +53,7 @@ public sealed class PhaseController : MonoBehaviour
     {
         Instance = this;
         scoreManager ??= FindFirstObjectByType<ScoreManager>();
+        mainFloorController ??= FindFirstObjectByType<MainFloorController>();
     }
 
     private void OnEnable()
@@ -53,7 +62,20 @@ public sealed class PhaseController : MonoBehaviour
         hipHopButton?.onClick.AddListener(SetHipHopPhase);
         technoButton?.onClick.AddListener(SetTechnoPhase);
 
+        if (scoreManager != null)
+            scoreManager.OnPointsAdded += HandlePointsAdded;
+
+        SubscribeToSeatPoints();
+
         scoreManager?.SetPhase(phase);
+        Apply();
+    }
+
+    private IEnumerator Start()
+    {
+        // Other scene components may initialize their materials in Start.
+        // Reapply the phase and per-seat colors after those initializers run.
+        yield return null;
         Apply();
     }
 
@@ -62,6 +84,9 @@ public sealed class PhaseController : MonoBehaviour
         popButton?.onClick.RemoveListener(SetPopPhase);
         hipHopButton?.onClick.RemoveListener(SetHipHopPhase);
         technoButton?.onClick.RemoveListener(SetTechnoPhase);
+        if (scoreManager != null)
+            scoreManager.OnPointsAdded -= HandlePointsAdded;
+        UnsubscribeFromSeatPoints();
         KillColorTweens();
         if (Instance == this)
             Instance = null;
@@ -101,8 +126,78 @@ public sealed class PhaseController : MonoBehaviour
         // Seat input flashes keep their brightness animation, but need their
         // restore colour rebased to this phase so completion cannot restore a
         // stale emission colour captured before the phase changed.
-        foreach (StageVisual seat in FindObjectsByType<StageVisual>(FindObjectsSortMode.None))
-            seat.OnPhaseColorChanged(emissionColour);
+        if (seats == null)
+            return;
+
+        for (int i = 0; i < seats.Length; i++)
+        {
+            StageVisual seat = seats[i];
+            if (seat == null)
+                continue;
+
+            Color seatColor = phase == Phase.Villain
+                ? seat.GetRivalPhaseColor(villainEmissionColor, neutralEmissionColor, playerEmissionColor)
+                : emissionColour;
+            seat.SetGlowColor(seatColor);
+            mainFloorController?.SetSeatEmissionColor(i, seatColor);
+        }
+    }
+
+    private void HandlePointsAdded(Keys key, int points)
+    {
+        StageVisual seat = StageController.Instance != null ? StageController.Instance.GetSeatForKey(key) : null;
+        if (seat == null)
+            return;
+
+        seat.AddPlayerPoints(points);
+    }
+
+    public void AddPointsToAllSeats(int points)
+    {
+        if (seats == null)
+            return;
+
+        foreach (StageVisual seat in seats)
+            seat?.AddPlayerPoints(points);
+    }
+
+    private void SubscribeToSeatPoints()
+    {
+        if (seats == null)
+            return;
+
+        foreach (StageVisual seat in seats)
+            if (seat != null)
+                seat.OnPlayerPointsChanged += HandleSeatPointsChanged;
+    }
+
+    private void UnsubscribeFromSeatPoints()
+    {
+        if (seats == null)
+            return;
+
+        foreach (StageVisual seat in seats)
+            if (seat != null)
+                seat.OnPlayerPointsChanged -= HandleSeatPointsChanged;
+    }
+
+    private void HandleSeatPointsChanged(StageVisual seat)
+    {
+        if (phase != Phase.Villain || seat == null)
+            return;
+
+        Color seatColor = seat.GetRivalPhaseColor(villainEmissionColor, neutralEmissionColor, playerEmissionColor);
+        seat.SetGlowColor(seatColor);
+
+        if (seats == null || mainFloorController == null)
+            return;
+
+        for (int i = 0; i < seats.Length; i++)
+            if (seats[i] == seat)
+            {
+                mainFloorController.SetSeatEmissionColor(i, seatColor);
+                break;
+            }
     }
 
     private Color GetBaseColour(Phase targetPhase) => targetPhase switch
@@ -118,6 +213,7 @@ public sealed class PhaseController : MonoBehaviour
         Phase.Pop => popEmissionColor,
         Phase.HipHop => hipHopEmissionColor,
         Phase.Techno => technoEmissionColor,
+        Phase.Villain => neutralEmissionColor,
         _ => popEmissionColor
     };
 
