@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class ScoreManager : MonoBehaviour
 {
+    public event Action<Keys, int> OnPointsAdded;
     [SerializeField] private MultiplierUI multiplierUI;
     [SerializeField] private ScoreUI scoreUI;
     [SerializeField] private ComboAndMagnification comboMagnificater;
@@ -96,6 +98,7 @@ public class ScoreManager : MonoBehaviour
 
             int addedScore = Mathf.RoundToInt(curScore + additionalScore);
             totalScore += addedScore;
+            OnPointsAdded?.Invoke(pressedKey, addedScore);
             scoreUI?.ScoreUpdate(totalScore);
             scoreUI?.ShowAddedScore(addedScore);
         }

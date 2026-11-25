@@ -49,6 +49,14 @@ public class MainFloorController : MonoBehaviour
         floorSections[floorIndex].ActiveLight();
     }
 
+    public void SetSeatEmissionColor(int floorIndex, Color color)
+    {
+        if (floorSections == null || floorIndex < 0 || floorIndex >= floorSections.Length)
+            return;
+
+        floorSections[floorIndex]?.SetSeatEmissionColor(color);
+    }
+
     #region 디버그
 
     int colorIndex_temp = 0;

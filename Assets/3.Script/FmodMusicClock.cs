@@ -16,6 +16,7 @@ public class FmodMusicClock : MonoBehaviour
     [SerializeField, Min(1f)] private float bpm = 128f;
 
     [Header("Automatic Phase Thresholds")]
+    [SerializeField] private bool autoPhaseFromBpm = true;
     [SerializeField, Min(0f)] private float technoEnterBpm = 120f;
     [SerializeField, Min(0f)] private float technoExitBpm = 116f;
     [SerializeField, Min(0f)] private float popEnterBpm = 80f;
@@ -104,7 +105,8 @@ public class FmodMusicClock : MonoBehaviour
             TimeSignatureLower = data.Lower;
             TimelineBeat?.Invoke(data.Bar, data.Beat, data.Tempo, data.Upper, data.Lower);
 
-            UpdatePhaseFromBpm(currentBpmDisplay);
+            if (autoPhaseFromBpm)
+                UpdatePhaseFromBpm(currentBpmDisplay);
         }
     }
 
