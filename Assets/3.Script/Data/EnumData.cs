@@ -14,3 +14,5 @@ public enum Phase { Pop, HipHop, Techno, Villain }
 public enum Judge { Just, Good, Bad, Miss }
 
 public enum KeyCommand { AAB, ABA, ABC, None }
+
+public enum PauseState { Playing, Transitioning, Paused, CountDowning }

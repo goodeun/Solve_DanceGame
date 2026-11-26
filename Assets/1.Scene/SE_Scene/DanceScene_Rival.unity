@@ -680,7 +680,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9350f8c60734595429382a3c766317ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PhaseController
-  phase: 3
+  phase: 0
   scoreManager: {fileID: 932935787}
   renderers:
   - {fileID: 718809897}
@@ -693,6 +693,7 @@ MonoBehaviour:
   - {fileID: 251477371}
   - {fileID: 1376593436}
   - {fileID: 1620473737}
+  mainFloorController: {fileID: 0}
   images:
   - {fileID: 1995896185}
   - {fileID: 544874595}
@@ -1018,6 +1019,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fc4b0a9a4be4bc795d1688f4f33d818, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FmodMusicClock
+  autoStart: 1
   phase: {fileID: 627529760}
   musicEventPath: 'event:/RetroVision - Puzzle (2024 Edit) [NCS Release]'
   beatOffsetSeconds: 0

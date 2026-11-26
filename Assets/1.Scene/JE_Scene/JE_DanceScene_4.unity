@@ -690,6 +690,8 @@ MonoBehaviour:
   - {fileID: 696782518}
   - {fileID: 1797068168}
   - {fileID: 1664653401}
+  seats: []
+  mainFloorController: {fileID: 0}
   images:
   - {fileID: 1995896185}
   - {fileID: 544874595}
@@ -711,6 +713,9 @@ MonoBehaviour:
   popEmissionColor: {r: 0.3525634, g: 1.5014288, b: 1.5660378, a: 1}
   hipHopEmissionColor: {r: 1.6037737, g: 1.5022801, b: 0.419836, a: 1}
   technoEmissionColor: {r: 1.6037737, g: 0.46146315, b: 1.203068, a: 1}
+  villainEmissionColor: {r: 0, g: 0, b: 0, a: 0}
+  neutralEmissionColor: {r: 0, g: 0, b: 0, a: 0}
+  playerEmissionColor: {r: 0, g: 0, b: 0, a: 0}
   colorTransitionDuration: 0.2
   colorTransitionEase: 4
 --- !u!23 &696782518 stripped
@@ -994,10 +999,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fc4b0a9a4be4bc795d1688f4f33d818, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FmodMusicClock
+  autoStart: 1
   phase: {fileID: 627529760}
   musicEventPath: 'event:/RetroVision - Puzzle (2024 Edit) [NCS Release]'
   beatOffsetSeconds: 0
   bpm: 128
+  autoPhaseFromBpm: 1
   technoEnterBpm: 120
   technoExitBpm: 116
   popEnterBpm: 80
@@ -3084,6 +3091,10 @@ PrefabInstance:
     - target: {fileID: 3444748071514688132, guid: 6ddd8b7525cf496489253c2a9f1faa15, type: 3}
       propertyPath: m_Name
       value: Rival
+      objectReference: {fileID: 0}
+    - target: {fileID: 3444748071514688132, guid: 6ddd8b7525cf496489253c2a9f1faa15, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
