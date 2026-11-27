@@ -8,6 +8,44 @@ public class HUDManager : MonoBehaviour
 
     public static HUDManager Instance = null;
 
+    private CanvasGroup pauseCanvasGroup;
+    private bool isHiddenForPause;
+    private float alphaBeforePause;
+    private bool interactableBeforePause;
+    private bool blocksRaycastsBeforePause;
+
+    public void SetPauseHidden(bool hidden)
+    {
+        if (isHiddenForPause == hidden) return;
+
+        if (hidden)
+        {
+            if (pauseCanvasGroup == null)
+            {
+                pauseCanvasGroup = GetComponent<CanvasGroup>();
+                if (pauseCanvasGroup == null)
+                    pauseCanvasGroup = gameObject.AddComponent<CanvasGroup>();
+            }
+
+            alphaBeforePause = pauseCanvasGroup.alpha;
+            interactableBeforePause = pauseCanvasGroup.interactable;
+            blocksRaycastsBeforePause = pauseCanvasGroup.blocksRaycasts;
+
+            // Hide the root without changing Fever's child CanvasGroup or stopping scripts.
+            pauseCanvasGroup.alpha = 0f;
+            pauseCanvasGroup.interactable = false;
+            pauseCanvasGroup.blocksRaycasts = false;
+        }
+        else if (pauseCanvasGroup != null)
+        {
+            pauseCanvasGroup.alpha = alphaBeforePause;
+            pauseCanvasGroup.interactable = interactableBeforePause;
+            pauseCanvasGroup.blocksRaycasts = blocksRaycastsBeforePause;
+        }
+
+        isHiddenForPause = hidden;
+    }
+
     private void Awake()
     {
         if(Instance == null)
