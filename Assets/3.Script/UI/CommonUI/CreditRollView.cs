@@ -45,7 +45,7 @@ public class CreditRollView : MonoBehaviour, IPauseSubPanel
     [SerializeField, Min(10f)] private float scrollSpeed = 90f;
     [SerializeField] private Color headingColor = new Color(1f, 0.18f, 0.78f, 1f);
     [SerializeField] private Color bodyColor = Color.white;
-    [SerializeField] private Vector2 characterSize = new Vector2(220f, 275f);
+    [SerializeField] private Vector2 characterSize = new Vector2(300f, 375f);
     [SerializeField] private Vector2 characterMargin = new Vector2(40f, 30f);
     [SerializeField, Min(0.05f)] private float fadeDuration = 0.5f;
 

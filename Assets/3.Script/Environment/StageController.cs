@@ -18,9 +18,11 @@ public class StageController : MonoBehaviour
 
     [SerializeField] private Transform[] squareAnchors = new Transform[4];
     [SerializeField] private Transform[] rhombusAnchors = new Transform[4];
-    [Header("Seat key order by stage (same order as Seats)")]
-    [SerializeField] private Keys[] squareSeatKeys = { Keys.Q, Keys.E, Keys.A, Keys.D };
-    [SerializeField] private Keys[] rhombusSeatKeys = { Keys.W, Keys.D, Keys.A, Keys.S };
+    // Seats·앵커는 시계 방향(사각형: 좌상·우상·우하·좌하 / 마름모: 위·오른쪽·아래·왼쪽) 순서로 둔다.
+    // 같은 인덱스의 좌석이 사각형 ↔ 마름모 사이를 시계 방향으로 회전하고, 키는 그 자리에 맞춰 바뀐다.
+    [Header("Seat key order by stage (same order as Seats, clockwise)")]
+    [SerializeField] private Keys[] squareSeatKeys = { Keys.Q, Keys.E, Keys.D, Keys.A };
+    [SerializeField] private Keys[] rhombusSeatKeys = { Keys.W, Keys.D, Keys.S, Keys.A };
 
     public Stage currentPhase = Stage.Square;
 

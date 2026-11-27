@@ -91,3 +91,8 @@ Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoRes
 ## Pause 연출
 
 수정 방법은 [`PAUSE_PRESENTATION_GUIDE.md`](PAUSE_PRESENTATION_GUIDE.md)에 정리했다.
+
+### 4차 수정
+- 좌석 회전: 프리팹 `StageController`의 좌석 목록을 앵커와 같은 시계 방향 순서(좌상·우상·우하·좌하)로 맞추고, 키 매핑을 사각형 Q·E·D·A / 마름모 W·D·S·A로 변경. 배치가 바뀔 때 좌석이 시계 방향으로 돌고, 눌렀을 때 반응하는 좌석은 키 위치와 일치
+- 크레딧 캐릭터: 춤 동작이 잘리지 않게 위·좌우 여유를 두고 촬영(`Credit Top Margin`, `Credit Side Padding`)
+- 커맨드 성공 연출(`CommandSuccessFx`, 리듬 휠에 자동 추가): 휠 중앙 번쩍임·충격파 링·별·방사형 불꽃 + 커맨드 이름(AAB TACKLE BREAK! / ABA SWING! / ABC CHAIN!) + 해당 객석 버스트 + 휠 튕김. 세 박 모두 Just면 더 크게

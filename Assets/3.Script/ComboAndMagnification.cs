@@ -57,6 +57,10 @@ public class ComboAndMagnification : MonoBehaviour
     {
         if (rhythmWheel == null)
             rhythmWheel = FindFirstObjectByType<RhythmWheelUI>();
+
+        // 커맨드 성공 타격감 연출
+        if (GetComponent<CommandSuccessFx>() == null)
+            gameObject.AddComponent<CommandSuccessFx>();
     }
 
     private void OnEnable()

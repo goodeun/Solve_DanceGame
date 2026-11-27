@@ -48,7 +48,11 @@ public class PausePresentation : MonoBehaviour
     [SerializeField] private string creditDanceState = "Credit_Dance";
     [SerializeField] private string creditDanceFallback = "Fever_Loop";
     [Tooltip("전신 구도: 0보다 작으면 발 아래 여유")]
-    [SerializeField, Range(-0.3f, 0.5f)] private float creditCropBottom = -0.06f;
+    [SerializeField, Range(-0.5f, 0.5f)] private float creditCropBottom = -0.18f;
+    [Tooltip("춤 동작(팔·점프)이 잘리지 않게 머리 위 여유(캐릭터 키 대비)")]
+    [SerializeField, Range(0f, 1f)] private float creditTopMargin = 0.4f;
+    [Tooltip("좌우 여유(캐릭터 폭 대비). 팔을 벌리는 동작이 잘리면 올린다")]
+    [SerializeField, Range(0f, 2f)] private float creditSidePadding = 0.8f;
     [SerializeField, Range(-180f, 180f)] private float creditYaw = 18f;
 
     [Header("Player Motion")]
@@ -261,17 +265,28 @@ public class PausePresentation : MonoBehaviour
     }
 
     /// <summary>허벅지 위 크롭으로 카메라 위치를 계산한다(duration > 0이면 트윈).</summary>
-    private void ApplyShot(float bottomRatio, float yaw, float duration)
+    private void ApplyShot(float bottomRatio, float yaw, float duration) => ApplyShot(bottomRatio, yaw, duration, cropTopMargin, 0f);
+
+    /// <param name="sidePadding">0보다 크면 좌우로도 캐릭터 폭 × (1 + 2·sidePadding)이 들어오도록 거리를 늘린다.</param>
+    private void ApplyShot(float bottomRatio, float yaw, float duration, float topMargin, float sidePadding)
     {
         if (portraitCamera == null || rig == null) return;
 
         Transform basis = rigCharacter != null ? rigCharacter : rig;
         float height = rigBounds.size.y;
         float bottom = rigBounds.min.y + height * bottomRatio;
-        float top = rigBounds.max.y + height * cropTopMargin;
+        float top = rigBounds.max.y + height * topMargin;
         Vector3 bottomWorld = basis.TransformPoint(new Vector3(rigBounds.center.x, bottom, rigBounds.center.z));
         Vector3 topWorld = basis.TransformPoint(new Vector3(rigBounds.center.x, top, rigBounds.center.z));
         float frameHeight = Mathf.Max(0.05f, Vector3.Distance(bottomWorld, topWorld));
+        if (sidePadding > 0f)
+        {
+            // 화면 비율(가로/세로)로 필요한 세로 높이를 환산해 둘 중 큰 쪽에 맞춘다.
+            float aspect = renderTextureSize.y > 0 ? renderTextureSize.x / (float)renderTextureSize.y : 0.8f;
+            float worldScale = Vector3.Distance(bottomWorld, topWorld) / Mathf.Max(0.0001f, top - bottom);
+            float width = Mathf.Max(rigBounds.size.x, rigBounds.size.z) * worldScale * (1f + 2f * sidePadding);
+            frameHeight = Mathf.Max(frameHeight, width / Mathf.Max(0.1f, aspect));
+        }
         float distance = frameHeight * 0.5f / Mathf.Tan(portraitFov * 0.5f * Mathf.Deg2Rad);
         portraitCamera.farClipPlane = distance + 10f;
 
@@ -669,7 +684,7 @@ public class PausePresentation : MonoBehaviour
         if (motionRoutine != null) StopCoroutine(motionRoutine);
         motionRoutine = null;
 
-        ApplyShot(creditCropBottom, creditYaw, 0f);
+        ApplyShot(creditCropBottom, creditYaw, 0f, creditTopMargin, creditSidePadding);
         int dance = ResolveState(creditDanceState, creditDanceFallback);
         if (dance != 0) rigAnimator.CrossFadeInFixedTime(dance, motionCrossFade, 0);
     }
