@@ -40,8 +40,8 @@ public class BossBattleDirector : MonoBehaviour
     [SerializeField] private StoryDialogueSequence introDialogue;
     [Tooltip("보스전 규칙 안내(튜토리얼) 대사")]
     [SerializeField] private StoryDialogueSequence ruleDialogue;
-    [SerializeField] private StoryDialogueSequence winDialogue;
-    [SerializeField] private StoryDialogueSequence loseDialogue;
+    [Tooltip("라이벌전 종료 직후 대사(승패 공개 전). 승패 대사는 결과 씬에서 나온다.")]
+    [SerializeField] private StoryDialogueSequence finishDialogue;
     [SerializeField] private bool useDefaultLines = true;
 
     [Header("Battle")]
@@ -118,17 +118,12 @@ public class BossBattleDirector : MonoBehaviour
         ruleDialogue.FillIfEmpty(StoryDialogueLine.List(
             StoryDialogueLine.Npc("클럽 매니저", "라이벌전은 제한 시간 동안 객석을 차지하는 승부야. 끝날 때 더 많은 객석을 달군 쪽이 이겨."),
             StoryDialogueLine.Npc("클럽 매니저", "태클 말풍선을 방치하면 그 객석은 라이벌 쪽으로 넘어가. AAB로 바로바로 물리쳐!"),
-            StoryDialogueLine.Npc("클럽 매니저", "객석이 파랗게 달아오르면 네 편, 빨간 객석은 라이벌 편이야. 마름모 배치에선 ABC 커맨드로 객석을 확 끌어올 수 있어. 'CHANGE NEXT'가 뜨면 다음 마디부터 배치가 바뀌니 조심해.")));
+            StoryDialogueLine.Npc("클럽 매니저", "객석마다 너와 라이벌의 분위기가 줄다리기 중이야. 끝날 때 네 쪽으로 더 기운 객석이 많으면 승리! 마름모 배치에선 ABC 커맨드로 객석을 확 끌어올 수 있어."),
+            StoryDialogueLine.Npc("클럽 매니저", "'CHANGE NEXT'가 뜨면 그 마디 쉬는 박에 배치가 바뀌니, 다음 마디부터 새 배치로 춰!")));
 
-        winDialogue = Ensure(winDialogue);
-        winDialogue.FillIfEmpty(StoryDialogueLine.List(
-            StoryDialogueLine.Npc("라이벌", "말도 안 돼… 관객들이 저 녀석을 따라 추고 있어…", DialogueStyle.Gloomy),
-            StoryDialogueLine.Player("오늘 밤 무대는 내가 가져갈게!", PlayerStanding.Happy, DialogueStyle.Emphasis)));
-
-        loseDialogue = Ensure(loseDialogue);
-        loseDialogue.FillIfEmpty(StoryDialogueLine.List(
-            StoryDialogueLine.Npc("라이벌", "봤지? 이 클럽의 주인공은 나야.", DialogueStyle.Emphasis),
-            StoryDialogueLine.Player("다음엔… 꼭 이길 거야.", PlayerStanding.Sad, DialogueStyle.Gloomy)));
+        finishDialogue = Ensure(finishDialogue);
+        finishDialogue.FillIfEmpty(StoryDialogueLine.List(
+            StoryDialogueLine.Npc("클럽 매니저", "그만! 승부는 여기까지. 객석을 누가 더 차지했는지 확인해 보자!", DialogueStyle.Emphasis)));
     }
 
     private void BuildSchedule()
@@ -302,8 +297,10 @@ public class BossBattleDirector : MonoBehaviour
             playerTotal += points;
             rivalTotal += Mathf.Max(0, seat.MaxPlayerPoints - points);
 
-            if (points >= seat.PlayerPointThreshold) playerSeats++;
-            else if (points < seat.RivalPointThreshold) rivalSeats++;
+            // 땅따먹기: 객석 점수(플레이어 몫)와 나머지(라이벌 몫)를 비교해 더 큰 쪽이 객석을 차지한다.
+            int rivalPoints = Mathf.Max(0, seat.MaxPlayerPoints - points);
+            if (points > rivalPoints) playerSeats++;
+            else if (rivalPoints > points) rivalSeats++;
         }
 
         if (playerSeats != rivalSeats) return playerSeats > rivalSeats;
@@ -332,6 +329,21 @@ public class BossBattleDirector : MonoBehaviour
         DemoSession.PlayerMoodTotal = Mathf.RoundToInt(playerTotal);
         DemoSession.RivalMoodTotal = Mathf.RoundToInt(rivalTotal);
         DemoSession.BossScore = scoreManager != null ? scoreManager.TotalScore : 0;
+
+        // 결과 씬의 객석 공개 연출용 기록
+        DemoSession.Seats.Clear();
+        int seatCount = stageController != null ? stageController.SeatCount : 0;
+        for (int i = 0; i < seatCount; i++)
+        {
+            StageVisual seat = stageController.GetSeat(i);
+            if (seat == null) continue;
+            DemoSession.Seats.Add(new DemoSession.SeatResult
+            {
+                key = stageController.GetKeyForSeat(i).ToString(),
+                playerPoints = seat.PlayerPoints,
+                maxPoints = Mathf.Max(1, seat.MaxPlayerPoints),
+            });
+        }
         DemoSession.AccumulateBattle(scoreManager, combo);
 
         StartCoroutine(EndRoutine(won));
@@ -341,16 +353,15 @@ public class BossBattleDirector : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
 
-        DemoUISettings s = DemoUI.Settings;
-        banner?.Show(won ? "YOU WIN!" : "YOU LOSE...", won ? s.green : s.magenta);
+        // 승패는 결과 씬에서 객석을 하나씩 공개하며 보여주므로 여기서는 종료만 알린다.
+        banner?.Show("FINISH!", DemoUI.Settings.green);
         yield return new WaitForSeconds(2f);
         banner?.Hide();
 
         bool done = false;
-        StoryDialogueSequence branch = won ? winDialogue : loseDialogue;
-        if (branch != null && branch.HasLines)
+        if (finishDialogue != null && finishDialogue.HasLines)
         {
-            branch.Play(() => done = true);
+            finishDialogue.Play(() => done = true);
             while (!done) yield return null;
         }
 

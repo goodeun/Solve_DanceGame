@@ -25,6 +25,10 @@ public class ResultController : MonoBehaviour
     [SerializeField, Min(0f)] private float stepDelay = 0.6f;
     [SerializeField] private List<StoryDialogueLine> winLines = new List<StoryDialogueLine>();
     [SerializeField] private List<StoryDialogueLine> loseLines = new List<StoryDialogueLine>();
+    [Tooltip("라이벌전 승리 공개 직후 대사")]
+    [SerializeField] private List<StoryDialogueLine> rivalWinLines = new List<StoryDialogueLine>();
+    [Tooltip("라이벌전 패배 공개 직후 대사")]
+    [SerializeField] private List<StoryDialogueLine> rivalLoseLines = new List<StoryDialogueLine>();
     [SerializeField, TextArea] private string thanksText =
         "데모를 플레이해 주셔서 감사합니다!\n\n" +
         "다음 업데이트에서는 도시를 돌아다니며 스탯을 키우는 일상 파트,\n" +
@@ -68,13 +72,37 @@ public class ResultController : MonoBehaviour
                 StoryDialogueLine.Npc("클럽 매니저", "낮 동안 스탯을 더 키워서 다시 도전해 보자. (일상 파트는 추후 업데이트!)"),
                 StoryDialogueLine.Npc("라이벌", "다음에도 이 무대는 내 거야.", DialogueStyle.Emphasis));
 
+        // 0. 라이벌전 땅따먹기 공개 → 라이벌 반응 대사
+        if (DemoSession.BossPlayed && DemoSession.Seats.Count > 0)
+        {
+            if (rivalWinLines == null || rivalWinLines.Count == 0)
+                rivalWinLines = StoryDialogueLine.List(
+                    StoryDialogueLine.Npc("라이벌", "말도 안 돼… 관객들이 저 녀석을 따라 추고 있어…", DialogueStyle.Gloomy),
+                    StoryDialogueLine.Player("오늘 밤 무대는 내가 가져갈게!", PlayerStanding.Happy, DialogueStyle.Emphasis));
+            if (rivalLoseLines == null || rivalLoseLines.Count == 0)
+                rivalLoseLines = StoryDialogueLine.List(
+                    StoryDialogueLine.Npc("라이벌", "봤지? 이 클럽의 주인공은 나야.", DialogueStyle.Emphasis),
+                    StoryDialogueLine.Player("다음엔… 꼭 이길 거야.", PlayerStanding.Sad, DialogueStyle.Gloomy));
+
+            var reveal = gameObject.AddComponent<SeatRevealView>();
+            yield return reveal.Play((RectTransform)canvas.transform, DemoSession.Seats, DemoSession.BossWon);
+
+            bool reacted = false;
+            StoryDialogueView.GetOrCreate().Play(DemoSession.BossWon ? rivalWinLines : rivalLoseLines, () => reacted = true);
+            while (!reacted) yield return null;
+
+            CanvasGroup group = reveal.Root.gameObject.AddComponent<CanvasGroup>();
+            yield return group.DOFade(0f, 0.4f).WaitForCompletion();
+            Destroy(reveal.Root.gameObject);
+        }
+
         yield return new WaitForSeconds(stepDelay);
 
         // 1. 승패
         var verdict = AddRow(won ? "CLEAR!" : "FAILED...", 120f, won ? s.green : s.magenta, true);
         verdict.transform.DOPunchScale(Vector3.one * 0.2f, 0.5f, 6, 0.5f);
         string bossLine = DemoSession.BossPlayed
-            ? $"라이벌전 {(DemoSession.BossWon ? "승리" : "패배")}  (객석 파랑 {DemoSession.PlayerSeats} · 보라 {DemoSession.NeutralSeats} · 빨강 {DemoSession.RivalSeats})"
+            ? $"라이벌전 {(DemoSession.BossWon ? "승리" : "패배")}  (객석 {DemoSession.PlayerSeats} : {DemoSession.RivalSeats})"
             : "라이벌전 미진행";
         AddRow(bossLine, 40f, s.cyan);
         yield return new WaitForSeconds(stepDelay);

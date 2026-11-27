@@ -1749,11 +1749,11 @@ PrefabInstance:
       objectReference: {fileID: 278933720}
     - target: {fileID: 2693657982039847339, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: gain
-      value: 0.03
+      value: 0.04
       objectReference: {fileID: 0}
     - target: {fileID: 2693657982039847339, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: loss
-      value: 0.02
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 2718787999501412623, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_HorizontalAlignment

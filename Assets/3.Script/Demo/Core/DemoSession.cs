@@ -22,6 +22,20 @@ public static class DemoSession
 
     public static bool TutorialSkipped;
 
+    /// <summary>라이벌전 객석별 결과(결과 씬 땅따먹기 공개용). 라이벌 몫 = maxPoints - playerPoints.</summary>
+    public struct SeatResult
+    {
+        public string key;
+        public int playerPoints;
+        public int maxPoints;
+        public int RivalPoints => Mathf.Max(0, maxPoints - playerPoints);
+        public float PlayerShare => maxPoints > 0 ? playerPoints / (float)maxPoints : 0f;
+        /// <summary>1 = 플레이어, -1 = 라이벌, 0 = 동률</summary>
+        public int Owner => playerPoints > RivalPoints ? 1 : RivalPoints > playerPoints ? -1 : 0;
+    }
+
+    public static readonly System.Collections.Generic.List<SeatResult> Seats = new System.Collections.Generic.List<SeatResult>();
+
     public static int FinalScore => NormalScore + BossScore;
 
     public static void Reset()
@@ -35,6 +49,7 @@ public static class DemoSession
         PlayerSeats = RivalSeats = NeutralSeats = 0;
         PlayerMoodTotal = RivalMoodTotal = 0;
         TutorialSkipped = false;
+        Seats.Clear();
     }
 
     /// <summary>한 전투(일반전·보스전)의 판정 개수와 최대 콤보를 누적한다.</summary>
