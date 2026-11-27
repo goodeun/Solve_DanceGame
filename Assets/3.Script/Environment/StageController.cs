@@ -58,7 +58,10 @@ public class StageController : MonoBehaviour
         return seatIndex >= 0 && seatIndex < seats.Length ? seats[seatIndex] : null;
     }
 
-    public void ChangePhase(Stage targetPhase)
+    public void ChangePhase(Stage targetPhase) => ChangePhase(targetPhase, 0f);
+
+    /// <param name="keyApplyDelay">객석 이동은 바로 시작하고, 키 배치(입력·커맨드 층)는 이 시간(초) 뒤에 바꾼다.</param>
+    public void ChangePhase(Stage targetPhase, float keyApplyDelay)
     {
         if (currentPhase == targetPhase) return;
 
@@ -82,8 +85,25 @@ public class StageController : MonoBehaviour
                 break;
         }
 
+        if (keyApplyDelay > 0f)
+        {
+            if (keyApplyRoutine != null) StopCoroutine(keyApplyRoutine);
+            keyApplyRoutine = StartCoroutine(ApplyKeysLater(targetPhase, keyApplyDelay));
+            return;
+        }
+
         currentPhase = targetPhase;
         rhythmWheelFormation?.ApplyStage(targetPhase);
+    }
+
+    private Coroutine keyApplyRoutine;
+
+    private IEnumerator ApplyKeysLater(Stage targetPhase, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        currentPhase = targetPhase;
+        rhythmWheelFormation?.ApplyStage(targetPhase);
+        keyApplyRoutine = null;
     }
 
     private void MoveSeats(Transform[] targetAnchors, int activeSeatCount)

@@ -1749,7 +1749,7 @@ PrefabInstance:
       objectReference: {fileID: 278933720}
     - target: {fileID: 2693657982039847339, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: gain
-      value: 0.036
+      value: 0.03
       objectReference: {fileID: 0}
     - target: {fileID: 2693657982039847339, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: loss

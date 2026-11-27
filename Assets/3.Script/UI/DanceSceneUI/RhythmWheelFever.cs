@@ -65,7 +65,7 @@ public sealed class RhythmWheelFever : MonoBehaviour
     private void OnDisable() { if (combo != null) { combo.OnComboSaved -= Save; combo.OnComboFailed -= Fail; } timing.BeatStarted -= HandleBeatStarted; }
 
     private void Save(Keys _) { if (active || ReachedLimit || !FeverEnabled) return; gauge = Mathf.Clamp01(gauge + gain); queued |= gauge >= 1; hud?.AddFeverGage(gauge); }
-    private void Fail() { if (active) return; gauge = Mathf.Clamp01(gauge - loss); hud?.AddFeverGage(gauge); }
+    private void Fail() { if (active || ReachedLimit || !FeverEnabled) return; gauge = Mathf.Clamp01(gauge - loss); hud?.AddFeverGage(gauge); }
 
     /// <summary>테스트·튜토리얼용: 게이지를 직접 설정한다.</summary>
     public void SetGauge(float value)
@@ -131,7 +131,8 @@ public sealed class RhythmWheelFever : MonoBehaviour
 
         feverEndBeat = -1;
         feverStartBeat = -1;
-        gauge = 0f;
+        // 최대 횟수를 다 쓰면 더 이상 피버가 오지 않으므로 게이지를 가득 찬 상태로 둔다.
+        gauge = ReachedLimit ? 1f : 0f;
         active = false;
         feverCamera?.AllowGameplayInput();
         hud?.AddFeverGage(gauge);

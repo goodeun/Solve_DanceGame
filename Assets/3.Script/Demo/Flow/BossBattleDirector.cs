@@ -9,7 +9,8 @@ using UnityEngine.Events;
 /// 보스(라이벌)전 진행.
 /// 등장: 씬 전환 → 라이벌 위쪽 플랫폼 등장 → 등장 연출(카메라·대사) → 기본 카메라 → 보스전 안내 대사 → UI 오픈 → 카운트다운 → 시작
 /// 전투: 4키 유지(6키 폐기). 속성 페이즈는 Villain으로 고정. QEAD 사각형과 WASD 마름모를 약 4~5회 교체한다.
-///       변경 직전 마디에 CHANGE NEXT로 예고하고(이 마디는 기존 배치로 계속 판정), 다음 마디 첫 박에 새 배치를 적용한다.
+///       변경할 마디 첫 박에 CHANGE NEXT로 예고하고 1·2·3박은 기존 배치로 판정, 쉬는 박(4박)에 객석이 움직이며
+///       새 배치로 바뀐다. 플레이어는 쉬는 박에 바뀐 객석을 보고 다음 마디 1박부터 새 배치로 친다.
 ///       보스전은 입력을 멈추지 않는다.
 /// 승패: 기존 객석 점수(StageVisual.PlayerPoints, 객석 색과 같은 값)로 판정한다.
 ///       객석 색 기준선으로 플레이어 객석(파랑, playerPointThreshold 이상)과 라이벌 객석(빨강, rivalPointThreshold 미만)을 센다.
@@ -48,8 +49,10 @@ public class BossBattleDirector : MonoBehaviour
     [SerializeField, Min(4)] private int battleBars = 32;
     [Tooltip("배치 변경 마디(비우면 아래 범위로 무작위 생성)")]
     [SerializeField] private List<int> changeBars = new List<int>();
-    [SerializeField] private Vector2Int randomChangeCount = new Vector2Int(4, 5);
-    [SerializeField, Min(2)] private int minBarsBetweenChanges = 4;
+    [SerializeField] private Vector2Int randomChangeCount = new Vector2Int(3, 3);
+    [SerializeField, Min(2)] private int minBarsBetweenChanges = 6;
+    [Tooltip("쉬는 박 시작 후 키 배치를 바꾸기까지의 지연(박). 3박째 늦은 입력이 기존 키로 판정되도록 반 박 늦춘다.")]
+    [SerializeField, Range(0f, 0.9f)] private float keySwapDelayBeats = 0.5f;
     [SerializeField] private string changeNextText = "CHANGE NEXT";
 
     [Header("ABC Command")]
@@ -220,9 +223,28 @@ public class BossBattleDirector : MonoBehaviour
 
     private void HandleBeat(int beat)
     {
-        if (!battling || beat % 4 != 0) return;
+        if (!battling) return;
 
         int bar = beat / 4;
+
+        // 예고한 마디의 쉬는 박: 객석 이동 + 키 배치 변경(다음 마디 1박부터 새 배치)
+        if (beat % 4 == 3)
+        {
+            if (announcedBar == bar)
+            {
+                announcedBar = -1;
+                banner?.Hide();
+                if (stageController != null)
+                {
+                    Stage next = stageController.currentPhase == Stage.Square ? Stage.Rhombus : Stage.Square;
+                    float delay = wheel != null ? wheel.BeatDurationSeconds * keySwapDelayBeats : 0f;
+                    stageController.ChangePhase(next, delay);
+                }
+            }
+            return;
+        }
+
+        if (beat % 4 != 0) return;
 
         if (bar >= battleBars)
         {
@@ -230,19 +252,7 @@ public class BossBattleDirector : MonoBehaviour
             return;
         }
 
-        // 예고된 마디의 첫 박: 새 배치 적용(입력은 계속 받는다)
-        if (announcedBar == bar)
-        {
-            announcedBar = -1;
-            banner?.Hide();
-            if (stageController != null)
-            {
-                Stage next = stageController.currentPhase == Stage.Square ? Stage.Rhombus : Stage.Square;
-                stageController.ChangePhase(next);
-            }
-        }
-
-        // 다음 마디에 변경 예정이면 이번 마디에 예고한다. 피버와 겹치면 뒤로 미룬다(사전 공지 없는 변경은 없다).
+        // 이번 마디에 변경 예정이면 첫 박에 예고하고 이 마디의 쉬는 박에 바꾼다. 피버와 겹치면 뒤로 미룬다.
         if (announcedBar < 0 && nextChangeIndex < schedule.Count && schedule[nextChangeIndex] <= bar + 1)
         {
             RhythmWheelFever fever = wheel != null ? wheel.Fever : null;
@@ -254,7 +264,7 @@ public class BossBattleDirector : MonoBehaviour
             }
             else
             {
-                announcedBar = bar + 1;
+                announcedBar = bar;
                 nextChangeIndex++;
                 banner?.Show(changeNextText, DemoUI.Settings.cyan, DemoUI.Settings.changeNextSprite);
             }
@@ -318,6 +328,7 @@ public class BossBattleDirector : MonoBehaviour
         DemoSession.BossWon = won;
         DemoSession.PlayerSeats = playerSeats;
         DemoSession.RivalSeats = rivalSeats;
+        DemoSession.NeutralSeats = Mathf.Max(0, (stageController != null ? stageController.SeatCount : 0) - playerSeats - rivalSeats);
         DemoSession.PlayerMoodTotal = Mathf.RoundToInt(playerTotal);
         DemoSession.RivalMoodTotal = Mathf.RoundToInt(rivalTotal);
         DemoSession.BossScore = scoreManager != null ? scoreManager.TotalScore : 0;

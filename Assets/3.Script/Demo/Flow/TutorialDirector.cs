@@ -24,7 +24,9 @@ public class TutorialDirector : MonoBehaviour
         public List<StoryDialogueLine> guide = new List<StoryDialogueLine>();
         public Practice practice = Practice.Basic;
         [Min(0)] public int practiceBars = 2;
-        [Tooltip("태클 실습: 몇 번째 실습 마디(1부터)에 태클을 띄울지")]
+        [Tooltip("태클 실습: 실습 시작(첫 마디 첫 박)에 동시에 띄울 태클 수(3개 동시 태클 기믹)")]
+        [Min(0)] public int tackleGimmickAtStart = 0;
+        [Tooltip("태클 실습: 몇 번째 실습 마디(1부터)에 태클을 하나씩 더 띄울지")]
         public List<int> tackleBars = new List<int>();
         [Tooltip("실습 성공 시(태클 실습: 태클을 모두 처리)")]
         public List<StoryDialogueLine> successLines = new List<StoryDialogueLine>();
@@ -203,6 +205,8 @@ public class TutorialDirector : MonoBehaviour
         if (currentStep != null && currentStep.practice == Practice.Tackle && beat % 4 == 0 && bubbles != null)
         {
             int practiceBar = (beat - practiceStartBeat) / 4 + 1;
+            if (practiceBar == 1 && currentStep.tackleGimmickAtStart > 0)
+                bubbles.SpawnBubbles(currentStep.tackleGimmickAtStart);
             if (currentStep.tackleBars.Contains(practiceBar))
                 bubbles.SpawnBubble();
         }
@@ -326,11 +330,13 @@ public class TutorialDirector : MonoBehaviour
                 name = "태클 처리",
                 practice = Practice.Tackle,
                 practiceBars = 6,
-                tackleBars = new List<int> { 2, 4 },
+                tackleGimmickAtStart = 3,
+                tackleBars = new List<int>(),
                 guide = StoryDialogueLine.List(
                     StoryDialogueLine.Npc(guide, "가끔 객석에서 태클 말풍선이 날아와. 놔두면 전체 점수 배율이 계속 떨어져.", DialogueStyle.Angry),
                     StoryDialogueLine.Npc(guide, "같은 층 키를 두 번 누르고 다른 층 키로 마무리하는 AAB 커맨드! 마지막 키의 객석 태클을 물리칠 수 있어."),
-                    StoryDialogueLine.Npc(guide, "예를 들어 Q-E-A면 A 객석, A-D-Q면 Q 객석이야. 6마디 동안 태클 두 개를 처리해 봐.")),
+                    StoryDialogueLine.Npc(guide, "예를 들어 Q-E-A면 A 객석, A-D-Q면 Q 객석이야."),
+                    StoryDialogueLine.Npc(guide, "실습을 시작하면 태클이 한꺼번에 세 개 날아올 거야. 6마디 안에 전부 처리해 봐!", DialogueStyle.Emphasis)),
                 successLines = StoryDialogueLine.List(StoryDialogueLine.Npc(guide, "완벽해! 태클 따위 문제없지?", DialogueStyle.Emphasis)),
                 failLines = StoryDialogueLine.List(
                     StoryDialogueLine.Npc(guide, "아직 태클이 남았네… 괜찮아, 본 무대에서 다시 해 보자.", DialogueStyle.Gloomy),

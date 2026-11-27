@@ -16,6 +16,7 @@ public static class DemoSession
     public static bool BossWon;
     public static int PlayerSeats;
     public static int RivalSeats;
+    public static int NeutralSeats;
     public static int PlayerMoodTotal;
     public static int RivalMoodTotal;
 
@@ -31,7 +32,7 @@ public static class DemoSession
         MaxCombo = 0;
         BossPlayed = false;
         BossWon = false;
-        PlayerSeats = RivalSeats = 0;
+        PlayerSeats = RivalSeats = NeutralSeats = 0;
         PlayerMoodTotal = RivalMoodTotal = 0;
         TutorialSkipped = false;
     }

@@ -52,6 +52,9 @@ public class ResultController : MonoBehaviour
         int score = DemoSession.FinalScore;
         bool won = DemoSession.BossWon && score >= targetScore;
         string rank = GetRank(score, targetScore, rankRatios);
+        // 라이벌전에서 패배하면 최대 랭크는 B
+        if (DemoSession.BossPlayed && !DemoSession.BossWon && (rank == "S" || rank == "A"))
+            rank = "B";
         DemoUISettings s = DemoUI.Settings;
 
         if (winLines == null || winLines.Count == 0)
@@ -71,7 +74,7 @@ public class ResultController : MonoBehaviour
         var verdict = AddRow(won ? "CLEAR!" : "FAILED...", 120f, won ? s.green : s.magenta, true);
         verdict.transform.DOPunchScale(Vector3.one * 0.2f, 0.5f, 6, 0.5f);
         string bossLine = DemoSession.BossPlayed
-            ? $"라이벌전 {(DemoSession.BossWon ? "승리" : "패배")}  (객석 {DemoSession.PlayerSeats} : {DemoSession.RivalSeats})"
+            ? $"라이벌전 {(DemoSession.BossWon ? "승리" : "패배")}  (객석 파랑 {DemoSession.PlayerSeats} · 보라 {DemoSession.NeutralSeats} · 빨강 {DemoSession.RivalSeats})"
             : "라이벌전 미진행";
         AddRow(bossLine, 40f, s.cyan);
         yield return new WaitForSeconds(stepDelay);
