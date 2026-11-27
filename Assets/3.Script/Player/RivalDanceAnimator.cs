@@ -20,6 +20,9 @@ public sealed class RivalDanceAnimator : MonoBehaviour
         if (musicClock == null) musicClock = FindFirstObjectByType<FmodMusicClock>();
     }
 
+    // 오브젝트를 껐다 켜면(공중 무대 숨김·등장 등) Animator가 기본 상태(Ready)로 돌아가므로 상태를 다시 맞춘다.
+    private void OnEnable() => dancing = false;
+
     private void Update()
     {
         bool shouldDance = musicClock != null
