@@ -37,12 +37,12 @@ Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoRes
 | F6/D7 | 일반전 좌석 변경 최대 2회. 2마디 전환(경고·이동 → 3·2·1 → 다음 마디 재개), 피버와 겹치면 연기 | `NormalBattleDirector` |
 | F7 | 곡 종료 감지 → 판정 정리 → 보스전 대사 → 보스 씬 | `MainGameFlow`, `FmodMusicClock.MusicEnded` |
 | F8/D8 | 보스 등장(라이벌 낙하·연출 대사·규칙 안내) → UI 오픈 → 시작. Villain 고정, 4키 유지, CHANGE NEXT 예고 후 다음 마디 첫 박에 배치 변경(입력 계속) 4~5회 | `BossBattleDirector` |
-| F9 | 객석별 플레이어·라이벌 분위기, 제한 마디, 승패(객석 수 → 총 분위기 → 완전 동률 플레이어 승) + 분기 대사, 분위기 막대 HUD | `BossBattleDirector`, `BossMoodHUD` |
+| F9 | 제한 마디, 기존 객석 점수(객석 색과 같은 값)로 승패: 파랑 객석 수 vs 빨강 객석 수 → 동률이면 총 점수가 최대치 절반 초과인지 → 완전 동률 플레이어 승. 분기 대사 | `BossBattleDirector`, `StageVisual` |
 | F10 | 결과: 승패 → 점수 → 판정 개수 → 최대 콤보 → 랭크 → 대사 → [다음날] → 감사·업데이트 안내 → 타이틀 | `ResultController`, `DemoSession` |
 | D4 | 피버 길이 마디 단위(`durationBars`), 시작 시 확정. 카메라 컷·HUD 복구·입력 재개가 같은 종료 박을 따름 | `RhythmWheelFever`, `DanceSceneHUD` |
 | D5 | 피버: 시작 속성 고정, 마디당 자동 득점, 피버 배수 플래그 연결 | `ScoreManager` |
 | D6 | 마디 콤보(`BarCombo`/`MaxBarCombo`) + 콤보 보너스, 판정별 개수 집계 | `ComboAndMagnification`, `ScoreManager` |
-| D9 | ABC: 일반전은 마지막 키 배율 감소 완화, 보스전은 라이벌 분위기 감소 | `ScoreManager`, `BossBattleDirector` |
+| D9 | ABC: 일반전은 마지막 키 배율 감소 완화, 보스전은 마지막 키 객석 점수 +40 | `ScoreManager`, `BossBattleDirector` |
 | P2 | 6개 동시 태클 삭제. 3개 동시 태클은 보스전 기믹(일반전 확률 0), 보스전 빈도·불이익 강화 | `NGBubbleManager` |
 | P3 | 보스전 관객 말풍선은 `Boss` 문구 사용(없으면 Dance로 대체) | `BubbleManager`, `DialogueManager`, `Dialogue.json` |
 | P4 | Pause 버튼(Resume/Option/Credit/Main) 코드 연결. 프리팹 OnClick이 비어 있었음 | `PauseMenuButtons`, `SimplePauseSubPanel` |
@@ -61,6 +61,7 @@ Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoRes
 - 보스전 기본 점수를 원래 값(10)으로 되돌림(1차 작업에서 스탯 평균으로 바꿔 객석 분위기가 한 번에 차던 문제)
 - 게임 씬에서 플레이어가 춤추지 않던 문제: PlayerManager가 Player 프리팹에서 DontDestroyOnLoad를 써 튜토리얼 플레이어가 남고 게임 씬 플레이어가 파괴됨 → 스탯만 유지하고 플레이어는 씬마다 새로 사용
 - Pause 패널이 대사창보다 앞에 보이도록 PauseSystem Canvas 정렬을 1500으로 올림
+- 보스전 승패를 기존 객석 점수로 판정, 별도 분위기 막대 HUD 삭제
 
 ## 3. 미결 사항(Q1~Q7)에 적용한 기본값
 
@@ -71,7 +72,7 @@ Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoRes
 | Q3 | 보스 변경 마디는 비워두면 4~5회 무작위(최소 4마디 간격), 지정도 가능. 좌석 이동과 키 적용은 새 마디 첫 박에 함께 | `BossBattleDirector.changeBars` |
 | Q4 | 피버 중이거나 피버 대기 중이면 일반전 전환·보스 예고를 미룸. 전환 중 Pause 허용(박 기준이라 멈췄다가 이어짐), 카운트다운 중 Pause 입력은 기존대로 무시 | 각 Director |
 | Q5 | 피버 길이는 마디 단위, Play Mode에서 바꾸면 다음 피버부터 반영 | `RhythmWheelFever.durationBars` |
-| Q6 | 객석별 분위기가 같으면 어느 쪽 소유도 아님 | `BossBattleDirector.EvaluateWinner` |
+| Q6 | 중립(보라) 객석은 어느 쪽에도 세지 않음 | `BossBattleDirector.EvaluateWinner` |
 | Q7 | F3 카메라·대사 순서 제어는 구현(보스 등장 연출에 연결 가능). 점수에 따른 클럽 상승 연출은 이번 범위에서 제외 | `CinematicDialoguePlayer` |
 
 ## 4. 확인이 필요한 점

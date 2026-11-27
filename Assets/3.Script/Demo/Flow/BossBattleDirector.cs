@@ -11,8 +11,10 @@ using UnityEngine.Events;
 /// 전투: 4키 유지(6키 폐기). 속성 페이즈는 Villain으로 고정. QEAD 사각형과 WASD 마름모를 약 4~5회 교체한다.
 ///       변경 직전 마디에 CHANGE NEXT로 예고하고(이 마디는 기존 배치로 계속 판정), 다음 마디 첫 박에 새 배치를 적용한다.
 ///       보스전은 입력을 멈추지 않는다.
-/// 승패: 제한 마디가 끝나면 객석별 플레이어·라이벌 분위기를 비교해 더 많은 객석을 차지한 쪽이 승리.
-///       객석 수 동률이면 총 분위기 비교, 완전 동률이면 플레이어 승리. 객석별 분위기가 같으면 어느 쪽 소유도 아니다.
+/// 승패: 기존 객석 점수(StageVisual.PlayerPoints, 객석 색과 같은 값)로 판정한다.
+///       객석 색 기준선으로 플레이어 객석(파랑, playerPointThreshold 이상)과 라이벌 객석(빨강, rivalPointThreshold 미만)을 센다.
+///       더 많은 객석을 차지한 쪽이 승리. 객석 수 동률이면 총 분위기(전체 객석 점수 합이 최대치의 절반을 넘는지),
+///       완전 동률이면 플레이어 승리. 중립(보라) 객석은 어느 쪽에도 세지 않는다.
 /// </summary>
 public class BossBattleDirector : MonoBehaviour
 {
@@ -50,23 +52,9 @@ public class BossBattleDirector : MonoBehaviour
     [SerializeField, Min(2)] private int minBarsBetweenChanges = 4;
     [SerializeField] private string changeNextText = "CHANGE NEXT";
 
-    [Header("Mood (객석별 분위기)")]
-    [SerializeField] private float justMood = 12f;
-    [SerializeField] private float goodMood = 6f;
-    [SerializeField] private float badMood = 2f;
-    [SerializeField] private float failedPhraseLoss = 8f;
-    [SerializeField] private float emptyPhraseLoss = 3f;
-    [Tooltip("스타일 스탯 1당 플레이어 분위기 상승 배수 증가")]
-    [SerializeField] private float styleMoodBonus = 0.02f;
-    [Tooltip("라이벌이 마디마다 각 객석에서 얻는 분위기(최소~최대)")]
-    [SerializeField] private Vector2 rivalMoodPerBar = new Vector2(2f, 6f);
-    [Tooltip("태클 말풍선이 떠 있는 객석: 마디마다 라이벌 +, 플레이어 -")]
-    [SerializeField] private float bubbleRivalGain = 6f;
-    [SerializeField] private float bubblePlayerLoss = 4f;
-    [Tooltip("ABC 커맨드: 마지막 키 객석의 라이벌 분위기 감소")]
-    [SerializeField] private float abcRivalReduction = 20f;
-    [Tooltip("피버 중 마디마다 모든 객석 플레이어 분위기 +")]
-    [SerializeField] private float feverMoodPerBar = 8f;
+    [Header("ABC Command")]
+    [Tooltip("보스전 ABC 커맨드 성공 시 마지막 키 객석에 더하는 객석 점수(라이벌 분위기를 밀어냄)")]
+    [SerializeField, Min(0)] private int abcSeatPoints = 40;
 
     [Header("Flow")]
     [SerializeField] private bool hideHudBeforeStart = true;
@@ -81,20 +69,13 @@ public class BossBattleDirector : MonoBehaviour
     [Tooltip("true면 패배 시 결과 씬으로 자동 이동하지 않는다(게임오버 흐름이 처리)")]
     [SerializeField] private bool defeatHandledExternally = false;
 
-    private float[] playerMood = new float[4];
-    private float[] rivalMood = new float[4];
     private readonly List<int> schedule = new List<int>();
     private int nextChangeIndex;
     private int announcedBar = -1;
     private bool battling;
     private bool finished;
-    private BossMoodHUD moodHud;
 
     public bool IsBattling => battling;
-    public int SeatCount => playerMood.Length;
-    public float GetPlayerMood(int seat) => seat >= 0 && seat < playerMood.Length ? playerMood[seat] : 0f;
-    public float GetRivalMood(int seat) => seat >= 0 && seat < rivalMood.Length ? rivalMood[seat] : 0f;
-    public Keys GetSeatKey(int seat) => stageController != null ? stageController.GetKeyForSeat(seat) : Keys.Q;
     public int RemainingBars => wheel != null ? Mathf.Max(0, battleBars - Mathf.Max(0, wheel.CurrentBeat) / 4) : battleBars;
 
     private void Awake()
@@ -111,16 +92,10 @@ public class BossBattleDirector : MonoBehaviour
         if (banner == null) banner = gameObject.AddComponent<BannerView>();
         if (countdown == null) countdown = gameObject.AddComponent<CountDownController>();
 
-        int seats = stageController != null && stageController.SeatCount > 0 ? stageController.SeatCount : 4;
-        playerMood = new float[seats];
-        rivalMood = new float[seats];
-
         musicClock?.DisableAutoStart();
         musicClock?.SetAutoPhase(false);
         wheel?.SetJudgementSuspended(true);
 
-        moodHud = gameObject.AddComponent<BossMoodHUD>();
-        moodHud.Bind(this);
 
         if (useDefaultLines) FillDefaultLines();
         BuildSchedule();
@@ -140,7 +115,7 @@ public class BossBattleDirector : MonoBehaviour
         ruleDialogue.FillIfEmpty(StoryDialogueLine.List(
             StoryDialogueLine.Npc("클럽 매니저", "라이벌전은 제한 시간 동안 객석을 차지하는 승부야. 끝날 때 더 많은 객석을 달군 쪽이 이겨."),
             StoryDialogueLine.Npc("클럽 매니저", "태클 말풍선을 방치하면 그 객석은 라이벌 쪽으로 넘어가. AAB로 바로바로 물리쳐!"),
-            StoryDialogueLine.Npc("클럽 매니저", "마름모 배치에선 ABC 커맨드로 라이벌의 분위기를 깎을 수 있어. 'CHANGE NEXT'가 뜨면 다음 마디부터 배치가 바뀌니 조심해.")));
+            StoryDialogueLine.Npc("클럽 매니저", "객석이 파랗게 달아오르면 네 편, 빨간 객석은 라이벌 편이야. 마름모 배치에선 ABC 커맨드로 객석을 확 끌어올 수 있어. 'CHANGE NEXT'가 뜨면 다음 마디부터 배치가 바뀌니 조심해.")));
 
         winDialogue = Ensure(winDialogue);
         winDialogue.FillIfEmpty(StoryDialogueLine.List(
@@ -181,15 +156,11 @@ public class BossBattleDirector : MonoBehaviour
         nextChangeIndex = 0;
     }
 
-    // RhythmWheelUI.Awake보다 먼저 호출될 수 있으므로 컴포넌트를 직접 찾는다.
-    private RhythmWheelFever FeverComponent => wheel != null ? wheel.GetComponent<RhythmWheelFever>() : null;
-
     private void OnEnable()
     {
         if (wheel != null) wheel.OnBeatStarted += HandleBeat;
         if (musicClock != null) musicClock.MusicEnded += HandleMusicEnded;
         if (combo != null) combo.OnPhraseHandoff += HandlePhrase;
-        if (FeverComponent != null) FeverComponent.OnFeverBar += HandleFeverBar;
     }
 
     private void OnDisable()
@@ -197,14 +168,12 @@ public class BossBattleDirector : MonoBehaviour
         if (wheel != null) wheel.OnBeatStarted -= HandleBeat;
         if (musicClock != null) musicClock.MusicEnded -= HandleMusicEnded;
         if (combo != null) combo.OnPhraseHandoff -= HandlePhrase;
-        if (FeverComponent != null) FeverComponent.OnFeverBar -= HandleFeverBar;
     }
 
     private IEnumerator Start()
     {
         DemoUI.EnsureEventSystem();
         if (hideHudBeforeStart) HUDManager.Instance?.SetFlowHidden(true);
-        moodHud.SetVisible(false);
         phaseController?.SetPhase(Phase.Villain);
 
         yield return null;
@@ -238,7 +207,6 @@ public class BossBattleDirector : MonoBehaviour
 
         // UI 오픈
         HUDManager.Instance?.SetFlowHidden(false);
-        moodHud.SetVisible(true);
 
         done = false;
         countdown.StartCountdown(() => done = true, true);
@@ -255,7 +223,6 @@ public class BossBattleDirector : MonoBehaviour
         if (!battling || beat % 4 != 0) return;
 
         int bar = beat / 4;
-        if (bar > 0) ApplyBarMood();
 
         if (bar >= battleBars)
         {
@@ -294,55 +261,14 @@ public class BossBattleDirector : MonoBehaviour
         }
     }
 
-    private void ApplyBarMood()
-    {
-        for (int i = 0; i < rivalMood.Length; i++)
-        {
-            rivalMood[i] += UnityEngine.Random.Range(rivalMoodPerBar.x, rivalMoodPerBar.y);
-
-            if (bubbles != null && stageController != null && bubbles.IsBubbleActive(stageController.GetKeyForSeat(i)))
-            {
-                rivalMood[i] += bubbleRivalGain;
-                playerMood[i] = Mathf.Max(0f, playerMood[i] - bubblePlayerLoss);
-            }
-        }
-    }
-
     private void HandlePhrase(Keys lastKey, int just, int good, int bad, int miss, KeyCommand command)
     {
-        if (!battling) return;
+        // 객석 점수 상승은 기존 방식(점수 → PhaseController → StageVisual) 그대로 둔다.
+        // ABC만 보스전 효과로 마지막 키 객석의 점수를 더 올려 라이벌 쪽으로 기운 객석을 되찾는다.
+        if (!battling || command != KeyCommand.ABC || miss > 0) return;
 
-        bool empty = just + good + bad == 0;
-        if (empty)
-        {
-            for (int i = 0; i < playerMood.Length; i++)
-                playerMood[i] = Mathf.Max(0f, playerMood[i] - emptyPhraseLoss);
-            return;
-        }
-
-        int seat = stageController != null ? stageController.GetSeatIndexForKey(lastKey) : -1;
-        if (seat < 0 || seat >= playerMood.Length) return;
-
-        if (miss > 0)
-        {
-            playerMood[seat] = Mathf.Max(0f, playerMood[seat] - failedPhraseLoss);
-            return;
-        }
-
-        float style = PlayerManager.Instance != null ? PlayerManager.Instance.currentStats.style : 0f;
-        float gain = (just * justMood + good * goodMood + bad * badMood) * (1f + style * styleMoodBonus);
-        playerMood[seat] += gain;
-
-        // ABC: 라이벌 분위기 감소(마름모 배치에서만 성립)
-        if (command == KeyCommand.ABC)
-            rivalMood[seat] = Mathf.Max(0f, rivalMood[seat] - abcRivalReduction);
-    }
-
-    private void HandleFeverBar(int _)
-    {
-        if (!battling) return;
-        for (int i = 0; i < playerMood.Length; i++)
-            playerMood[i] += feverMoodPerBar;
+        StageVisual seat = stageController != null ? stageController.GetSeatForKey(lastKey) : null;
+        seat?.AddPlayerPoints(abcSeatPoints);
     }
 
     private void HandleMusicEnded()
@@ -350,19 +276,24 @@ public class BossBattleDirector : MonoBehaviour
         if (battling) EndBattle();
     }
 
-    /// <summary>결과 계산: 객석 수 → 총 분위기 → 완전 동률은 플레이어 승리.</summary>
+    /// <summary>결과 계산(기존 객석 점수): 객석 수 → 총 분위기 → 완전 동률은 플레이어 승리.</summary>
     public bool EvaluateWinner(out int playerSeats, out int rivalSeats, out float playerTotal, out float rivalTotal)
     {
         playerSeats = rivalSeats = 0;
         playerTotal = rivalTotal = 0f;
 
-        for (int i = 0; i < playerMood.Length; i++)
+        int count = stageController != null ? stageController.SeatCount : 0;
+        for (int i = 0; i < count; i++)
         {
-            playerTotal += playerMood[i];
-            rivalTotal += rivalMood[i];
+            StageVisual seat = stageController.GetSeat(i);
+            if (seat == null) continue;
 
-            if (playerMood[i] > rivalMood[i]) playerSeats++;
-            else if (rivalMood[i] > playerMood[i]) rivalSeats++;
+            int points = seat.PlayerPoints;
+            playerTotal += points;
+            rivalTotal += Mathf.Max(0, seat.MaxPlayerPoints - points);
+
+            if (points >= seat.PlayerPointThreshold) playerSeats++;
+            else if (points < seat.RivalPointThreshold) rivalSeats++;
         }
 
         if (playerSeats != rivalSeats) return playerSeats > rivalSeats;

@@ -37,6 +37,9 @@ public class StageVisual : MonoBehaviour
 
     public Renderer[] Glow => new[] { upperRenderer, lowerRenderer };
     public int PlayerPoints => playerPoints;
+    public int RivalPointThreshold => rivalPointThreshold;
+    public int PlayerPointThreshold => playerPointThreshold;
+    public int MaxPlayerPoints => maxPlayerPoints;
 
     private void Awake()
     {
