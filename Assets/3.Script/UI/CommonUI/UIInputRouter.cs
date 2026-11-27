@@ -35,11 +35,10 @@ public class UIInputRouter : MonoBehaviour
     {
         if (uiStack.Count <=0) return;
         ICancelableUI curUI = uiStack.Pop();
-        curUI.OnCancel();
         return;
     }
 
-    public void HandleCancelInput(InputAction.CallbackContext context)
+    private void HandleCancelInput(InputAction.CallbackContext context)
     {
         if (pauseManager != null && pauseManager.isPauseActive == true)
         {
