@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
 using DG.Tweening;
@@ -9,47 +8,47 @@ public class FeverCamera : MonoBehaviour
     [SerializeField] private FeverUI feverUI;
     [SerializeField] private Animator playerAnimator;
     [SerializeField] private Transform player;
-
     [SerializeField] private CinemachineBrain mainCameraBrain;
     [SerializeField] private CinemachineCamera defaultCamera;
     [SerializeField] private CinemachineCamera[] feverCameras;
-
     [SerializeField] private string hiddenLayerName = "UI";
+
     private int originalCullingMask;
     private int hiddenLayerMask;
-
     public bool IsCameraSequenceActive { get; private set; }
     private Coroutine feverSequenceCoroutine;
 
     private void Start()
     {
         feverUI = FindAnyObjectByType<FeverUI>();
-        feverUI.FeverCameraGroup = this;
+        if (feverUI != null)
+            feverUI.FeverCameraGroup = this;
 
-        //TODO 플레이어 애니메이터 연결. 임시로 태그 달아뒀습니다.
-        player = GameObject.FindWithTag("Player").transform;
+        GameObject playerObject = GameObject.FindWithTag("Player");
+        if (playerObject != null)
+            player = playerObject.transform;
 
         Setting();
-
         if (Camera.main != null)
         {
             originalCullingMask = Camera.main.cullingMask;
-            hiddenLayerMask = 1 << LayerMask.NameToLayer(hiddenLayerName);
+            int layer = LayerMask.NameToLayer(hiddenLayerName);
+            hiddenLayerMask = layer >= 0 ? 1 << layer : 0;
         }
     }
 
     public void Setting()
     {
-        if(player == null)
-        {
-            Debug.Log("FeverCamera가 player를 찾지 못함");
-        }
+        if (player == null)
+            Debug.Log("FeverCamera: Player was not found.", this);
 
-        for (int i = 0; i < feverCameras.Length; i++)
-        {
-            feverCameras[i].LookAt = player;
-        }
+        if (feverCameras == null)
+            return;
+        foreach (CinemachineCamera camera in feverCameras)
+            if (camera != null)
+                camera.LookAt = player;
     }
+
     public void FeverCameraOnAir(float currentFeverDuration, float returnBlendDuration)
     {
         if (feverSequenceCoroutine != null)
@@ -59,54 +58,56 @@ public class FeverCamera : MonoBehaviour
         feverSequenceCoroutine = StartCoroutine(FeverSuccess_co(currentFeverDuration, returnBlendDuration));
     }
 
+    public void AllowGameplayInput() => IsCameraSequenceActive = false;
+
     private IEnumerator FeverSuccess_co(float duration, float returnBlendDuration)
     {
-        //TODO 플레이어 애니메이터 연결
-        //playerAnimator.SetTrigger("FeverStart");
+        if (mainCameraBrain != null)
+            mainCameraBrain.DefaultBlend.Style = CinemachineBlendDefinition.Styles.Cut;
 
-        mainCameraBrain.DefaultBlend.Style = CinemachineBlendDefinition.Styles.Cut;
+        int cameraCount = feverCameras != null ? feverCameras.Length : 0;
+        float timePerCut = cameraCount > 0 ? duration / cameraCount : 0f;
 
-        //TODO BPM 계산하여 카메라 연출
-        float timePerCut = duration / feverCameras.Length;
+        if (Camera.main != null)
+            Camera.main.cullingMask &= ~hiddenLayerMask;
 
-        Camera.main.cullingMask &= ~hiddenLayerMask;
-
-        for (int i = 0; i < feverCameras.Length; i++)
+        for (int i = 0; i < cameraCount; i++)
         {
-            feverCameras[i].Priority = 20;
+            CinemachineCamera feverCamera = feverCameras[i];
+            if (feverCamera == null)
+                continue;
 
-            CinemachineSplineDolly dolly = feverCameras[i].GetComponent<CinemachineSplineDolly>();
-
-            float currentDuration = timePerCut;
-
+            feverCamera.Priority = 20;
+            CinemachineSplineDolly dolly = feverCamera.GetComponent<CinemachineSplineDolly>();
             if (dolly != null)
             {
                 dolly.CameraPosition = 0;
-
-                DOTween.To(() => dolly.CameraPosition, x => dolly.CameraPosition = x, 1f, currentDuration)
+                DOTween.To(() => dolly.CameraPosition, x => dolly.CameraPosition = x, 1f, timePerCut)
                     .SetEase(Ease.Linear);
             }
 
-            //TODO 플레이어 마지막 포징
-
-            yield return new WaitForSeconds(currentDuration);
-
-            feverCameras[i].Priority = 10;
+            yield return new WaitForSeconds(timePerCut);
+            feverCamera.Priority = 10;
         }
 
-        mainCameraBrain.DefaultBlend.Style = CinemachineBlendDefinition.Styles.EaseInOut;
-        mainCameraBrain.DefaultBlend.Time = returnBlendDuration;
-        defaultCamera.Priority = 20;
+        if (mainCameraBrain != null)
+        {
+            mainCameraBrain.DefaultBlend.Style = CinemachineBlendDefinition.Styles.EaseInOut;
+            mainCameraBrain.DefaultBlend.Time = returnBlendDuration;
+        }
+        if (defaultCamera != null)
+            defaultCamera.Priority = 20;
 
-        // Wait one frame for the priority change to start its blend, then keep
-        // judgements locked until the default camera is fully active again.
+        // The fever gameplay ends on the beat boundary. Unlock input then,
+        // while the camera completes its purely visual return blend.
+        IsCameraSequenceActive = false;
+
         yield return null;
         while (mainCameraBrain != null && mainCameraBrain.IsBlending)
             yield return null;
 
-        Camera.main.cullingMask = originalCullingMask;
-        IsCameraSequenceActive = false;
+        if (Camera.main != null)
+            Camera.main.cullingMask = originalCullingMask;
         feverSequenceCoroutine = null;
     }
-
 }

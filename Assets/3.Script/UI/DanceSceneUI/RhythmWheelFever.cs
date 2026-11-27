@@ -20,32 +20,41 @@ public sealed class RhythmWheelFever : MonoBehaviour
     public event System.Action OnFeverEnded;
 
     private void Awake() { timing = GetComponent<RhythmWheelTiming>(); combo ??= GetComponent<ComboAndMagnification>(); feverCamera ??= FindFirstObjectByType<FeverCamera>(); hud ??= FindFirstObjectByType<DanceSceneHUD>(); }
-    private void OnEnable() { if (combo != null) { combo.OnComboSaved += Save; combo.OnComboFailed += Fail; } timing.PhraseCompleted += StartFever; timing.BeatStarted += CheckFeverEnd; }
-    private void OnDisable() { if (combo != null) { combo.OnComboSaved -= Save; combo.OnComboFailed -= Fail; } timing.PhraseCompleted -= StartFever; timing.BeatStarted -= CheckFeverEnd; }
+    private void OnEnable() { if (combo != null) { combo.OnComboSaved += Save; combo.OnComboFailed += Fail; } timing.BeatStarted += HandleBeatStarted; }
+    private void OnDisable() { if (combo != null) { combo.OnComboSaved -= Save; combo.OnComboFailed -= Fail; } timing.BeatStarted -= HandleBeatStarted; }
     private void Save(Keys _) { if (active) return; gauge = Mathf.Clamp01(gauge + gain); queued |= gauge >= 1; hud?.AddFeverGage(gauge); }
     private void Fail() { if (active) return; gauge = Mathf.Clamp01(gauge - loss); hud?.AddFeverGage(gauge); }
-    private void StartFever()
+    private void HandleBeatStarted(int beat)
     {
-        if (!queued || active) return;
+        if (active)
+        {
+            if (beat == feverEndBeat - 1)
+                EndFever();
+            return;
+        }
+
+        // Start on the next phrase's first beat after the gauge fills.
+        if (!queued || beat % 4 != 0)
+            return;
+
         queued = false;
         active = true;
         int beatCount = Mathf.CeilToInt(durationBeats / 4f) * 4;
-        feverEndBeat = timing.CurrentBeat + beatCount;
-        // This is display-only. Gameplay ends on the FMOD beat callback below.
-        hud?.RequestFeverTime(true, beatCount * timing.BeatDurationSeconds, timing.BeatDurationSeconds);
+        feverEndBeat = beat + beatCount;
+        // Finish on the rest beat immediately before the next phrase begins.
+        float activeDuration = Mathf.Max(1, beatCount - 1) * timing.BeatDurationSeconds;
+        hud?.RequestFeverTime(true, activeDuration, timing.BeatDurationSeconds);
         OnFeverStarted?.Invoke();
     }
 
-    private void CheckFeverEnd(int beat)
+    private void EndFever()
     {
-        if (!active) return;
-
-        if (beat == feverEndBeat - 2) OnFeverEnded?.Invoke();
-
-        if(beat < feverEndBeat) return;
         feverEndBeat = -1;
         gauge = 0f;
         active = false;
+        feverCamera?.AllowGameplayInput();
         hud?.AddFeverGage(gauge);
+        hud?.EndFeverTime();
+        OnFeverEnded?.Invoke();
     }
 }
