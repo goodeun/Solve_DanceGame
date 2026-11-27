@@ -47,6 +47,8 @@ public class FloorSection : MonoBehaviour
         // 켜질 때 구역 모양 그대로 위로 솟구치는 빛기둥
         pillar = GetComponent<FloorLightPillar>();
         if (pillar == null) pillar = gameObject.AddComponent<FloorLightPillar>();
+        // 빛기둥의 실제 조명(플레이어에 빛이 닿음). 분리된 컴포넌트라 따로 끄고 켤 수 있다.
+        if (GetComponent<FloorPillarLight>() == null) gameObject.AddComponent<FloorPillarLight>();
         phaseController = FindFirstObjectByType<PhaseController>();
         baseEmissionColor = floorMat.HasProperty(Shader.PropertyToID("_EmissionColor"))
             ? floorMat.GetColor(Shader.PropertyToID("_EmissionColor"))

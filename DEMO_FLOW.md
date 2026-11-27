@@ -112,3 +112,20 @@ Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoRes
 - 회전: 가운데는 정면, 옆이면 플레이어 무대 쪽으로 `Max Yaw`(기본 18도)까지 부드럽게.
 - 흐름: BossBattleDirector가 시작 시 숨기고, 인트로 컷씬(introCinematic/introDialogue)이 끝나면 위에서 내려오게 한 뒤 룰 대사 → 카운트다운.
   컷씬에서 걸어나오는 보스는 씬에 따로 두고 컷씬 끝에 꺼 주면 된다(공중 무대의 Rival과 별개 오브젝트).
+- 크기: `Size From Character`를 켜면 위에 선 캐릭터 키 × `Radius Per Character Height`(0.38)로 무대 반지름을 정한다.
+- 가운데(사각형)일 때는 `Center Height Offset`(-7)만큼 더 내려와 Fever UI에 가리지 않는다.
+- 조명: URP 실시간 Area Light는 지원되지 않아, 넓고 부드러운 Spot Light(RivalStageLight)가 앞 위에서 은은하게 비춘다.
+  `Use Light`, `Light Strength`, `Light Angle` 등으로 조정하고, 코드에서는 `SetLightEnabled(bool)`로 끄고 켠다.
+
+## 빛기둥 / 빛기둥 조명
+
+- `FloorLightPillar`: 높이는 플레이어 무릎(Humanoid 무릎 뼈) 기준. `Knee Height Scale`로 조정, `Match Player Knee`를 끄면 구역 폭 × `Height Multiplier`.
+- `FloorPillarLight`(분리된 컴포넌트): 기둥이 솟을 때 기둥 색 Point Light를 낮게 켜서 플레이어에 실제 빛이 닿게 한다.
+  전체 끄기/켜기는 `FloorPillarLight.GloballyEnabled = false/true`, 구역별로는 `UseLight`.
+  둘 다 FloorSection이 실행 시 자동으로 붙인다.
+
+## 태클 처리 액체 이펙트
+
+- `LiquidBurst`가 터뜨린 파티클은 Particle Camera → Tex_MetaBall → MasterCanvas `EffectFilter (RawImage)`로 보인다.
+- EffectFilter가 말풍선(Bubbles) UI보다 아래에 그려져 가려지던 문제 → 처음 터질 때 EffectFilter를 형제 중 맨 위로 올린다.
+- 원본 파티클 수명(0.3초)·깊이(객석 거리)로는 너무 작고 짧아서, 고정 깊이 16에서 수명 2.4배로 터뜨린다.

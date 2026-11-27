@@ -28,7 +28,10 @@ public class FloatingRivalStage : MonoBehaviour
     [SerializeField] private Transform visual;
 
     [Header("Shape (구를 잘라 위가 평평한 원반)")]
-    [SerializeField, Min(0.5f)] private float radius = 7f;
+    [Tooltip("켜면 위에 선 캐릭터 키에 맞춰 무대 크기를 정한다(반지름 = 키 × 아래 비율). 끄면 Radius 사용")]
+    [SerializeField] private bool sizeFromCharacter = true;
+    [SerializeField, Range(0.15f, 1.5f)] private float radiusPerCharacterHeight = 0.38f;
+    [SerializeField, Min(0.1f)] private float radius = 7f;
     [Tooltip("구 중심에서 자르는 높이 비율. 클수록 평평한 윗면이 작고 배가 둥글다")]
     [SerializeField, Range(0f, 0.9f)] private float cutHeight = 0.45f;
     [Tooltip("세로 납작함(1 = 구, 0.4 = UFO처럼 납작)")]
@@ -51,8 +54,10 @@ public class FloatingRivalStage : MonoBehaviour
 
     [Header("Placement")]
     [Tooltip("객석 앵커에서 플레이어 무대 쪽(앞)으로 당기는 거리")]
-    [SerializeField] private float forwardOffset = 12f;
+    [SerializeField] private float forwardOffset = 22f;
     [SerializeField] private float heightOffset = 0f;
+    [Tooltip("가운데(사각형)에 있을 때 추가 높이. 음수면 아래로(Fever UI에 가리지 않게)")]
+    [SerializeField] private float centerHeightOffset = -7f;
     [Tooltip("사각형에서 쓸 위쪽 두 앵커(시계 방향 Seats 순서: 0 = 좌상, 1 = 우상)")]
     [SerializeField] private int topLeftAnchorIndex = 0;
     [SerializeField] private int topRightAnchorIndex = 1;
@@ -74,6 +79,20 @@ public class FloatingRivalStage : MonoBehaviour
     [SerializeField, Min(0f)] private float bobHeight = 0.5f;
     [SerializeField, Min(0.1f)] private float bobPeriod = 2.6f;
     [SerializeField, Range(0f, 10f)] private float swayAngle = 2f;
+
+    [Header("Light (은은한 조명)")]
+    [Tooltip("URP 실시간 Area Light는 지원되지 않아 넓고 부드러운 Spot Light로 앞 위에서 비춘다")]
+    [SerializeField] private bool useLight = true;
+    [SerializeField] private Color lightColor = new Color(1f, 0.85f, 0.95f, 1f);
+    [Tooltip("캐릭터 크기와 상관없이 같은 밝기가 되도록 거리²를 곱해 쓴다")]
+    [SerializeField, Min(0f)] private float lightStrength = 0.8f;
+    [Tooltip("캐릭터 앞쪽 거리(키 배수)")]
+    [SerializeField, Min(0.1f)] private float lightDistance = 1.1f;
+    [Tooltip("캐릭터 위쪽 높이(키 배수)")]
+    [SerializeField] private float lightHeight = 1.2f;
+    [SerializeField, Range(10f, 170f)] private float lightAngle = 60f;
+    [Tooltip("박자에 맞춰 살짝 밝아지는 정도(0 = 고정)")]
+    [SerializeField, Range(0f, 1f)] private float lightBeatPulse = 0.15f;
 
     [Header("Appear")]
     [Tooltip("켜면 시작할 때 숨겨 두고 Appear()로 등장한다(BossBattleDirector가 인트로 컷씬 뒤에 부른다)")]
@@ -105,6 +124,10 @@ public class FloatingRivalStage : MonoBehaviour
     private RhythmWheelTiming timing;
     private bool subscribed;
     private bool hidden;
+    private float characterHeight;
+    private Light stageLight;
+    private float lightBaseIntensity;
+    private bool measured;
 
     public Slot CurrentSlot => slot;
     public bool IsShown => visual == null || visual.gameObject.activeSelf;
@@ -125,7 +148,9 @@ public class FloatingRivalStage : MonoBehaviour
     private void Start()
     {
         if (!Application.isPlaying) return;
+        MeasureCharacter();
         BuildMesh();
+        BuildLight();
         Subscribe();
         SnapToCurrentStage();
         if (hideOnStart || hidden) HideImmediate();
@@ -233,7 +258,8 @@ public class FloatingRivalStage : MonoBehaviour
         Vector3 toPlayer = PlayerStagePosition() - anchor;
         toPlayer.y = 0f;
         Vector3 forward = toPlayer.sqrMagnitude > 0.0001f ? toPlayer.normalized : Vector3.back;
-        return anchor + forward * forwardOffset + Vector3.up * heightOffset;
+        float height = heightOffset + (s == Slot.Center ? centerHeightOffset : 0f);
+        return anchor + forward * forwardOffset + Vector3.up * height;
     }
 
     private float TargetYaw(Slot s, Vector3 position)
@@ -246,6 +272,65 @@ public class FloatingRivalStage : MonoBehaviour
         front.y = 0f;
         float angle = Vector3.SignedAngle(front, toPlayer, Vector3.up);
         return Mathf.Clamp(angle, -maxYaw, maxYaw);
+    }
+
+    // ================= Size =================
+
+    /// <summary>Visual 아래 캐릭터(무대 메시 제외)의 렌더러 높이를 잰다.</summary>
+    private void MeasureCharacter()
+    {
+        if (Application.isPlaying && measured) return;
+        measured = true;
+        characterHeight = 0f;
+        Transform root = visual != null ? visual : transform;
+        bool any = false;
+        Bounds bounds = default;
+        foreach (Renderer r in root.GetComponentsInChildren<Renderer>(true))
+        {
+            if (meshObject != null && r.gameObject == meshObject) continue;
+            if (r is ParticleSystemRenderer) continue;
+            if (!any) { bounds = r.bounds; any = true; }
+            else bounds.Encapsulate(r.bounds);
+        }
+        if (any) characterHeight = bounds.size.y;
+    }
+
+    private float EffectiveRadius() =>
+        sizeFromCharacter && characterHeight > 0.01f ? characterHeight * radiusPerCharacterHeight : radius;
+
+    // ================= Light =================
+
+    private void BuildLight()
+    {
+        if (!useLight || stageLight != null) return;
+        float h = characterHeight > 0.01f ? characterHeight : EffectiveRadius() * 2.5f;
+
+        var go = new GameObject("RivalStageLight");
+        go.transform.SetParent(transform, false);
+        // 정면 = 로컬 -Z(플레이어 쪽). 앞 위에서 가슴 높이를 비춘다.
+        Vector3 localPos = new Vector3(0f, h * lightHeight, -h * lightDistance);
+        Vector3 aim = new Vector3(0f, h * 0.55f, 0f);
+        go.transform.localPosition = localPos;
+        go.transform.localRotation = Quaternion.LookRotation(aim - localPos, Vector3.up);
+
+        stageLight = go.AddComponent<Light>();
+        stageLight.type = LightType.Spot;
+        stageLight.color = lightColor;
+        float distance = (aim - localPos).magnitude;
+        stageLight.range = distance * 2.2f;
+        stageLight.spotAngle = lightAngle;
+        stageLight.innerSpotAngle = lightAngle * 0.35f;  // 가장자리를 넓게 퍼지게(Area 느낌)
+        lightBaseIntensity = lightStrength * distance * distance;
+        stageLight.intensity = lightBaseIntensity;
+        stageLight.shadows = LightShadows.None;
+    }
+
+    /// <summary>라이벌 조명 켜기/끄기.</summary>
+    public void SetLightEnabled(bool on)
+    {
+        useLight = on;
+        if (on) BuildLight();
+        if (stageLight != null) stageLight.enabled = on;
     }
 
     private void ApplyRotation() => transform.rotation = baseRotation * Quaternion.Euler(0f, yaw, 0f);
@@ -298,7 +383,7 @@ public class FloatingRivalStage : MonoBehaviour
 
     private void UpdateRimPulse()
     {
-        if (runtimeRim == null) return;
+        if (runtimeRim == null && stageLight == null) return;
         float env = 0f;
         if (timing == null) timing = FindFirstObjectByType<RhythmWheelTiming>();
         if (timing != null && timing.TryGetCurrentBeatTiming(timing.ElapsedSeconds, out int beat, out float offset, out float duration) && beat >= 0 && duration > 0f)
@@ -306,7 +391,9 @@ public class FloatingRivalStage : MonoBehaviour
             float phase = Mathf.Clamp01(offset / duration);
             env = Mathf.Exp(-6f * phase) * (beat % 4 == 0 ? 1.4f : beat % 4 == 3 ? 0.5f : 1f);
         }
-        runtimeRim.SetColor(EmissionColorId, rimColor * (rimIntensity + rimBeatPulse * env));
+        if (stageLight != null && stageLight.enabled)
+            stageLight.intensity = lightBaseIntensity * (1f + lightBeatPulse * env);
+        if (runtimeRim != null) runtimeRim.SetColor(EmissionColorId, rimColor * (rimIntensity + rimBeatPulse * env));
     }
 
     // ================= Appear / Hide =================
@@ -314,10 +401,13 @@ public class FloatingRivalStage : MonoBehaviour
     /// <summary>바로 숨긴다(인트로 컷씬 동안).</summary>
     public void HideImmediate()
     {
+        // 꺼진 렌더러는 크기를 잴 수 없으므로 숨기기 전에 캐릭터 키를 재 둔다.
+        MeasureCharacter();
         hidden = true;
         appearTween?.Kill();
         if (visual != null) visual.gameObject.SetActive(false);
         if (meshObject != null) meshObject.SetActive(false);
+        if (stageLight != null) stageLight.gameObject.SetActive(false);
     }
 
     /// <summary>위에서 내려와 등장한다.</summary>
@@ -327,6 +417,7 @@ public class FloatingRivalStage : MonoBehaviour
         appearTween?.Kill();
         if (visual != null) visual.gameObject.SetActive(true);
         if (meshObject != null) meshObject.SetActive(true);
+        if (stageLight != null) stageLight.gameObject.SetActive(true);
         appearOffset = appearHeight;
         appearTween = DOTween.To(() => appearOffset, v => appearOffset = v, 0f, appearDuration)
             .SetEase(Ease.OutBack, 1.1f)
@@ -375,6 +466,7 @@ public class FloatingRivalStage : MonoBehaviour
     /// <summary>윗면이 y = 0인 잘린 구(서브메시 0: 배, 1: 윗면, 2: 테두리 띠).</summary>
     private Mesh CreateMesh()
     {
+        float radius = EffectiveRadius();
         var verts = new List<Vector3>();
         var normals = new List<Vector3>();
         var uvs = new List<Vector2>();
@@ -471,7 +563,8 @@ public class FloatingRivalStage : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (Application.isPlaying) return;
-        string key = $"{radius}|{cutHeight}|{verticalScale}|{segments}|{rings}|{rimHeight}";
+        MeasureCharacter();
+        string key = $"{EffectiveRadius()}|{cutHeight}|{verticalScale}|{segments}|{rings}|{rimHeight}";
         if (previewMesh == null || previewKey != key)
         {
             if (previewMesh != null) DestroyImmediate(previewMesh);

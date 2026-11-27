@@ -48,6 +48,8 @@ MonoBehaviour:
   stageController: {fileID: 0}
   playerStage: {fileID: 0}
   visual: {fileID: 6679296865499755423}
+  sizeFromCharacter: 1
+  radiusPerCharacterHeight: 0.38
   radius: 7
   cutHeight: 0.45
   verticalScale: 0.42
@@ -62,8 +64,9 @@ MonoBehaviour:
   rimColor: {r: 0.85, g: 0.2, b: 1, a: 1}
   rimIntensity: 2.5
   rimBeatPulse: 2
-  forwardOffset: 12
+  forwardOffset: 22
   heightOffset: 0
+  centerHeightOffset: -7
   topLeftAnchorIndex: 0
   topRightAnchorIndex: 1
   maxYaw: 18
@@ -75,6 +78,13 @@ MonoBehaviour:
   bobHeight: 0.5
   bobPeriod: 2.6
   swayAngle: 2
+  useLight: 1
+  lightColor: {r: 1, g: 0.85, b: 0.95, a: 1}
+  lightStrength: 0.8
+  lightDistance: 1.1
+  lightHeight: 1.2
+  lightAngle: 60
+  lightBeatPulse: 0.15
   hideOnStart: 0
   appearHeight: 25
   appearDuration: 1.3

@@ -56,13 +56,9 @@ public class NegativeBubble : MonoBehaviour
     {
         if (!gameObject.activeSelf) return;
 
-        // 화면 위치에서 액체 파티클을 터뜨린다. 크기는 해당 객석까지의 거리 기준.
+        // 화면 위치에서 액체 파티클을 터뜨린다(카메라 가까운 고정 깊이 → 화면에서 충분히 크게).
         Vector2 screen = RectTransformUtility.WorldToScreenPoint(null, transform.position);
-        float depth = 40f;
-        Camera cam = Camera.main;
-        StageVisual seat = StageController.Instance != null ? StageController.Instance.GetSeatForKey(seatKey) : null;
-        if (cam != null && seat != null)
-            depth = Mathf.Max(5f, Vector3.Dot(seat.transform.position - cam.transform.position, cam.transform.forward));
+        float depth = LiquidBurst.DefaultDepth;
         LiquidBurst.Spawn(screen, depth, LiquidBurst.NegativeChannel);
 
         transform.DOKill();
