@@ -879,7 +879,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1924000019237526494}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.024520865, y: -0.70532525, z: -0.033232078, w: 0.70767975}
+  m_LocalRotation: {x: -0.024520867, y: -0.70532525, z: -0.03323208, w: 0.70767975}
   m_LocalPosition: {x: 0.006795741, y: 0.03161169, z: 0.00049224275}
   m_LocalScale: {x: 0.99999994, y: 1.0000004, z: 1.0000001}
   m_ConstrainProportionsScale: 0
@@ -1281,6 +1281,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2481031817497362156}
   - component: {fileID: 2337240653946616094}
+  - component: {fileID: 2610683389763350501}
   m_Layer: 0
   m_Name: Rival
   m_TagString: Untagged
@@ -1315,10 +1316,10 @@ Animator:
   m_GameObject: {fileID: 3444748071514688132}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 92ebb182c223ee646b58047ad51a0bd7, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: bec8230ff748a5744aaacd01d344e031, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
@@ -1327,6 +1328,22 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2610683389763350501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3444748071514688132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 118f73cfe1165aa42b9f43c461d7b14d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RivalDanceAnimator
+  musicClock: {fileID: 0}
+  authoredBpm: 128
+  blendSeconds: 0.15
+  playWithoutMusicClock: 1
 --- !u!1 &3475272400514169134
 GameObject:
   m_ObjectHideFlags: 0
@@ -1542,7 +1559,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4348709737754716138}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.035095625, y: -0.70803684, z: -0.022750307, w: 0.70493597}
+  m_LocalRotation: {x: -0.03509562, y: -0.70803684, z: -0.022750305, w: 0.70493597}
   m_LocalPosition: {x: 0.0067747775, y: 0.031611703, z: 0.004471851}
   m_LocalScale: {x: 1, y: 1, z: 0.9999999}
   m_ConstrainProportionsScale: 0
@@ -2437,7 +2454,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8131822323003829099}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.015795797, y: -0.7102551, z: -0.041994527, w: 0.7025132}
+  m_LocalRotation: {x: -0.015795795, y: -0.7102551, z: -0.041994523, w: 0.7025132}
   m_LocalPosition: {x: 0.0067664827, y: 0.031943675, z: 0.011199992}
   m_LocalScale: {x: 0.9999997, y: 1.0000004, z: 1}
   m_ConstrainProportionsScale: 0
