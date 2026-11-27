@@ -35,10 +35,10 @@ MonoBehaviour:
   Path: fmodProject/Build/Desktop/Bank A.bank
   Name: Bank A
   StudioPath: bank:/Bank A
-  lastModified: 639304488322513264
+  lastModified: 639313972037977329
   FileSizes:
   - Name: Desktop
-    Value: 4984768
+    Value: 7500896
   Exists: 1
 --- !u!114 &-2984132775536027127
 MonoBehaviour:
@@ -66,7 +66,7 @@ MonoBehaviour:
   Parameters: []
   MinDistance: 1
   MaxDistance: 20
-  Length: 274552
+  Length: 341413
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -90,7 +90,7 @@ MonoBehaviour:
   - {fileID: 8218238209796944386}
   StringsBanks:
   - {fileID: -6062457703301502991}
-  cacheTime: 639304488322513264
+  cacheTime: 639313972037977329
   cacheVersion: 131637
 --- !u!114 &8218238209796944386
 MonoBehaviour:

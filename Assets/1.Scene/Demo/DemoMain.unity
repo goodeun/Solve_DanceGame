@@ -1065,10 +1065,10 @@ MonoBehaviour:
   beatOffsetSeconds: 0
   bpm: 128
   autoPhaseFromBpm: 1
-  technoEnterBpm: 120
-  technoExitBpm: 116
-  popEnterBpm: 80
-  popExitBpm: 76
+  technoEnterBpm: 135
+  technoExitBpm: 130
+  popEnterBpm: 100
+  popExitBpm: 95
   currentBpmDisplay: 0
   currentBarDisplay: 0
   currentBeatDisplay: 0
@@ -1649,11 +1649,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1530402470141570680, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -150.00002
+      value: -50.000015
       objectReference: {fileID: 0}
     - target: {fileID: 1530402470141570680, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000015258789
+      value: 100.36232
       objectReference: {fileID: 0}
     - target: {fileID: 1623341167540710105, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_Color.b
@@ -1729,11 +1729,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2059291604910380755, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -50
+      value: -116.66667
       objectReference: {fileID: 0}
     - target: {fileID: 2059291604910380755, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -100
+      value: 33.69566
       objectReference: {fileID: 0}
     - target: {fileID: 2081381431655160624, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_text
@@ -1865,11 +1865,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4275578891703109165, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 150.00002
+      value: 50.000015
       objectReference: {fileID: 0}
     - target: {fileID: 4275578891703109165, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000015258789
+      value: 100.36234
       objectReference: {fileID: 0}
     - target: {fileID: 4719437595470551982, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: scoreManager
@@ -2025,11 +2025,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7584146780566524190, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: -66.66667
       objectReference: {fileID: 0}
     - target: {fileID: 7584146780566524190, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 100
+      value: 33.69566
       objectReference: {fileID: 0}
     - target: {fileID: 7746378213391986093, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: offsetY
@@ -2963,6 +2963,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DanceSceneCameraGroup
       objectReference: {fileID: 0}
+    - target: {fileID: 4128307847265658630, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
+      propertyPath: phaseController
+      value: 
+      objectReference: {fileID: 627529760}
     - target: {fileID: 4659142890635819365, guid: b814d2f9f8da09f4b855587a70470428, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0.12
@@ -3317,13 +3321,15 @@ MonoBehaviour:
   combo: {fileID: 0}
   banner: {fileID: 0}
   triggerMode: 1
-  initialPhase: 2
+  initialPhase: 0
   maxSeatChanges: 2
   transitionBars: 2
   ignorePhaseChangesBeforeBar: 2
   scheduledChanges:
-  - bar: 44
-    phase: 0
+  - bar: 34
+    phase: 2
+  - bar: 84
+    phase: 1
   bannerText: PHASE CHANGE
   onTransitionStarted:
     m_PersistentCalls:

@@ -46,16 +46,18 @@ public class NormalBattleDirector : MonoBehaviour
     [Header("Rules")]
     [SerializeField] private TriggerMode triggerMode = TriggerMode.ScheduledBars;
     [Tooltip("ScheduledBars 모드에서 곡 시작 시 페이즈")]
-    [SerializeField] private Phase initialPhase = Phase.Techno;
+    [SerializeField] private Phase initialPhase = Phase.Pop;
     [SerializeField, Min(0)] private int maxSeatChanges = 2;
     [Tooltip("전환 구간 길이(마디). 마지막 3박에 카운트다운이 들어간다.")]
     [SerializeField, Min(1)] private int transitionBars = 2;
     [Tooltip("곡 시작 직후 이 마디 전까지의 페이즈 변경은 좌석 변경으로 세지 않는다(초기 페이즈 보정).")]
     [SerializeField, Min(0)] private int ignorePhaseChangesBeforeBar = 2;
-    [Tooltip("현재 곡(RetroVision - Puzzle): 0초 128BPM(테크노) → 82.5초 = 44마디째 90BPM(팝)")]
+    [Tooltip("현재 곡: 0초 128BPM(팝) → 63.65초 = 34마디째 140BPM(테크노) → 149.36초 = 84마디째 90BPM(힙합).\n" +
+             "마디 = 곡 시작부터의 박 수 / 4. 템포 마커에서 박이 새로 시작되므로 마커 직전 박은 짧을 수 있다.")]
     [SerializeField] private List<ScheduledChange> scheduledChanges = new List<ScheduledChange>
     {
-        new ScheduledChange { bar = 44, phase = Phase.Pop },
+        new ScheduledChange { bar = 34, phase = Phase.Techno },
+        new ScheduledChange { bar = 84, phase = Phase.HipHop },
     };
 
     [Header("Banner")]
@@ -115,13 +117,13 @@ public class NormalBattleDirector : MonoBehaviour
     private void OnEnable()
     {
         if (wheel != null) wheel.OnBeatStarted += HandleBeat;
-        if (phaseController != null) phaseController.PhaseChanged += HandlePhaseChanged;
+        if (phaseController != null) phaseController.PhaseTransitioned += HandlePhaseChanged;
     }
 
     private void OnDisable()
     {
         if (wheel != null) wheel.OnBeatStarted -= HandleBeat;
-        if (phaseController != null) phaseController.PhaseChanged -= HandlePhaseChanged;
+        if (phaseController != null) phaseController.PhaseTransitioned -= HandlePhaseChanged;
     }
 
     /// <summary>곡 종료 등으로 더 이상 전환하지 않는다. 진행 중인 표시는 정리한다.</summary>

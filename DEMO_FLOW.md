@@ -81,7 +81,7 @@ Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoRes
 
 ## 4. 확인이 필요한 점
 
-- **일반전 페이즈 변경**: 기본은 `ScheduledBars`. 새 페이즈가 시작되는 마디(곡의 템포 마커)를 지정하면 그 앞 2마디에서 공지·좌석 이동·3·2·1이 진행되고, 색은 곡의 BPM이 바뀌는 박에 함께 바뀐다. 현재 곡은 템포 마커가 하나(0초 128BPM 테크노 → 82.5초 = 44마디째 90BPM 팝)라 **좌석 변경 1회, 힙합 없음**. 곡이 3구간이 되면 `Scheduled Changes`에 마디·페이즈를 추가한다(곡 시작 페이즈는 `Initial Phase`).
+- **일반전 페이즈 변경**: 기본은 `ScheduledBars`. 새 페이즈가 시작되는 마디(곡의 템포 마커)를 지정하면 그 앞 2마디에서 공지·좌석 이동·3·2·1이 진행되고, 색은 곡의 BPM이 바뀌는 박에 함께 바뀐다. 현재 곡(dev 11.27.2): 0초 128BPM 팝 → 63.65초(34마디) 140BPM 테크노 → 149.36초(84마디) 90BPM 힙합. 곡 구성이 바뀌면 `Scheduled Changes`의 마디를 다시 맞춘다(마디 = 곡 시작부터 박 수 / 4).
 - **튜토리얼 BGM**: `DemoTutorial`의 `FmodMusicClock > Music Event Path`에 튜토리얼 곡을 지정. 곡이 끝나면 처음부터 다시 재생한다. 메트로놈은 FMOD 이벤트가 없으면 내장 클릭음을 쓴다.
 - **HP·게임오버 연동(P1)**: 보스전 패배 시 `BossBattleDirector.onPlayerLost` 이벤트가 발생한다. 게임오버 흐름이 처리하려면 `defeatHandledExternally`를 켠다. 전환·대사 중 판정 제외 여부는 `RhythmWheelUI.IsBeatBlocked(beat)` / `RhythmWheelJudgement.IsSuspended`로 확인할 수 있다.
 - **아트 리소스**: Phase Change / Change Next 이미지, 대사창, 스탠딩(`PlayerManager.standingSprites`, 대사별 NPC 스프라이트), 타이틀·결과 배경은 비어 있으면 텍스트·단색으로 표시된다.
