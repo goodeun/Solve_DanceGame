@@ -9,6 +9,8 @@ using UnityEngine.UI;
 /// - Resume : 기존 흐름 유지(메뉴 닫기 → 1박 카운트다운 → 재개)
 /// - Option, Credit : 서브 패널을 열고 ESC로 닫는다(PauseManager의 서브 패널 스택 사용)
 /// - Main : 확인 팝업 후 타이틀 씬으로 이동
+/// - Quit : 확인 팝업 후 게임 종료(프리팹에 없으면 Main 버튼을 복제해 아래에 만든다)
+/// Option 패널에는 설정 화면(OptionsMenuView)을 붙인다.
 /// </summary>
 public class PauseMenuButtons : MonoBehaviour
 {
@@ -17,6 +19,9 @@ public class PauseMenuButtons : MonoBehaviour
     [SerializeField] private Button optionButton;
     [SerializeField] private Button creditButton;
     [SerializeField] private Button mainButton;
+    [SerializeField] private Button quitButton;
+    [SerializeField] private string quitLabel = "Quit";
+    [SerializeField] private string quitConfirmMessage = "게임을 종료할까요?";
     [SerializeField] private GameObject optionPanel;
     [SerializeField] private GameObject creditPanel;
     [Tooltip("Pause 캔버스 정렬 순서. 대사창(650)·배너·카운트다운보다 앞, 확인 팝업(2000)보다 뒤")]
@@ -51,24 +56,59 @@ public class PauseMenuButtons : MonoBehaviour
         if (optionButton == null) optionButton = FindButton("Option_b");
         if (creditButton == null) creditButton = FindButton("Credit_b");
         if (mainButton == null) mainButton = FindButton("Main_b");
+        if (quitButton == null) quitButton = FindButton("Quit_b");
+        if (quitButton == null && mainButton != null) quitButton = CreateQuitButton();
+        PauseButtonLayout.Collect(pauseRoot);
         if (optionPanel == null) optionPanel = FindChild("OptionPanel");
         if (creditPanel == null) creditPanel = FindChild("CreditPanel");
 
         // 서브 패널·팝업은 처음에 닫아 둔다(반투명 배경이 겹쳐 화면이 희게 덮이던 문제).
         // PausePanel의 자식이면 서브 메뉴 진입 때 PausePanel과 함께 꺼지므로 PausePanel 옆(형제)으로 옮긴다.
         PrepareSubPanel(optionPanel);
+        if (optionPanel != null && optionPanel.GetComponent<OptionsMenuView>() == null)
+            optionPanel.AddComponent<OptionsMenuView>();
         PrepareSubPanel(creditPanel);
         PrepareSubPanel(FindChild("MainConfirmPopup"));
         resumeButton?.onClick.AddListener(Resume);
         optionButton?.onClick.AddListener(() => OpenSubPanel(optionPanel));
         creditButton?.onClick.AddListener(() => OpenSubPanel(creditPanel));
         mainButton?.onClick.AddListener(GoToTitle);
+        quitButton?.onClick.AddListener(QuitGame);
     }
 
     private void OnDestroy()
     {
         if (wiredManager != null) wired.Remove(wiredManager);
         wired.RemoveWhere(m => m == null);
+    }
+
+    /// <summary>Main 버튼을 복제해 바로 아래에 Quit 버튼을 만든다(버튼 간격은 기존 버튼 배치에서 계산).</summary>
+    private Button CreateQuitButton()
+    {
+        var mainRect = (RectTransform)mainButton.transform;
+        GameObject copy = Instantiate(mainButton.gameObject, mainRect.parent);
+        copy.name = "Quit_b";
+        var rect = (RectTransform)copy.transform;
+
+        float spacing = 100f;
+        if (creditButton != null)
+            spacing = Mathf.Max(60f, Mathf.Abs(((RectTransform)creditButton.transform).anchoredPosition.y - mainRect.anchoredPosition.y));
+        rect.anchoredPosition = mainRect.anchoredPosition + new Vector2(0f, -spacing);
+
+        foreach (Text legacy in copy.GetComponentsInChildren<Text>(true)) legacy.text = quitLabel;
+        foreach (TMPro.TMP_Text tmp in copy.GetComponentsInChildren<TMPro.TMP_Text>(true)) tmp.text = quitLabel;
+
+        return copy.GetComponent<Button>();
+    }
+
+    public void QuitGame()
+    {
+        StoryDialogueView.InputBlockCount++;
+        DemoUI.ShowConfirmPopup(quitConfirmMessage, "종료", () =>
+        {
+            StoryDialogueView.InputBlockCount = Mathf.Max(0, StoryDialogueView.InputBlockCount - 1);
+            SceneFlow.Quit();
+        }, "취소", () => StoryDialogueView.InputBlockCount = Mathf.Max(0, StoryDialogueView.InputBlockCount - 1), 2000);
     }
 
     private static void PrepareSubPanel(GameObject panel)

@@ -339,7 +339,7 @@ public class BossBattleDirector : MonoBehaviour
             if (seat == null) continue;
             DemoSession.Seats.Add(new DemoSession.SeatResult
             {
-                key = stageController.GetKeyForSeat(i).ToString(),
+                key = KeyBindings.DisplayName(stageController.GetKeyForSeat(i)),
                 playerPoints = seat.PlayerPoints,
                 maxPoints = Mathf.Max(1, seat.MaxPlayerPoints),
             });

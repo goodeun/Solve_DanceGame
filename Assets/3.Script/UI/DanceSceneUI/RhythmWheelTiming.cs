@@ -105,6 +105,9 @@ public sealed class RhythmWheelTiming : MonoBehaviour
         if (deliveryDelay >= 0d && deliveryDelay <= .25d)
             elapsed -= (float)deliveryDelay;
 
+        // 옵션의 입력 보정(ms)
+        elapsed -= GameSettings.InputOffsetSeconds;
+
         return Mathf.Max(0f, elapsed);
     }
 

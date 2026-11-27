@@ -374,7 +374,6 @@ public class StoryDialogueView : MonoBehaviour
     {
         if (string.IsNullOrEmpty(eventPath)) return;
 
-        try { FMODUnity.RuntimeManager.PlayOneShot(eventPath); }
-        catch (FMODUnity.EventNotFoundException) { Debug.LogWarning($"Dialogue SFX not found: {eventPath}"); }
+        GameSettings.PlaySfx(eventPath);
     }
 }

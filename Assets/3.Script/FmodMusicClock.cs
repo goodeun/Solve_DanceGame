@@ -129,9 +129,20 @@ public class FmodMusicClock : MonoBehaviour
         }
     }
 
+    private void OnEnable() => GameSettings.Changed += ApplyMusicVolume;
+    private void OnDisable() => GameSettings.Changed -= ApplyMusicVolume;
+
+    /// <summary>FMOD에 Music 버스가 없으면 곡 인스턴스에 음악 볼륨을 직접 적용한다.</summary>
+    private void ApplyMusicVolume()
+    {
+        if (musicInstance.isValid())
+            musicInstance.setVolume(GameSettings.HasMusicBus ? 1f : GameSettings.MusicVolume);
+    }
+
     public void StartMusic()
     {
         if (IsStarted || !musicInstance.isValid()) return;
+        ApplyMusicVolume();
 
         musicInstance.start();
         IsStarted = true;

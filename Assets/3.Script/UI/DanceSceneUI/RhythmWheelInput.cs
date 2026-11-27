@@ -72,11 +72,14 @@ public sealed class RhythmWheelInput : MonoBehaviour
     private void OnEnable()
     { 
         playerInput.onActionTriggered += Handle; 
+        KeyBindings.Changed += ApplyBindingOverrides;
+        ApplyBindingOverrides();
         CinemachineCore.CameraUpdatedEvent.AddListener(ApplyCameraOffset);
     }
     private void OnDisable()
     { 
         playerInput.onActionTriggered -= Handle; 
+        KeyBindings.Changed -= ApplyBindingOverrides;
         CinemachineCore.CameraUpdatedEvent.RemoveListener(ApplyCameraOffset); 
     }
 
@@ -85,22 +88,42 @@ public sealed class RhythmWheelInput : MonoBehaviour
         // PlayerInput can temporarily stop dispatching an action while its map
         // is being re-enabled.  Poll the physical keyboard as a same-frame
         // fallback so a real key press is never lost during that transition.
-        var keyboard = Keyboard.current;
-        if (keyboard == null) return;
-        if (keyboard.wKey.wasPressedThisFrame) HandleKey(Keys.W, Time.realtimeSinceStartupAsDouble);
-        if (keyboard.aKey.wasPressedThisFrame) HandleKey(Keys.A, Time.realtimeSinceStartupAsDouble);
-        if (keyboard.sKey.wasPressedThisFrame) HandleKey(Keys.S, Time.realtimeSinceStartupAsDouble);
-        if (keyboard.dKey.wasPressedThisFrame) HandleKey(Keys.D, Time.realtimeSinceStartupAsDouble);
-        if (keyboard.qKey.wasPressedThisFrame) HandleKey(Keys.Q, Time.realtimeSinceStartupAsDouble);
-        if (keyboard.eKey.wasPressedThisFrame) HandleKey(Keys.E, Time.realtimeSinceStartupAsDouble);
+        // 키 바인딩(옵션)에 연결된 실제 키로 판단한다.
+        if (Keyboard.current == null) return;
+        foreach (Keys slot in KeyBindings.Slots)
+            if (KeyBindings.WasPressedThisFrame(slot)) HandleKey(slot, Time.realtimeSinceStartupAsDouble);
     }
 
     private void LateUpdate() => handledKeysThisFrame.Clear();
 
     private void Handle(InputAction.CallbackContext context)
     {
-        if (context.performed && Enum.TryParse(context.control.name, true, out Keys key))
+        if (!context.performed) return;
+
+        // 누른 실제 키를 바인딩된 슬롯(W·A·S·D·Q·E 위치)으로 바꾼다.
+        if (context.control is UnityEngine.InputSystem.Controls.KeyControl keyControl
+            && KeyBindings.TryGetSlot(keyControl.keyCode, out Keys key))
             HandleKey(key, context.time);
+    }
+
+    /// <summary>
+    /// PlayerInput 액션의 바인딩(기본 w·a·s·d·q·e)을 옵션의 키로 덮어쓴다.
+    /// 입력 이벤트의 정확한 시각(context.time)을 바뀐 키에서도 쓰기 위함이다.
+    /// </summary>
+    private void ApplyBindingOverrides()
+    {
+        if (playerInput == null || playerInput.actions == null) return;
+
+        foreach (InputAction action in playerInput.actions)
+        {
+            for (int i = 0; i < action.bindings.Count; i++)
+            {
+                string path = action.bindings[i].path;
+                if (string.IsNullOrEmpty(path) || !path.StartsWith("<Keyboard>/")) continue;
+                if (!Enum.TryParse(path.Substring("<Keyboard>/".Length), true, out Keys slot)) continue;
+                action.ApplyBindingOverride(i, KeyBindings.ControlPath(slot));
+            }
+        }
     }
 
     private void HandleKey(Keys key, double inputTime)

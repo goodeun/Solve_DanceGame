@@ -408,24 +408,13 @@ public class PausePresentation : MonoBehaviour
         PauseManager pm = FindFirstObjectByType<PauseManager>(FindObjectsInactive.Include);
         if (pm == null) return;
 
-        foreach (Button b in pm.transform.root.GetComponentsInChildren<Button>(true))
+        // 화면 위쪽 버튼부터(PauseButtonLayout이 원래 배치를 기억한다)
+        foreach (RectTransform rect in PauseButtonLayout.Collect(pm.transform.root))
         {
-            if (b.transform.parent == null || b.transform.parent.name != "ButtonGroup") continue;
-            var rect = (RectTransform)b.transform;
             buttons.Add(rect);
-            buttonOrigins.Add(rect.anchoredPosition);
-            if (b.GetComponent<PauseButtonFx>() == null) b.gameObject.AddComponent<PauseButtonFx>().Bind(this);
+            buttonOrigins.Add(PauseButtonLayout.Origin(rect));
+            if (rect.GetComponent<PauseButtonFx>() == null) rect.gameObject.AddComponent<PauseButtonFx>().Bind(this);
         }
-
-        // 화면 위쪽 버튼부터 차례로 등장
-        var order = new List<int>();
-        for (int i = 0; i < buttons.Count; i++) order.Add(i);
-        order.Sort((a, b) => buttonOrigins[b].y.CompareTo(buttonOrigins[a].y));
-        var sortedButtons = new List<RectTransform>();
-        var sortedOrigins = new List<Vector2>();
-        foreach (int i in order) { sortedButtons.Add(buttons[i]); sortedOrigins.Add(buttonOrigins[i]); }
-        buttons.Clear(); buttons.AddRange(sortedButtons);
-        buttonOrigins.Clear(); buttonOrigins.AddRange(sortedOrigins);
     }
 
     // ================= Enter =================
@@ -599,6 +588,8 @@ public class PausePresentation : MonoBehaviour
                 RectTransform b = buttons[i];
                 if (b == null) continue;
                 Vector2 target = buttonOrigins[i];
+                CanvasGroup group = b.GetComponent<CanvasGroup>();
+                if (group != null) { group.DOKill(); group.alpha = 1f; }
                 b.anchoredPosition = new Vector2(-120f, target.y * 0.2f);
                 b.localScale = Vector3.zero;
                 b.localRotation = Quaternion.Euler(0f, 0f, i % 2 == 0 ? 25f : -25f);

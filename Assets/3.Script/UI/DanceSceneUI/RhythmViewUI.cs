@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+
+public enum KeyTextColor { White, Black }
 
 [System.Serializable]
 public struct BeatSlot
@@ -30,6 +33,17 @@ public class RhythmViewUI : MonoBehaviour
     [SerializeField] private Sprite[] judgeSprites;
     [SerializeField] private Sprite[] KeySprites;
 
+    [Header("Key Text (키 이미지 위 글자, 옵션 키 바인딩 반영)")]
+    [Tooltip("Keys 순서(W, A, S, D, Q, E)별 글자색. 흰 화살표는 Black, 검은 화살표는 White")]
+    [SerializeField] private KeyTextColor[] keyTextColors =
+        { KeyTextColor.Black, KeyTextColor.White, KeyTextColor.White, KeyTextColor.White, KeyTextColor.Black, KeyTextColor.Black };
+    [SerializeField] private TMP_FontAsset keyTextFont;
+    [SerializeField, Min(1f)] private float keyTextSize = 26f;
+    [Tooltip("키 이미지 중심에서 글자 위치 보정")]
+    [SerializeField] private Vector2 keyTextOffset = Vector2.zero;
+
+    private TextMeshProUGUI[] keyTexts;
+
     private int curSlotIndex;
 
     private void Awake()
@@ -43,6 +57,7 @@ public class RhythmViewUI : MonoBehaviour
         musicClock.TimelineBeat += HandleTimeLineBeat;
 
         ArrangeBeatCircles();
+        CreateKeyTexts();
         ClearSlot();
     }
     private void Update()
@@ -121,11 +136,60 @@ public class RhythmViewUI : MonoBehaviour
                 curCircles.keyImage.enabled = true;
             }
 
+            SetKeyText(curSlotIndex, judge == Judge.Miss ? null : (Keys?)key);
+
             curCircles.judgementImage.sprite = judgeSprites[(int)judge];
             curCircles.circleRect.gameObject.SetActive(true);
         }
 
         curSlotIndex++;
+    }
+
+    private void CreateKeyTexts()
+    {
+        keyTexts = new TextMeshProUGUI[beatCircles.Length];
+        for (int i = 0; i < beatCircles.Length; i++)
+        {
+            Image image = beatCircles[i].keyImage;
+            if (image == null) continue;
+
+            var go = new GameObject("KeyText", typeof(RectTransform));
+            var rect = (RectTransform)go.transform;
+            rect.SetParent(image.transform, false);
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = rect.offsetMax = Vector2.zero;
+            rect.anchoredPosition = keyTextOffset;
+
+            var text = go.AddComponent<TextMeshProUGUI>();
+            text.font = keyTextFont != null ? keyTextFont : DemoUI.TitleFont;
+            text.fontSize = keyTextSize;
+            text.fontStyle = FontStyles.Bold;
+            text.alignment = TextAlignmentOptions.Center;
+            text.raycastTarget = false;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 8f;
+            text.fontSizeMax = keyTextSize;
+            text.text = string.Empty;
+            keyTexts[i] = text;
+        }
+    }
+
+    private void SetKeyText(int slot, Keys? key)
+    {
+        if (keyTexts == null || slot < 0 || slot >= keyTexts.Length || keyTexts[slot] == null) return;
+
+        TextMeshProUGUI text = keyTexts[slot];
+        if (key == null)
+        {
+            text.text = string.Empty;
+            return;
+        }
+
+        int index = (int)key.Value;
+        KeyTextColor color = keyTextColors != null && index < keyTextColors.Length ? keyTextColors[index] : KeyTextColor.White;
+        text.color = color == KeyTextColor.White ? Color.white : Color.black;
+        text.text = KeyBindings.DisplayName(key.Value);
     }
 
     private void HandleTimeLineBeat(int bar, int beat, float tempo, int upper, int lower)

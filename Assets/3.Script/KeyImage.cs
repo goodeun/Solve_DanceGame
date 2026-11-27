@@ -48,8 +48,15 @@ public class KeyImage : MonoBehaviour
         RefreshVisuals();
     }
 
+    private void OnEnable()
+    {
+        KeyBindings.Changed += SetKeyText;
+        SetKeyText();
+    }
+
     private void OnDisable()
     {
+        KeyBindings.Changed -= SetKeyText;
         pressSequence?.Kill();
         pressSequence = null;
 
@@ -126,7 +133,8 @@ public class KeyImage : MonoBehaviour
         if (keyInfo == null)
             return;
 
-        keyInfo.text = CurrentKey.ToString();
+        // 옵션 키 바인딩에 연결된 실제 키 이름을 표시한다.
+        keyInfo.text = KeyBindings.DisplayName(CurrentKey);
     }
 
     public void SetStageKey(Stage stage)

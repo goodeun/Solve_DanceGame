@@ -250,12 +250,12 @@ public class TutorialDirector : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(metronomeEvent))
         {
-            try { FMODUnity.RuntimeManager.PlayOneShot(metronomeEvent); return; }
-            catch (FMODUnity.EventNotFoundException) { metronomeEvent = null; }
+            GameSettings.PlaySfx(metronomeEvent);
+            return;
         }
 
         if (clickSource != null)
-            clickSource.PlayOneShot(accent ? accentClip : clickClip);
+            clickSource.PlayOneShot(accent ? accentClip : clickClip, GameSettings.SfxVolume);
     }
 
     // ---------------- Skip ----------------
@@ -296,6 +296,9 @@ public class TutorialDirector : MonoBehaviour
 
     // ---------------- Default Scenario ----------------
 
+    // 옵션의 키 바인딩을 반영한 키 이름
+    private static string K(Keys slot) => KeyBindings.DisplayName(slot);
+
     private static List<Step> DefaultSteps()
     {
         const string guide = "클럽 매니저";
@@ -308,7 +311,7 @@ public class TutorialDirector : MonoBehaviour
                 practiceBars = 2,
                 guide = StoryDialogueLine.List(
                     StoryDialogueLine.Npc(guide, "어서 와! 무대에 오르기 전에 기본부터 짚고 가자."),
-                    StoryDialogueLine.Npc(guide, "Q·E는 팔, A·D는 다리 동작이야. 정해진 노트 없이 리듬에 맞춰 네 마음대로 춤을 추면 돼."),
+                    StoryDialogueLine.Npc(guide, $"{K(Keys.Q)}·{K(Keys.E)}는 팔, {K(Keys.A)}·{K(Keys.D)}는 다리 동작이야. 정해진 노트 없이 리듬에 맞춰 네 마음대로 춤을 추면 돼."),
                     StoryDialogueLine.Npc(guide, "한 마디는 4박. 앞의 세 박에 키를 하나씩 누르고, 네 번째 박은 쉬는 박이야."),
                     StoryDialogueLine.Npc(guide, "박자에 정확할수록 Just, 조금 어긋나면 Good·Bad. 세 박을 모두 성공하면 콤보가 쌓여!", DialogueStyle.Emphasis),
                     StoryDialogueLine.Npc(guide, "메트로놈 소리에 맞춰 2마디만 춰 볼까?")),
@@ -335,7 +338,7 @@ public class TutorialDirector : MonoBehaviour
                 guide = StoryDialogueLine.List(
                     StoryDialogueLine.Npc(guide, "가끔 객석에서 태클 말풍선이 날아와. 놔두면 전체 점수 배율이 계속 떨어져.", DialogueStyle.Angry),
                     StoryDialogueLine.Npc(guide, "같은 층 키를 두 번 누르고 다른 층 키로 마무리하는 AAB 커맨드! 마지막 키의 객석 태클을 물리칠 수 있어."),
-                    StoryDialogueLine.Npc(guide, "예를 들어 Q-E-A면 A 객석, A-D-Q면 Q 객석이야."),
+                    StoryDialogueLine.Npc(guide, $"예를 들어 {K(Keys.Q)}-{K(Keys.E)}-{K(Keys.A)}면 {K(Keys.A)} 객석, {K(Keys.A)}-{K(Keys.D)}-{K(Keys.Q)}면 {K(Keys.Q)} 객석이야."),
                     StoryDialogueLine.Npc(guide, "실습을 시작하면 태클이 한꺼번에 세 개 날아올 거야. 6마디 안에 전부 처리해 봐!", DialogueStyle.Emphasis)),
                 successLines = StoryDialogueLine.List(StoryDialogueLine.Npc(guide, "완벽해! 태클 따위 문제없지?", DialogueStyle.Emphasis)),
                 failLines = StoryDialogueLine.List(
@@ -349,7 +352,7 @@ public class TutorialDirector : MonoBehaviour
                 practiceBars = 2,
                 guide = StoryDialogueLine.List(
                     StoryDialogueLine.Npc(guide, "곡의 분위기가 바뀌면 무대와 객석이 움직이고 키 배치도 바뀌어!", DialogueStyle.Emphasis),
-                    StoryDialogueLine.Npc(guide, "마름모 배치에선 W는 머리, A·D는 팔, S는 스텝이야. 경고와 카운트다운이 끝난 마디부터 새 키를 쓰면 돼."),
+                    StoryDialogueLine.Npc(guide, $"마름모 배치에선 {K(Keys.W)}는 머리, {K(Keys.A)}·{K(Keys.D)}는 팔, {K(Keys.S)}는 스텝이야. 경고와 카운트다운이 끝난 마디부터 새 키를 쓰면 돼."),
                     StoryDialogueLine.Npc(guide, "새 배치로 2마디 춰 보자.")),
                 successLines = StoryDialogueLine.List(StoryDialogueLine.Npc(guide, "적응이 빠른걸!")),
             },

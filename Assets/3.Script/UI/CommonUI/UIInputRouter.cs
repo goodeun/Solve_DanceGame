@@ -40,6 +40,9 @@ public class UIInputRouter : MonoBehaviour
 
     private void HandleCancelInput(InputAction.CallbackContext context)
     {
+        // 옵션에서 새 키를 기다리는 중이면 ESC는 키 지정 취소로만 쓴다.
+        if (KeyBindings.IsRebinding) return;
+
         if (pauseManager != null && pauseManager.isPauseActive == true)
         {
             pauseManager.HandlePauseInput();
