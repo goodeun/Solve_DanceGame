@@ -3,11 +3,36 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
+/// <summary>
+/// 점수·배율 관리. 씬에 ScoreManager가 여러 개 있어도(현재 MasterCanvas 프리팹 2개 + 씬 1개)
+/// 처음 깨어난 하나만 동작하고 나머지는 그 하나로 위임한다. 여러 개가 각자 배율을 계산해
+/// 같은 배율 UI를 번갈아 덮어쓰던 문제를 막기 위함이다.
+/// </summary>
+[DefaultExecutionOrder(-300)]
 public class ScoreManager : MonoBehaviour
 {
-    public event Action<Keys, int> OnPointsAdded;
+    private static ScoreManager primary;
+    private bool isDuplicate;
+
+    /// <summary>실제로 점수를 계산하는 ScoreManager.</summary>
+    public static ScoreManager Primary => primary;
+    private ScoreManager Target => isDuplicate && primary != null ? primary : this;
+
+    private event Action<Keys, int> onPointsAdded;
+    private event Action<int> onBonusPointsAdded;
+
+    public event Action<Keys, int> OnPointsAdded
+    {
+        add { if (isDuplicate && primary != null) primary.onPointsAdded += value; else onPointsAdded += value; }
+        remove { if (isDuplicate && primary != null) primary.onPointsAdded -= value; else onPointsAdded -= value; }
+    }
+
     /// <summary>키와 무관한 득점(피버 자동 득점, 콤보 보너스 등).</summary>
-    public event Action<int> OnBonusPointsAdded;
+    public event Action<int> OnBonusPointsAdded
+    {
+        add { if (isDuplicate && primary != null) primary.onBonusPointsAdded += value; else onBonusPointsAdded += value; }
+        remove { if (isDuplicate && primary != null) primary.onBonusPointsAdded -= value; else onBonusPointsAdded -= value; }
+    }
 
     [SerializeField] private MultiplierUI multiplierUI;
     [SerializeField] private ScoreUI scoreUI;
@@ -54,13 +79,24 @@ public class ScoreManager : MonoBehaviour
     public Phase curPhase = Phase.Pop; // 페이즈 캐싱
     private Phase feverPhase = Phase.Pop; // 피버 시작 시점의 속성
 
-    public int TotalScore => totalScore;
-    public Stage CurrentStage { get; private set; } = Stage.Square;
+    public int TotalScore => Target.totalScore;
+    private Stage currentStage = Stage.Square;
+    public Stage CurrentStage => Target.currentStage;
+    public bool IsDuplicate => isDuplicate;
 
-    public int GetJudgeCount(Judge judge) => judgeCounts[(int)judge];
+    public int GetJudgeCount(Judge judge) => Target.judgeCounts[(int)judge];
 
     private void Awake()
     {
+        if (primary != null && primary != this && primary.gameObject.scene == gameObject.scene)
+        {
+            isDuplicate = true;
+            Debug.LogWarning($"ScoreManager: 씬에 ScoreManager가 여러 개 있습니다. '{name}'은(는) '{primary.name}'에 위임합니다.", this);
+            return;
+        }
+
+        primary = this;
+
         if (comboMagnificater == null) comboMagnificater = FindFirstObjectByType<ComboAndMagnification>();
         if (multiplierUI == null) multiplierUI = FindFirstObjectByType<MultiplierUI>();
         if (scoreUI == null) scoreUI = FindFirstObjectByType<ScoreUI>();
@@ -68,8 +104,15 @@ public class ScoreManager : MonoBehaviour
         SetStageMode(Stage.Square);
     }
 
+    private void OnDestroy()
+    {
+        if (primary == this) primary = null;
+    }
+
     private void OnEnable()
     {
+        if (isDuplicate) return;
+
         if (comboMagnificater != null)
         {
             comboMagnificater.OnJudged += ProcessHit;
@@ -91,6 +134,8 @@ public class ScoreManager : MonoBehaviour
 
     private void OnDisable()
     {
+        if (isDuplicate) return;
+
         if (comboMagnificater != null)
         {
             comboMagnificater.OnJudged -= ProcessHit;
@@ -108,6 +153,8 @@ public class ScoreManager : MonoBehaviour
 
     public void ProcessHit(Keys pressedKey, Judge judge, float offset)
     {
+        if (isDuplicate) { primary?.ProcessHit(pressedKey, judge, offset); return; }
+
         judgeCounts[(int)judge]++;
 
         // 자동 Miss는 키 정보가 없으므로(default) 배율을 건드리지 않는다.
@@ -140,7 +187,7 @@ public class ScoreManager : MonoBehaviour
 
         int addedScore = Mathf.RoundToInt(curScore + additionalScore);
         totalScore += addedScore;
-        OnPointsAdded?.Invoke(pressedKey, addedScore);
+        onPointsAdded?.Invoke(pressedKey, addedScore);
         scoreUI?.ScoreUpdate(totalScore);
         scoreUI?.ShowAddedScore(addedScore);
 
@@ -150,10 +197,11 @@ public class ScoreManager : MonoBehaviour
     /// <summary>키와 무관한 점수를 더한다.</summary>
     public void AddBonusScore(int amount)
     {
+        if (isDuplicate) { primary?.AddBonusScore(amount); return; }
         if (amount <= 0) return;
 
         totalScore += amount;
-        OnBonusPointsAdded?.Invoke(amount);
+        onBonusPointsAdded?.Invoke(amount);
         scoreUI?.ScoreUpdate(totalScore);
         scoreUI?.ShowAddedScore(amount);
     }
@@ -208,8 +256,6 @@ public class ScoreManager : MonoBehaviour
                 return stats.groove;
             case Phase.Techno:
                 return stats.power;
-            case Phase.Villain:
-                return (stats.rhythm + stats.groove + stats.power) / 3f;
             default:
                 return 10f;
         }
@@ -217,12 +263,14 @@ public class ScoreManager : MonoBehaviour
 
     public void SetPhase(Phase phase)
     {
+        if (isDuplicate) { primary?.SetPhase(phase); return; }
         curPhase = phase;
     }
 
     public void SetStageMode(Stage stage)
     {
-        CurrentStage = stage;
+        if (isDuplicate) { primary?.SetStageMode(stage); return; }
+        currentStage = stage;
         curKeyOrder = (stage == Stage.Square) ? squreOrder : rhombusOrder;
 
         foreach (Keys k in curKeyOrder)
@@ -274,6 +322,7 @@ public class ScoreManager : MonoBehaviour
     /// <summary>방치된 태클 말풍선 수만큼 전체 배율을 낮춘다. scale은 보스전 강화용.</summary>
     public void DecreaseMultipliers(int activeBubble, float scale)
     {
+        if (isDuplicate) { primary?.DecreaseMultipliers(activeBubble, scale); return; }
         if (isFeverTime) return;
 
         foreach (Keys key in curKeyOrder)

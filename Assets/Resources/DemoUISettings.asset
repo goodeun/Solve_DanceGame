@@ -25,6 +25,6 @@ MonoBehaviour:
   dialogueNextIcon: {fileID: 0}
   titleScene: DemoTitle
   tutorialScene: DemoTutorial
-  mainScene: DanceScene_1
-  bossScene: DanceScene_Rival
+  mainScene: DemoMain
+  bossScene: DemoBoss
   resultScene: DemoResult

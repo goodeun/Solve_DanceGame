@@ -20,6 +20,9 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
     // 판정 게이트: 대사·전환 구간에서 입력, 자동 Miss, 마디 실패를 함께 막는다.
     private bool suspended;
     private int blockedUntilBeat = int.MinValue;
+    private int closedFromBeat = int.MaxValue;
+    // [from, to) 박 구간. 전환을 한 마디 앞서 예약해 경계 박의 이른 입력도 막는다.
+    private readonly System.Collections.Generic.List<Vector2Int> blockedRanges = new();
 
     public int Score => scoreManager != null ? scoreManager.TotalScore : 0;
     /// <summary>Just·Good 입력 연속 횟수. 결과용 마디 콤보는 ComboAndMagnification.BarCombo를 사용한다.</summary>
@@ -49,10 +52,33 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
     public void ResumeAtBeat(int beat)
     {
         blockedUntilBeat = beat;
+        closedFromBeat = int.MaxValue;
         suspended = false;
     }
 
-    public bool IsBeatBlocked(int beat) => suspended || beat < blockedUntilBeat;
+    /// <summary>지정 박부터 판정을 닫는다(실습 종료 등). 마디 끝의 쉬는 박에서 다음 마디 첫 박을 미리 누른 입력도 막힌다.</summary>
+    public void CloseFromBeat(int beat) => closedFromBeat = beat;
+
+    /// <summary>[fromBeat, toBeat) 구간을 판정에서 제외한다.</summary>
+    public void BlockRange(int fromBeat, int toBeat)
+    {
+        if (toBeat <= fromBeat) return;
+        blockedRanges.Add(new Vector2Int(fromBeat, toBeat));
+    }
+
+    public bool IsBeatBlocked(int beat)
+    {
+        if (suspended || beat < blockedUntilBeat || beat >= closedFromBeat) return true;
+
+        for (int i = blockedRanges.Count - 1; i >= 0; i--)
+        {
+            Vector2Int range = blockedRanges[i];
+            // 지나간 구간 정리
+            if (timing != null && timing.CurrentBeat >= range.y + 4) { blockedRanges.RemoveAt(i); continue; }
+            if (beat >= range.x && beat < range.y) return true;
+        }
+        return false;
+    }
 
     private void Update()
     {

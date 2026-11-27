@@ -62,6 +62,7 @@ public class TutorialDirector : MonoBehaviour
 
     private bool practicing;
     private int practiceStartBeat;
+    private int practiceEndBeat;
     private Step currentStep;
     private AudioSource clickSource;
     private AudioClip accentClip;
@@ -146,11 +147,15 @@ public class TutorialDirector : MonoBehaviour
         if (step.practice == Practice.Tackle) bubbles?.ClearBubbles();
 
         // 다음 마디 첫 박부터 실습
+        // 한 마디 = 1·2·3박 + 쉬는 박. 실습은 마지막 마디의 쉬는 박까지이며,
+        // 다음 마디 첫 박(종료 박)은 미리 판정을 닫아 이른 입력이 섞이지 않게 한다.
         practiceStartBeat = wheel != null ? wheel.NextBarStartBeat : 0;
+        practiceEndBeat = practiceStartBeat + step.practiceBars * 4;
         wheel?.ResumeJudgementAtBeat(practiceStartBeat);
+        wheel?.CloseJudgementFromBeat(practiceEndBeat);
         practicing = true;
 
-        int endBeat = practiceStartBeat + step.practiceBars * 4;
+        int endBeat = practiceEndBeat;
         while (wheel != null && wheel.CurrentBeat < endBeat && !leaving)
             yield return null;
 
@@ -183,7 +188,7 @@ public class TutorialDirector : MonoBehaviour
 
     private void HandleBeat(int beat)
     {
-        if (!practicing || beat < practiceStartBeat) return;
+        if (!practicing || beat < practiceStartBeat || beat >= practiceEndBeat) return;
 
         PlayClick(beat % 4 == 0);
 

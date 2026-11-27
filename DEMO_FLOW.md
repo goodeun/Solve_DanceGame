@@ -3,17 +3,23 @@
 인계 문서(데모 플레이 구현 인계 문서 v1.0)의 F·D·P 항목 중 **HP·게임오버(P1)를 제외한** 작업을 구현했다.
 Unity 에디터 없이 작성했으므로 **씬 연결은 아래 메뉴 한 번으로 설치**한다.
 
-## 1. 설치 (Unity에서 1회)
+## 1. 데모 씬
 
-1. 프로젝트를 열고 컴파일이 끝나기를 기다린다.
-2. 상단 메뉴 **Solve > Demo > Setup All (전체 설치)** 실행
-   - `DanceScene_1`: `DemoFlow` 오브젝트(MainGameFlow, NormalBattleDirector, CountDownController) + PauseSystem 프리팹 + DancePauseHandler 설치
-   - `DanceScene_Rival`: `DemoFlow`(BossBattleDirector, CountDownController) + Pause 설치
-   - `Assets/1.Scene/Demo/`에 `DemoTitle`, `DemoResult` 새로 생성, `DanceScene_1`을 복사해 `DemoTutorial` 생성(TutorialDirector로 교체)
-   - Build Settings: DemoTitle → DemoTutorial → DanceScene_1 → DanceScene_Rival → DemoResult
-3. `DemoTitle`에서 플레이.
+데모 씬은 저장소에 들어 있다(`Assets/1.Scene/Demo`). 원본 `DanceScene_1`, `DanceScene_Rival`은 수정하지 않는다.
 
-이미 설치된 항목은 건너뛰므로 여러 번 실행해도 된다. 씬 하나만 설치하려면 `Install Main/Boss Flow In Open Scene`.
+| 씬 | 내용 |
+|---|---|
+| `DemoTitle` | 카메라 + TitleController + EventSystem |
+| `DemoTutorial` | DanceScene_1 복제 + PauseSystem + DancePauseHandler + DemoFlow(TutorialDirector) |
+| `DemoMain` | DanceScene_1 복제 + PauseSystem + DancePauseHandler + DemoFlow(MainGameFlow, NormalBattleDirector) |
+| `DemoBoss` | DanceScene_Rival 복제 + DemoFlow(BossBattleDirector) |
+| `DemoResult` | 카메라 + ResultController + EventSystem |
+
+Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoResult (기존 DanceScene_1은 뒤에 유지). `DemoTitle`에서 플레이.
+
+빠진 컴포넌트가 있으면 메뉴 **Solve > Demo > Repair Demo Scenes**로 다시 넣을 수 있다(원본 씬은 건드리지 않음).
+
+> 이전 버전의 `Setup All`을 이미 실행했다면, pull 전에 로컬의 `DanceScene_1`/`DanceScene_Rival` 변경과 `ProjectSettings/EditorBuildSettings.asset` 변경을 되돌리고 `Assets/1.Scene/Demo` 폴더(추적되지 않은 파일)를 지운다.
 
 폰트·색·씬 이름·경고 이미지: `Assets/Resources/DemoUISettings.asset` (한글 폰트 SF레몬빙수 / 뚝상체 지정됨).
 
@@ -47,6 +53,14 @@ Unity 에디터 없이 작성했으므로 **씬 연결은 아래 메뉴 한 번�
 - `MultiplierUI`가 사각형 키로만 매핑되어 마름모 배율이 표시되지 않던 문제 수정
 - 씬 전환 시 DontDestroyOnLoad `HUDManager`가 다음 씬의 HUD를 파괴하던 문제 → `SceneFlow.Load`에서 해제
 - CP949 스크립트 15개를 UTF-8로 변환하고, 이미 깨진 채 커밋된 주석은 이전 커밋에서 복구함(HealthUI.cs는 HP 작업 충돌 방지를 위해 제외)
+
+### 2차 수정 (플레이 피드백)
+- 연출 구간(곡 시작 전·대사·곡 종료 후)에서 Pause 복귀 시 카운트다운 없이 바로 복귀
+- 배율 표시가 튀던 문제: 씬마다 ScoreManager가 3개(MasterCanvas 프리팹의 Score·DanceHUD + 씬)여서 각자 계산한 배율이 같은 UI를 번갈아 덮어씀 → 처음 깨어난 하나만 계산하고 나머지는 위임(오브젝트는 삭제하지 않음)
+- 마디 경계: 전환·실습 종료를 한 마디 앞서 예약해, 쉬는 박 뒤쪽에서 다음 마디 첫 박을 미리 누른 입력도 막음. 튜토리얼 메트로놈이 실습 다음 마디 첫 박에 한 번 더 울리던 문제 수정
+- 보스전 기본 점수를 원래 값(10)으로 되돌림(1차 작업에서 스탯 평균으로 바꿔 객석 분위기가 한 번에 차던 문제)
+- 게임 씬에서 플레이어가 춤추지 않던 문제: PlayerManager가 Player 프리팹에서 DontDestroyOnLoad를 써 튜토리얼 플레이어가 남고 게임 씬 플레이어가 파괴됨 → 스탯만 유지하고 플레이어는 씬마다 새로 사용
+- Pause 패널이 대사창보다 앞에 보이도록 PauseSystem Canvas 정렬을 1500으로 올림
 
 ## 3. 미결 사항(Q1~Q7)에 적용한 기본값
 

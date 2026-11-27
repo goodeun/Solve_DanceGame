@@ -52,6 +52,8 @@ public sealed class RhythmWheelUI : MonoBehaviour
     public void SetJudgementSuspended(bool value) => judgement.SetSuspended(value);
     public void BlockJudgementUntilBeat(int beat) => judgement.BlockUntilBeat(beat);
     public void ResumeJudgementAtBeat(int beat) => judgement.ResumeAtBeat(beat);
+    public void CloseJudgementFromBeat(int beat) => judgement.CloseFromBeat(beat);
+    public void BlockJudgementRange(int fromBeat, int toBeat) => judgement.BlockRange(fromBeat, toBeat);
     public bool IsBeatBlocked(int beat) => judgement.IsBeatBlocked(beat);
 
     /// <summary>4박째(쉼) 박 번호를 받아 해당 마디의 입력 박이 판정 제외였는지 확인한다.</summary>

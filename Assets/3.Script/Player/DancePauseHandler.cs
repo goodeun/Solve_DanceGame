@@ -49,6 +49,13 @@ public class DancePauseHandler : MonoBehaviour, IPauseSceneHandler
 
     public void OnResumeRequested(Action onReadyToResume)
     {
+        // 판정을 하지 않는 연출 구간(곡 시작 전·대사·곡 종료 후)에서는 카운트다운 없이 바로 복귀한다.
+        if (!IsGameplayActive())
+        {
+            onReadyToResume?.Invoke();
+            return;
+        }
+
         // 카운트다운은 씬 흐름 컴포넌트가 실행 중에 추가할 수 있으므로 늦게 찾는다.
         if (countDownCon == null) countDownCon = FindAnyObjectByType<CountDownController>();
 
@@ -60,6 +67,13 @@ public class DancePauseHandler : MonoBehaviour, IPauseSceneHandler
         {
             onReadyToResume?.Invoke();
         }
+    }
+
+    private bool IsGameplayActive()
+    {
+        if (musicClock == null || !musicClock.IsStarted || musicClock.IsEnded) return false;
+        if (rhythmWheel != null && rhythmWheel.Judgement != null && rhythmWheel.Judgement.IsSuspended) return false;
+        return true;
     }
 
     private void OnDisable()

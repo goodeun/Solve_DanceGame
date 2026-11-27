@@ -28,7 +28,7 @@ public class DemoUISettings : ScriptableObject
     [Header("Scene Names (Build Settings에 등록된 이름)")]
     public string titleScene = "DemoTitle";
     public string tutorialScene = "DemoTutorial";
-    public string mainScene = "DanceScene_1";
-    public string bossScene = "DanceScene_Rival";
+    public string mainScene = "DemoMain";
+    public string bossScene = "DemoBoss";
     public string resultScene = "DemoResult";
 }

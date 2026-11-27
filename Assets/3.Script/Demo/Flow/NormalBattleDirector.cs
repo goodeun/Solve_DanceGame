@@ -66,6 +66,7 @@ public class NormalBattleDirector : MonoBehaviour
     private Phase pendingPhase;
     private bool hasPendingPhase;
     private int transitionStartBeat = -1;
+    private int scheduledStartBeat = -1;
     private int transitionEndBeat = -1;
     private bool running = true;
 
@@ -107,6 +108,7 @@ public class NormalBattleDirector : MonoBehaviour
     {
         running = false;
         pending = false;
+        scheduledStartBeat = -1;
         banner?.Hide();
         countdown?.Hide();
         transitionStartBeat = transitionEndBeat = -1;
@@ -116,10 +118,12 @@ public class NormalBattleDirector : MonoBehaviour
     {
         if (!running || triggerMode != TriggerMode.OnPhaseChange) return;
         if (next == Phase.Villain) return;
-        if (changesDone >= maxSeatChanges) return;
+        if (changesDone + (scheduledStartBeat >= 0 ? 1 : 0) >= maxSeatChanges) return;
         if (wheel != null && wheel.CurrentBeat < ignorePhaseChangesBeforeBar * 4) return;
 
         pending = true;
+        if (wheel != null && !IsTransitioning && scheduledStartBeat < 0)
+            TrySchedule(wheel.NextBarStartBeat);
     }
 
     private void HandleBeat(int beat)
@@ -132,14 +136,21 @@ public class NormalBattleDirector : MonoBehaviour
             return;
         }
 
+        if (scheduledStartBeat >= 0)
+        {
+            if (beat >= scheduledStartBeat) BeginTransition(scheduledStartBeat);
+            return;
+        }
+
         if (beat % 4 != 0) return;
 
+        // 일정 모드: 다음 마디가 지정 마디면 이번 마디에 예약한다.
         if (triggerMode == TriggerMode.ScheduledBars && changesDone < maxSeatChanges)
         {
-            int bar = beat / 4;
+            int nextBar = beat / 4 + 1;
             foreach (ScheduledChange change in scheduledChanges)
             {
-                if (change != null && change.bar == bar)
+                if (change != null && change.bar == nextBar)
                 {
                     pending = true;
                     pendingPhase = change.phase;
@@ -149,23 +160,32 @@ public class NormalBattleDirector : MonoBehaviour
             }
         }
 
-        if (!pending) return;
+        if (pending) TrySchedule(beat + 4);
+    }
 
-        // 피버와 겹치면 전환을 미룬다.
-        RhythmWheelFever fever = wheel != null ? wheel.Fever : null;
-        if (fever != null && (fever.IsActive || fever.IsJudgementLocked)) return;
+    /// <summary>
+    /// 전환을 다음 마디 첫 박으로 예약하고 전환 구간을 미리 판정 제외로 등록한다.
+    /// 예약을 미리 해 두어야 쉬는 박 뒤쪽에서 다음 마디 첫 박을 일찍 누른 입력도 함께 막힌다.
+    /// 피버 중이거나 피버가 대기 중이면 다음 마디로 미룬다.
+    /// </summary>
+    private void TrySchedule(int startBeat)
+    {
+        RhythmWheelFever fever = wheel != null ? wheel.GetComponent<RhythmWheelFever>() : null;
+        if (fever != null && (fever.IsActive || fever.IsQueued || fever.IsJudgementLocked)) return;
 
-        BeginTransition(beat);
+        pending = false;
+        scheduledStartBeat = startBeat;
+        wheel?.BlockJudgementRange(startBeat, startBeat + transitionBars * 4);
     }
 
     private void BeginTransition(int startBeat)
     {
         pending = false;
+        scheduledStartBeat = -1;
         changesDone++;
         transitionStartBeat = startBeat;
         transitionEndBeat = startBeat + transitionBars * 4;
 
-        wheel?.BlockJudgementUntilBeat(transitionEndBeat);
         combo?.ResetCurrentPhrase();
 
         if (hasPendingPhase)

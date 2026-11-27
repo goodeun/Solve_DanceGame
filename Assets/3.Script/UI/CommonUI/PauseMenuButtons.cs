@@ -19,12 +19,34 @@ public class PauseMenuButtons : MonoBehaviour
     [SerializeField] private Button mainButton;
     [SerializeField] private GameObject optionPanel;
     [SerializeField] private GameObject creditPanel;
+    [Tooltip("Pause 캔버스 정렬 순서. 대사창(650)·배너·카운트다운보다 앞, 확인 팝업(2000)보다 뒤")]
+    [SerializeField] private int pauseSortingOrder = 1500;
     [SerializeField] private string mainConfirmMessage = "타이틀로 돌아갈까요?\n진행 중인 플레이는 저장되지 않습니다.";
+
+    private Transform pauseRoot;
+    // 같은 PauseManager에 버튼이 두 번 연결되면 팝업이 두 개 뜨므로 하나만 연결한다.
+    private static readonly System.Collections.Generic.HashSet<PauseManager> wired = new System.Collections.Generic.HashSet<PauseManager>();
+    private PauseManager wiredManager;
 
     private void Awake()
     {
         if (pauseManager == null) pauseManager = GetComponentInChildren<PauseManager>(true);
-        if (pauseManager == null) pauseManager = FindFirstObjectByType<PauseManager>();
+        if (pauseManager == null) pauseManager = FindFirstObjectByType<PauseManager>(FindObjectsInactive.Include);
+        if (pauseManager == null) return;
+        if (!wired.Add(pauseManager)) return;
+        wiredManager = pauseManager;
+
+        // 버튼·패널은 PauseSystem 아래에서 찾는다(이 컴포넌트가 다른 오브젝트에 있어도 동작).
+        pauseRoot = pauseManager.transform.root;
+
+        // Pause 패널이 대사창보다 앞에 보이도록 PauseSystem의 Canvas 정렬을 올린다.
+        foreach (Canvas canvas in pauseRoot.GetComponentsInChildren<Canvas>(true))
+        {
+            if (!canvas.isRootCanvas && !canvas.overrideSorting) continue;
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = pauseSortingOrder;
+        }
+
         if (resumeButton == null) resumeButton = FindButton("Resume_b");
         if (optionButton == null) optionButton = FindButton("Option_b");
         if (creditButton == null) creditButton = FindButton("Credit_b");
@@ -37,6 +59,12 @@ public class PauseMenuButtons : MonoBehaviour
         mainButton?.onClick.AddListener(GoToTitle);
     }
 
+    private void OnDestroy()
+    {
+        if (wiredManager != null) wired.Remove(wiredManager);
+        wired.RemoveWhere(m => m == null);
+    }
+
     private Button FindButton(string name)
     {
         GameObject go = FindChild(name);
@@ -45,7 +73,7 @@ public class PauseMenuButtons : MonoBehaviour
 
     private GameObject FindChild(string name)
     {
-        foreach (Transform t in GetComponentsInChildren<Transform>(true))
+        foreach (Transform t in pauseRoot.GetComponentsInChildren<Transform>(true))
             if (t.name == name) return t.gameObject;
         return null;
     }

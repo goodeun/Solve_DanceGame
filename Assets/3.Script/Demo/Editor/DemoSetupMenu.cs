@@ -7,11 +7,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 데모 흐름 설치 메뉴. Unity 상단 메뉴 Solve/Demo.
-/// 1) 메인(DanceScene_1)·보스(DanceScene_Rival) 씬에 흐름 컴포넌트와 Pause 시스템을 설치
-/// 2) 타이틀·결과 씬을 새로 만들고, 메인 씬을 복사해 튜토리얼 씬을 만든다
-/// 3) Build Settings에 Title → Tutorial → Main → Boss → Result 순서로 등록
-/// 이미 설치된 항목은 건너뛰므로 여러 번 실행해도 된다.
+/// 데모 씬 점검 메뉴. Unity 상단 메뉴 Solve/Demo.
+/// 데모 씬(Assets/1.Scene/Demo: DemoTitle, DemoTutorial, DemoMain, DemoBoss, DemoResult)은 저장소에 포함되어 있다.
+/// 원본 댄스 씬(DanceScene_1, DanceScene_Rival)은 건드리지 않는다.
+/// - Repair: 데모 씬에 빠진 흐름 컴포넌트·Pause 시스템이 있으면 다시 넣는다. 없는 데모 씬은 원본을 복사해 만든다.
+/// - Build Settings에 Title → Tutorial → Main → Boss → Result 순서로 등록
+/// 이미 있는 항목은 건너뛰므로 여러 번 실행해도 된다.
 /// </summary>
 public static class DemoSetupMenu
 {
@@ -19,13 +20,18 @@ public static class DemoSetupMenu
     private const string PauseSystemPrefab = "Assets/2.Model/Prefabs/PauseSystem.prefab";
     private const string FlowObjectName = "DemoFlow";
 
-    [MenuItem("Solve/Demo/Setup All (전체 설치)", priority = 0)]
+    private const string OriginalMainScene = "DanceScene_1";
+    private const string OriginalBossScene = "DanceScene_Rival";
+
+    [MenuItem("Solve/Demo/Repair Demo Scenes (데모 씬 점검)", priority = 0)]
     public static void SetupAll()
     {
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
         string previous = SceneManager.GetActiveScene().path;
 
+        EnsureCopy(LoadSettings().mainScene, OriginalMainScene);
+        EnsureCopy(LoadSettings().bossScene, OriginalBossScene);
         InstallInScene(MainScenePath(), InstallMain);
         InstallInScene(BossScenePath(), InstallBoss);
         CreateTitleScene();
@@ -36,7 +42,20 @@ public static class DemoSetupMenu
         if (!string.IsNullOrEmpty(previous) && File.Exists(previous))
             EditorSceneManager.OpenScene(previous);
 
-        EditorUtility.DisplayDialog("Solve Demo", "데모 흐름 설치가 끝났습니다.\nBuild Settings의 첫 씬(DemoTitle)부터 플레이하세요.", "확인");
+        EditorUtility.DisplayDialog("Solve Demo", "데모 씬 점검이 끝났습니다.\nBuild Settings의 첫 씬(DemoTitle)부터 플레이하세요.", "확인");
+    }
+
+    /// <summary>데모 씬이 없으면 원본 씬을 복사해 만든다(원본은 수정하지 않음).</summary>
+    private static void EnsureCopy(string demoName, string originalName)
+    {
+        string path = $"{DemoSceneFolder}/{demoName}.unity";
+        if (File.Exists(path)) return;
+
+        string original = FindScenePath(originalName);
+        if (string.IsNullOrEmpty(original)) return;
+
+        EnsureFolder(DemoSceneFolder);
+        AssetDatabase.CopyAsset(original, path);
     }
 
     [MenuItem("Solve/Demo/Install Main Flow In Open Scene")]
@@ -137,8 +156,8 @@ public static class DemoSetupMenu
                 so.ApplyModifiedPropertiesWithoutUndo();
             }
 
-            GameObject root = pause.transform.root.gameObject;
-            AddIfMissing<PauseMenuButtons>(root);
+            if (Object.FindObjectsByType<PauseMenuButtons>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length == 0)
+                AddIfMissing<PauseMenuButtons>(GetOrCreateRoot(scene, FlowObjectName));
         }
 
         if (FindInScene<UnityEngine.EventSystems.EventSystem>(scene) == null)

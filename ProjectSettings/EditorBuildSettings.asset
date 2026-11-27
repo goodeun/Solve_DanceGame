@@ -6,6 +6,21 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/1.Scene/Demo/DemoTitle.unity
+    guid: e6ece7384d30488ba415aef43f23b09e
+  - enabled: 1
+    path: Assets/1.Scene/Demo/DemoTutorial.unity
+    guid: c89bc175fa4d4c33bf948793531838eb
+  - enabled: 1
+    path: Assets/1.Scene/Demo/DemoMain.unity
+    guid: ef96a40ac4754d1383d1082cfa6576b7
+  - enabled: 1
+    path: Assets/1.Scene/Demo/DemoBoss.unity
+    guid: 57069029706d4545bb40fa2f913e3c81
+  - enabled: 1
+    path: Assets/1.Scene/Demo/DemoResult.unity
+    guid: 8865c46a459a48e8865b0495b44ab79c
+  - enabled: 1
     path: Assets/1.Scene/SE_Scene/DanceScene_1.unity
     guid: 9202488441f26ec46b4b6d0c7df970ba
   m_configObjects:
