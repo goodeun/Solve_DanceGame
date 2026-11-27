@@ -1976,7 +1976,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6389217528709684911, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6551743080332416974, guid: a8eed0a971e8c164b82c30305c2aafcd, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -3136,53 +3136,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
---- !u!1 &5565271181952268228
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7638507482163375521}
-  - component: {fileID: 5090423842274172838}
-  m_Layer: 0
-  m_Name: DancePauseHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7638507482163375521
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5565271181952268228}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 806.91125, y: 0, z: 2182.3625}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5090423842274172838
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5565271181952268228}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 600cf242faf06af46986135211cbf99a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DancePauseHandler
-  musicClock: {fileID: 0}
-  rhythmWheel: {fileID: 0}
-  countDownCon: {fileID: 0}
 --- !u!1001 &1457250681777311122
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3252,6 +3205,21 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 24fdd2d764c599840aae435108205fb1, type: 3}
+--- !u!4 &2288114817699644666
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2717686575109920281}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2717686575109920281
 GameObject:
   m_ObjectHideFlags: 0
@@ -3272,57 +3240,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2288114817699644666
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2717686575109920281}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8796015134342271730
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2717686575109920281}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d452f9225d1478f46bb66c7417df5f78, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CountDownController
---- !u!114 &8626683434416765156
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2717686575109920281}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f83e22a5ed741e09f5c6fdad5cab402, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MainGameFlow
---- !u!114 &7441069153369298111
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2717686575109920281}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4a09e5e7c04449f9a3a506498cff7e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NormalBattleDirector
 --- !u!114 &4384299852061755709
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3335,6 +3252,144 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b33e4e1d321644ff9ffc2d0cedfe8f7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PauseMenuButtons
+  pauseManager: {fileID: 0}
+  resumeButton: {fileID: 0}
+  optionButton: {fileID: 0}
+  creditButton: {fileID: 0}
+  mainButton: {fileID: 0}
+  optionPanel: {fileID: 0}
+  creditPanel: {fileID: 0}
+  pauseSortingOrder: 1500
+  mainConfirmMessage: "\uD0C0\uC774\uD2C0\uB85C \uB3CC\uC544\uAC08\uAE4C\uC694?\n\uC9C4\uD589
+    \uC911\uC778 \uD50C\uB808\uC774\uB294 \uC800\uC7A5\uB418\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4."
+--- !u!114 &5090423842274172838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5565271181952268228}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 600cf242faf06af46986135211cbf99a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DancePauseHandler
+  musicClock: {fileID: 0}
+  rhythmWheel: {fileID: 0}
+  countDownCon: {fileID: 0}
+  hudManager: {fileID: 0}
+--- !u!1 &5565271181952268228
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7638507482163375521}
+  - component: {fileID: 5090423842274172838}
+  m_Layer: 0
+  m_Name: DancePauseHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &7441069153369298111
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2717686575109920281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a09e5e7c04449f9a3a506498cff7e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NormalBattleDirector
+  wheel: {fileID: 0}
+  stageController: {fileID: 0}
+  phaseController: {fileID: 0}
+  musicClock: {fileID: 0}
+  countdown: {fileID: 0}
+  combo: {fileID: 0}
+  banner: {fileID: 0}
+  triggerMode: 1
+  initialPhase: 2
+  maxSeatChanges: 2
+  transitionBars: 2
+  ignorePhaseChangesBeforeBar: 2
+  scheduledChanges:
+  - bar: 44
+    phase: 0
+  bannerText: PHASE CHANGE
+  onTransitionStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  onTransitionFinished:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &7638507482163375521
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5565271181952268228}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 806.91125, y: 0, z: 2182.3625}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8626683434416765156
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2717686575109920281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f83e22a5ed741e09f5c6fdad5cab402, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MainGameFlow
+  musicClock: {fileID: 0}
+  wheel: {fileID: 0}
+  countdown: {fileID: 0}
+  scoreManager: {fileID: 0}
+  combo: {fileID: 0}
+  bubbles: {fileID: 0}
+  battleDirector: {fileID: 0}
+  introDialogue: {fileID: 0}
+  bossLeadInDialogue: {fileID: 0}
+  useDefaultLines: 1
+  endAfterBars: 0
+  hideHudBeforeStart: 1
+  nextSceneOverride: 
+  onPlayStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  onPlayFinished:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &8796015134342271730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2717686575109920281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d452f9225d1478f46bb66c7417df5f78, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CountDownController
+  musicClock: {fileID: 0}
+  count: 3
+  fallbackBeatSeconds: 0.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
