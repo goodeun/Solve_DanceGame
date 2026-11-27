@@ -15,6 +15,9 @@ public sealed class RhythmWheelPulseVisual : MonoBehaviour
     private Material runtimeMaterial;
     private static readonly int ProgressProperty = Shader.PropertyToID("_Progress");
 
+    /// <summary>true면 펄스 링을 숨긴다(페이즈 변경 전환 구간 등). 박 이벤트는 계속 흐른다.</summary>
+    public bool Suppressed { get; set; }
+
     private void Awake()
     {
         timing = GetComponent<RhythmWheelTiming>();
@@ -45,6 +48,11 @@ public sealed class RhythmWheelPulseVisual : MonoBehaviour
         int displayCycle = shiftedOffset >= 0f ? beat : beat - 1;
         int targetBeat = displayCycle + 1;
         timing.NotifyPulseCycle(displayCycle);
+
+        if (circlePulse != null && circlePulse.enabled == Suppressed)
+            circlePulse.enabled = !Suppressed;
+        if (Suppressed) return;
+
         runtimeMaterial.SetColor("_Ring_Color", ((targetBeat % 4) + 4) % 4 == 3 ? fourthBeatPulseColor : normalPulseColor);
         runtimeMaterial.SetFloat(ProgressProperty, Mathf.Repeat(shiftedOffset / beatDuration, 1f) * .5f);
     }

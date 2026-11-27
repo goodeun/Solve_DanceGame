@@ -52,6 +52,13 @@ public sealed class RhythmWheelUI : MonoBehaviour
     public void SetJudgementSuspended(bool value) => judgement.SetSuspended(value);
     public void BlockJudgementUntilBeat(int beat) => judgement.BlockUntilBeat(beat);
     public void ResumeJudgementAtBeat(int beat) => judgement.ResumeAtBeat(beat);
+    /// <summary>리듬 휠 펄스 링 표시를 잠시 끈다(페이즈 변경 전환 구간).</summary>
+    public void SetPulseSuppressed(bool suppressed)
+    {
+        var pulse = GetComponent<RhythmWheelPulseVisual>();
+        if (pulse != null) pulse.Suppressed = suppressed;
+    }
+
     public void CloseJudgementFromBeat(int beat) => judgement.CloseFromBeat(beat);
     public void BlockJudgementRange(int fromBeat, int toBeat) => judgement.BlockRange(fromBeat, toBeat);
     public bool IsBeatBlocked(int beat) => judgement.IsBeatBlocked(beat);

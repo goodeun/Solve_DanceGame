@@ -8,8 +8,12 @@ using UnityEngine;
 /// </summary>
 public sealed class RhythmWheelFever : MonoBehaviour
 {
-    [SerializeField, Range(.01f, 1f)] private float gain = .1f;
-    [SerializeField, Range(.01f, 1f)] private float loss = .1f;
+    [Tooltip("마디 성공 시 게이지 상승량. 일반전(약 80마디) 기준 0.036이면 피버 1~2회")]
+    [SerializeField, Range(.005f, 1f)] private float gain = .036f;
+    [Tooltip("마디 실패 시 게이지 감소량")]
+    [SerializeField, Range(0f, 1f)] private float loss = .02f;
+    [Tooltip("한 판(씬)에서 피버가 발동할 수 있는 최대 횟수. 0이면 제한 없음")]
+    [SerializeField, Min(0)] private int maxFeversPerGame = 2;
 
     [Tooltip("피버 타임 길이(마디). Play Mode 중에 바꾸면 다음 피버부터 반영된다.")]
     [SerializeField, Min(1)] private int durationBars = 3;
@@ -24,9 +28,12 @@ public sealed class RhythmWheelFever : MonoBehaviour
     private bool active;
     private int feverStartBeat = -1;
     private int feverEndBeat = -1;
+    private int feverCount;
 
     public bool IsActive => active;
     public bool IsQueued => queued;
+    public int FeverCount => feverCount;
+    private bool ReachedLimit => maxFeversPerGame > 0 && feverCount >= maxFeversPerGame;
     public float Gauge => gauge;
     public int DurationBars { get => durationBars; set => durationBars = Mathf.Max(1, value); }
     /// <summary>현재(또는 마지막) 피버에서 확정된 길이(마디).</summary>
@@ -55,7 +62,7 @@ public sealed class RhythmWheelFever : MonoBehaviour
     private void OnEnable() { if (combo != null) { combo.OnComboSaved += Save; combo.OnComboFailed += Fail; } timing.BeatStarted += HandleBeatStarted; }
     private void OnDisable() { if (combo != null) { combo.OnComboSaved -= Save; combo.OnComboFailed -= Fail; } timing.BeatStarted -= HandleBeatStarted; }
 
-    private void Save(Keys _) { if (active) return; gauge = Mathf.Clamp01(gauge + gain); queued |= gauge >= 1; hud?.AddFeverGage(gauge); }
+    private void Save(Keys _) { if (active || ReachedLimit) return; gauge = Mathf.Clamp01(gauge + gain); queued |= gauge >= 1; hud?.AddFeverGage(gauge); }
     private void Fail() { if (active) return; gauge = Mathf.Clamp01(gauge - loss); hud?.AddFeverGage(gauge); }
 
     /// <summary>테스트·튜토리얼용: 게이지를 직접 설정한다.</summary>
@@ -84,13 +91,23 @@ public sealed class RhythmWheelFever : MonoBehaviour
         if (!queued || beat % 4 != 0)
             return;
 
-        // 좌석 변경 구간·대사 중에는 피버를 미루고, 판정이 열린 첫 마디에서 시작한다.
-        if (judgement != null && judgement.IsBeatBlocked(beat))
+        if (ReachedLimit)
+        {
+            queued = false;
             return;
+        }
+
+        // 피버 구간이 좌석 변경 구간·대사와 하나라도 겹치면 미루고, 겹치지 않는 첫 마디에서 시작한다.
+        int bars = Mathf.Max(1, durationBars);
+        if (judgement != null)
+            for (int b = beat; b < beat + bars * 4; b++)
+                if (judgement.IsBeatBlocked(b))
+                    return;
 
         queued = false;
         active = true;
-        CurrentFeverBars = Mathf.Max(1, durationBars);
+        feverCount++;
+        CurrentFeverBars = bars;
         int beatCount = CurrentFeverBars * 4;
         feverStartBeat = beat;
         feverEndBeat = beat + beatCount;

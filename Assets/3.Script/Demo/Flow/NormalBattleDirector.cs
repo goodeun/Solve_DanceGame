@@ -6,14 +6,15 @@ using UnityEngine.Events;
 /// <summary>
 /// 일반전 진행표: 페이즈 변경에 맞춰 좌석(키 배치)을 바꾼다. 한 판에 최대 maxSeatChanges회(기본 2회).
 ///
-/// 전환 구간(기본 2마디, 4/4 기준 8박) 타임라인:
-///   첫 마디 1~4박   : PHASE CHANGE 경고 + 좌석 이동. 입력·판정·득점 중지
+/// 기본(ScheduledBars): 새 페이즈가 시작되는 마디(곡의 BPM이 바뀌는 마디)를 지정하면,
+/// 그 직전 transitionBars 마디를 전환 구간으로 쓴다. 공지가 먼저 나오고, 색·BPM은 전환이 끝나는 박에 함께 바뀐다.
+///   첫 마디 1~4박   : PHASE CHANGE 경고 + 좌석 이동. 입력·판정·득점 중지, 리듬 휠 펄스 숨김
 ///   둘째 마디 1박   : 경고 유지, 이동 마무리
 ///   둘째 마디 2~4박 : 3, 2, 1 (숫자당 1박)
-///   다음 마디 1박   : 경고를 닫고 새 키 배치로 입력·판정·득점 재개
-/// 전환 구간은 판정 게이트(RhythmWheelJudgement.BlockUntilBeat)로 막으므로
-/// 자동 Miss, 마디 실패, 분위기·배율·피버 감소가 발생하지 않고 피버 충전도 되지 않는다.
-/// 피버 중에는 전환을 미루고 피버가 끝난 뒤 첫 마디에서 시작한다.
+///   새 페이즈 첫 박 : 경고를 닫고 페이즈 색 적용(곡의 BPM 변경과 같은 박), 새 키 배치로 재개
+/// 전환 구간은 곡 시작 시 미리 판정 제외로 등록하므로 자동 Miss, 마디 실패, HP·분위기·배율·피버 감소가 없고,
+/// 피버도 전환 구간과 겹치면 시작하지 않는다.
+/// OnPhaseChange 모드는 BPM이 바뀐 뒤 다음 마디에 전환한다(공지가 색·BPM 변경보다 늦음).
 /// </summary>
 public class NormalBattleDirector : MonoBehaviour
 {
@@ -21,15 +22,16 @@ public class NormalBattleDirector : MonoBehaviour
     {
         [Tooltip("곡의 BPM 변화로 속성 페이즈가 바뀌면(FmodMusicClock 자동 페이즈) 다음 마디에 전환")]
         OnPhaseChange,
-        [Tooltip("아래 Scheduled Changes에 지정한 마디에서 페이즈와 좌석을 함께 전환")]
+        [Tooltip("Scheduled Changes의 마디에 새 페이즈가 시작되도록, 그 앞 마디들에서 미리 공지·좌석 이동")]
         ScheduledBars,
     }
 
     [Serializable]
     public class ScheduledChange
     {
-        [Min(1)] public int bar = 16;
-        public Phase phase = Phase.HipHop;
+        [Tooltip("새 페이즈(색·BPM)가 시작되는 마디(0부터). 곡의 템포 마커 위치와 맞춘다.")]
+        [Min(1)] public int bar = 44;
+        public Phase phase = Phase.Pop;
     }
 
     [Header("References (비우면 자동 탐색)")]
@@ -42,16 +44,18 @@ public class NormalBattleDirector : MonoBehaviour
     [SerializeField] private BannerView banner;
 
     [Header("Rules")]
-    [SerializeField] private TriggerMode triggerMode = TriggerMode.OnPhaseChange;
+    [SerializeField] private TriggerMode triggerMode = TriggerMode.ScheduledBars;
+    [Tooltip("ScheduledBars 모드에서 곡 시작 시 페이즈")]
+    [SerializeField] private Phase initialPhase = Phase.Techno;
     [SerializeField, Min(0)] private int maxSeatChanges = 2;
     [Tooltip("전환 구간 길이(마디). 마지막 3박에 카운트다운이 들어간다.")]
     [SerializeField, Min(1)] private int transitionBars = 2;
     [Tooltip("곡 시작 직후 이 마디 전까지의 페이즈 변경은 좌석 변경으로 세지 않는다(초기 페이즈 보정).")]
     [SerializeField, Min(0)] private int ignorePhaseChangesBeforeBar = 2;
+    [Tooltip("현재 곡(RetroVision - Puzzle): 0초 128BPM(테크노) → 82.5초 = 44마디째 90BPM(팝)")]
     [SerializeField] private List<ScheduledChange> scheduledChanges = new List<ScheduledChange>
     {
-        new ScheduledChange { bar = 16, phase = Phase.HipHop },
-        new ScheduledChange { bar = 32, phase = Phase.Techno },
+        new ScheduledChange { bar = 44, phase = Phase.Pop },
     };
 
     [Header("Banner")]
@@ -69,6 +73,7 @@ public class NormalBattleDirector : MonoBehaviour
     private int scheduledStartBeat = -1;
     private int transitionEndBeat = -1;
     private bool running = true;
+    private readonly List<ScheduledChange> booked = new List<ScheduledChange>();
 
     public bool IsTransitioning => transitionStartBeat >= 0;
     public int ChangesDone => changesDone;
@@ -91,6 +96,22 @@ public class NormalBattleDirector : MonoBehaviour
             musicClock.SetAutoPhase(false);
     }
 
+    private void Start()
+    {
+        if (triggerMode != TriggerMode.ScheduledBars) return;
+
+        phaseController?.SetPhase(initialPhase);
+
+        // 전환 구간을 곡 시작 전에 모두 판정 제외로 등록한다. 피버가 전환과 겹치지 않게 하는 용도이기도 하다.
+        foreach (ScheduledChange change in scheduledChanges)
+        {
+            if (change == null || booked.Count >= maxSeatChanges) continue;
+            int start = Mathf.Max(0, change.bar - transitionBars) * 4;
+            wheel?.BlockJudgementRange(start, change.bar * 4);
+            booked.Add(change);
+        }
+    }
+
     private void OnEnable()
     {
         if (wheel != null) wheel.OnBeatStarted += HandleBeat;
@@ -111,6 +132,7 @@ public class NormalBattleDirector : MonoBehaviour
         scheduledStartBeat = -1;
         banner?.Hide();
         countdown?.Hide();
+        wheel?.SetPulseSuppressed(false);
         transitionStartBeat = transitionEndBeat = -1;
     }
 
@@ -138,26 +160,26 @@ public class NormalBattleDirector : MonoBehaviour
 
         if (scheduledStartBeat >= 0)
         {
-            if (beat >= scheduledStartBeat) BeginTransition(scheduledStartBeat);
+            if (beat >= scheduledStartBeat) BeginTransition(scheduledStartBeat, scheduledStartBeat + transitionBars * 4);
             return;
         }
 
         if (beat % 4 != 0) return;
 
-        // 일정 모드: 다음 마디가 지정 마디면 이번 마디에 예약한다.
-        if (triggerMode == TriggerMode.ScheduledBars && changesDone < maxSeatChanges)
+        // 일정 모드: 새 페이즈 시작 transitionBars 마디 전에 전환을 시작한다.
+        if (triggerMode == TriggerMode.ScheduledBars)
         {
-            int nextBar = beat / 4 + 1;
-            foreach (ScheduledChange change in scheduledChanges)
+            foreach (ScheduledChange change in booked)
             {
-                if (change != null && change.bar == nextBar)
+                if (Mathf.Max(0, change.bar - transitionBars) * 4 == beat)
                 {
-                    pending = true;
                     pendingPhase = change.phase;
                     hasPendingPhase = true;
-                    break;
+                    BeginTransition(beat, change.bar * 4);
+                    return;
                 }
             }
+            return;
         }
 
         if (pending) TrySchedule(beat + 4);
@@ -178,21 +200,16 @@ public class NormalBattleDirector : MonoBehaviour
         wheel?.BlockJudgementRange(startBeat, startBeat + transitionBars * 4);
     }
 
-    private void BeginTransition(int startBeat)
+    private void BeginTransition(int startBeat, int endBeat)
     {
         pending = false;
         scheduledStartBeat = -1;
         changesDone++;
         transitionStartBeat = startBeat;
-        transitionEndBeat = startBeat + transitionBars * 4;
+        transitionEndBeat = endBeat;
 
         combo?.ResetCurrentPhrase();
-
-        if (hasPendingPhase)
-        {
-            phaseController?.SetPhase(pendingPhase);
-            hasPendingPhase = false;
-        }
+        wheel?.SetPulseSuppressed(true);
 
         banner?.Show(bannerText, DemoUI.Settings.magenta, DemoUI.Settings.phaseChangeSprite);
 
@@ -212,6 +229,14 @@ public class NormalBattleDirector : MonoBehaviour
 
         if (remaining <= 0)
         {
+            // 공지가 끝난 박에 페이즈 색을 바꾼다(일정 모드에선 곡의 BPM 변경과 같은 박).
+            if (hasPendingPhase)
+            {
+                phaseController?.SetPhase(pendingPhase);
+                hasPendingPhase = false;
+            }
+
+            wheel?.SetPulseSuppressed(false);
             countdown?.Hide();
             banner?.Hide();
             combo?.ResetCurrentPhrase();
