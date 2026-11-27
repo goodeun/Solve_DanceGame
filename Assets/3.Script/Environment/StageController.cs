@@ -54,6 +54,19 @@ public class StageController : MonoBehaviour
 
     public float TransitionDuration => transitionDuration;
 
+    /// <summary>객석 배치 변경이 시작될 때(목표 배치, 이동 시간). 라이벌 공중 무대 등이 같이 움직이는 데 쓴다.</summary>
+    public event System.Action<Stage, float> StageChangeStarted;
+
+    /// <summary>배치별 앵커 월드 위치(Seats와 같은 시계 방향 순서). 없으면 false.</summary>
+    public bool TryGetAnchorPosition(Stage stage, int index, out Vector3 position)
+    {
+        Transform[] anchors = stage == Stage.Square ? squareAnchors : rhombusAnchors;
+        position = Vector3.zero;
+        if (anchors == null || index < 0 || index >= anchors.Length || anchors[index] == null) return false;
+        position = anchors[index].position;
+        return true;
+    }
+
     public StageVisual GetSeatForKey(Keys key)
     {
         int seatIndex = GetSeatIndex(key);
@@ -66,6 +79,8 @@ public class StageController : MonoBehaviour
     public void ChangePhase(Stage targetPhase, float keyApplyDelay)
     {
         if (currentPhase == targetPhase) return;
+
+        StageChangeStarted?.Invoke(targetPhase, transitionDuration);
 
         if (targetPhase == Stage.Square)
         {

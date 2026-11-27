@@ -29,6 +29,7 @@ public class FloorSection : MonoBehaviour
     private readonly int scaleID = Shader.PropertyToID("_Scale");
 
     private Sequence seq;
+    private FloorLightPillar pillar;
 
     private void Awake()
     {
@@ -42,6 +43,10 @@ public class FloorSection : MonoBehaviour
         }
 
         floorMat = floorMesh.material;
+
+        // 켜질 때 구역 모양 그대로 위로 솟구치는 빛기둥
+        pillar = GetComponent<FloorLightPillar>();
+        if (pillar == null) pillar = gameObject.AddComponent<FloorLightPillar>();
         phaseController = FindFirstObjectByType<PhaseController>();
         baseEmissionColor = floorMat.HasProperty(Shader.PropertyToID("_EmissionColor"))
             ? floorMat.GetColor(Shader.PropertyToID("_EmissionColor"))
@@ -64,6 +69,7 @@ public class FloorSection : MonoBehaviour
         TempEventManager.OnMeasureEnd_Temp -= HandleMeasureEnd;
         TempEventManager.OnBeat_Temp -= ChangeScale;
         floorMat?.SetFloat(brightID, normalIntensity);
+        pillar?.Hide();
     }
 
     public void ActiveLight()
@@ -74,6 +80,8 @@ public class FloorSection : MonoBehaviour
 
         // Start the key-light response from the floor's normal brightness.
         floorMat.SetFloat(brightID, normalIntensity);
+
+        pillar?.Rise(currentPhaseEmissionColor);
 
         if (!isActivated)
         {
@@ -91,6 +99,7 @@ public class FloorSection : MonoBehaviour
     private void HandleMeasureEnd(bool isComboSuccess)
     {
         UpdatePhaseColor();
+        pillar?.Fall(isComboSuccess);
         isActivated = false;
         floorMat.DOKill();
         floorMat.SetFloat(brightID, normalIntensity);

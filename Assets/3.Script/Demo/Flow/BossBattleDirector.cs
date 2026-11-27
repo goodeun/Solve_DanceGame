@@ -35,6 +35,8 @@ public class BossBattleDirector : MonoBehaviour
     [SerializeField] private Transform rival;
     [SerializeField] private float rivalDropHeight = 6f;
     [SerializeField, Min(0f)] private float rivalDropDuration = 1.2f;
+    [Tooltip("게임 플레이 중 라이벌이 춤추는 UFO 공중 무대. 인트로 컷씬 동안 숨겼다가 컷씬 뒤 위에서 내려온다. 비우면 씬에서 찾는다")]
+    [SerializeField] private FloatingRivalStage rivalStage;
     [Tooltip("카메라 무빙 + 대사 등장 연출(없으면 introDialogue만 재생)")]
     [SerializeField] private CinematicDialoguePlayer introCinematic;
     [SerializeField] private StoryDialogueSequence introDialogue;
@@ -173,6 +175,8 @@ public class BossBattleDirector : MonoBehaviour
         DemoUI.EnsureEventSystem();
         if (hideHudBeforeStart) HUDManager.Instance?.SetFlowHidden(true);
         phaseController?.SetPhase(Phase.Villain);
+        if (rivalStage == null) rivalStage = FindFirstObjectByType<FloatingRivalStage>();
+        if (rivalStage != null) rivalStage.HideImmediate();
 
         yield return null;
 
@@ -193,6 +197,14 @@ public class BossBattleDirector : MonoBehaviour
         else if (introDialogue != null && introDialogue.HasLines)
         {
             introDialogue.Play(() => done = true);
+            while (!done) yield return null;
+        }
+
+        // 컷씬이 끝나면 라이벌이 공중 무대를 타고 내려온다.
+        if (rivalStage != null)
+        {
+            done = false;
+            rivalStage.Appear(() => done = true);
             while (!done) yield return null;
         }
 

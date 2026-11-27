@@ -5,6 +5,7 @@ using UnityEngine;
 public class BubbleManager : MonoBehaviour
 {
     [SerializeField] private Bubble bubble_pref;
+    public Bubble BubblePrefab => bubble_pref;
 
     [SerializeField] private BoxCollider spawnArea;
 

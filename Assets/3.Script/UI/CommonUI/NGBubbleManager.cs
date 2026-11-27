@@ -177,7 +177,7 @@ public class NGBubbleManager : MonoBehaviour
 
         if (! curBubble.gameObject.activeSelf) return;
 
-        curBubble.DisableBubble();
+        curBubble.Pop(key);
         ActiveBubble--;
     }
 

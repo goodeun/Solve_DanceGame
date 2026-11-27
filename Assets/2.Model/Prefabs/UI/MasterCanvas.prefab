@@ -1351,6 +1351,7 @@ GameObject:
   - component: {fileID: 581160845528575284}
   - component: {fileID: 8424909925180754174}
   - component: {fileID: 1623341167540710105}
+  - component: {fileID: 6317670453054244130}
   m_Layer: 5
   m_Name: Image (1)
   m_TagString: Untagged
@@ -8839,3 +8840,15 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 2997584037273780212, guid: 784a387468a97e144bef71ff7e70bf09, type: 3}
   m_PrefabInstance: {fileID: 5946062390398169215}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6317670453054244130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1664947490387343236}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a09763c952784f02bee5de2f63160775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BeatBounce

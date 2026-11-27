@@ -96,3 +96,19 @@ Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoRes
 - 좌석 회전: 프리팹 `StageController`의 좌석 목록을 앵커와 같은 시계 방향 순서(좌상·우상·우하·좌하)로 맞추고, 키 매핑을 사각형 Q·E·D·A / 마름모 W·D·S·A로 변경. 배치가 바뀔 때 좌석이 시계 방향으로 돌고, 눌렀을 때 반응하는 좌석은 키 위치와 일치
 - 크레딧 캐릭터: 춤 동작이 잘리지 않게 위·좌우 여유를 두고 촬영(`Credit Top Margin`, `Credit Side Padding`)
 - 커맨드 성공 연출(`CommandSuccessFx`, 리듬 휠에 자동 추가): 휠 중앙 번쩍임·충격파 링·별·방사형 불꽃 + 커맨드 이름(AAB TACKLE BREAK! / ABA SWING! / ABC CHAIN!) + 해당 객석 버스트 + 휠 튕김. 세 박 모두 Just면 더 크게
+
+### 5차 수정
+- 태클 처리(AAB) 연출: 기존 MetaBall 액체 연출 재사용(`LiquidBurst`). 말풍선 프리팹의 액체 파티클을 태클 말풍선 위치에서 터뜨리고(Particle Camera → Tex_MetaBall → EffectFilter), 말풍선은 눌렸다가 사라짐(`NegativeBubble.Pop`). `CommandSuccessFx`의 AAB는 글자·휠 튕김만(`Aab Label Only`)
+- HUD 박자 바운스: `BeatBounce` — 붙이기만 하면 그 오브젝트가 FMOD 박에 맞춰 쿵쿵 뜀(마디 첫 박 강조). MasterCanvas `DanceHUD/Image (1)`에 추가됨. 다른 HUD에도 컴포넌트만 추가하면 됨(점수·피버 게이지 등). 기존 `PulseAnimation`은 환경 프리팹에 있어 MasterCanvas의 HUD를 참조할 수 없어 별도 컴포넌트로 만듦
+
+## 라이벌 공중 무대 (DemoBoss)
+
+- 프리펩: `Assets/2.Model/Prefabs/RivalStage.prefab` = `RivalStage`(FloatingRivalStage) → `Visual` → `Rival`(Rival.prefab 중첩, 원본은 수정하지 않음)
+- 무대 메시(위가 평평하게 잘린 납작한 구 + 빛나는 테두리)는 실행 시 생성. 에디터에서는 Gizmo로 모양만 보인다.
+  재질을 직접 넣고 싶으면 Body/Top/Rim Material 슬롯에 넣으면 된다(비우면 URP Lit 임시 재질).
+- 위치: 사각형(QEAD)이면 위쪽 두 객석 사이 가운데, 마름모(WASD)이면 비는 좌상·우상 중 랜덤.
+  객석 앵커에서 플레이어 무대 쪽으로 `Forward Offset`(기본 12)만큼 앞으로 당겨 둔다. 높이는 `Height Offset`.
+  배치 변경(StageController.StageChangeStarted) 때 객석과 같은 시간 동안 앞으로 휘는 궤적(`Arc Forward/Height`)으로 이동.
+- 회전: 가운데는 정면, 옆이면 플레이어 무대 쪽으로 `Max Yaw`(기본 18도)까지 부드럽게.
+- 흐름: BossBattleDirector가 시작 시 숨기고, 인트로 컷씬(introCinematic/introDialogue)이 끝나면 위에서 내려오게 한 뒤 룰 대사 → 카운트다운.
+  컷씬에서 걸어나오는 보스는 씬에 따로 두고 컷씬 끝에 꺼 주면 된다(공중 무대의 Rival과 별개 오브젝트).
