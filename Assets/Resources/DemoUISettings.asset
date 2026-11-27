@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bodyFont: {fileID: 11400000, guid: 41d0213493d21b445a0d5532e4ffb66c, type: 2}
   titleFont: {fileID: 11400000, guid: bcae19feb2834f24bb422b8af001d622, type: 2}
+  bodySourceFont: {fileID: 12800000, guid: e876719355867c940ab31690e3b05cce, type: 3}
   magenta: {r: 1, g: 0.18, b: 0.78, a: 1}
   cyan: {r: 0.25, g: 0.85, b: 1, a: 1}
   green: {r: 0.75, g: 1, b: 0.2, a: 1}

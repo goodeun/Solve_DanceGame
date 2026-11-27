@@ -19,8 +19,8 @@ public class NGBubbleManager : MonoBehaviour
     [Tooltip("보스전에서 마디마다 3개 동시 태클이 나올 확률(%)")]
     [SerializeField, Range(0, 100)] private int bossTripleChance = 20;
     [Tooltip("보스전에서 마디마다 태클 1개가 추가로 나올 확률(%) - 더 높은 출현 빈도")]
-    [SerializeField, Range(0, 100)] private int bossExtraBubbleChance = 35;
-    [Tooltip("보스전 방치 불이익 배수(배율 하락·객석 점수 감소)")]
+    [SerializeField, Range(0, 100)] private int bossExtraBubbleChance = 15;
+    [Tooltip("보스전 방치 불이익 배수(배율 하락)")]
     [SerializeField, Min(1f)] private float bossPenaltyScale = 2f;
 
     /// <summary>튜토리얼 등에서 무작위 태클 생성을 끈다(Miss로 생기는 태클은 유지).</summary>
@@ -127,7 +127,7 @@ public class NGBubbleManager : MonoBehaviour
             if ((int)key < 0)
                 continue;
 
-            stageController.GetSeatForKey(key)?.RemovePlayerPoints(Mathf.RoundToInt(pointsLostPerBubblePerBeat * bossPenaltyScale));
+            stageController.GetSeatForKey(key)?.RemovePlayerPoints(pointsLostPerBubblePerBeat);
         }
     }
 

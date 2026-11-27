@@ -56,6 +56,10 @@ public class ScoreManager : MonoBehaviour
     [Tooltip("피버 중 마디당 자동 득점 = 피버 시작 속성 기본 점수 × 이 값 × 피버 배수")]
     [SerializeField, Min(0f)] private float feverScorePerBar = 3f;
 
+    [Header("Boss (Villain)")]
+    [Tooltip("보스전 입력 1회 기본 점수. 득점이 그대로 해당 키 객석 점수(빨강 100 미만 / 보라 / 파랑 200 이상)로 들어간다.")]
+    [SerializeField, Min(1f)] private float villainBaseScore = 30f;
+
     [Header("Combo")]
     [Tooltip("마디 성공 시 보너스 = 현재 마디 콤보 × 이 값")]
     [SerializeField, Min(0)] private int comboBonusPerCombo = 50;
@@ -256,6 +260,8 @@ public class ScoreManager : MonoBehaviour
                 return stats.groove;
             case Phase.Techno:
                 return stats.power;
+            case Phase.Villain:
+                return villainBaseScore;
             default:
                 return 10f;
         }

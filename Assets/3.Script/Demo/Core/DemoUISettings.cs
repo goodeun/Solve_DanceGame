@@ -12,6 +12,9 @@ public class DemoUISettings : ScriptableObject
     public TMP_FontAsset bodyFont;
     public TMP_FontAsset titleFont;
 
+    [Tooltip("지정하면 bodyFont 대신 이 폰트 파일로 동적 TMP 폰트를 만들어 본문(대사·버튼·안내)에 쓴다. 임시: Pretendard Medium")]
+    public Font bodySourceFont;
+
     [Header("Colors (마젠타 - 시안 - 그린)")]
     public Color magenta = new Color(1f, 0.18f, 0.78f);
     public Color cyan = new Color(0.25f, 0.85f, 1f);

@@ -25,7 +25,22 @@ public static class DemoUI
         }
     }
 
-    public static TMP_FontAsset BodyFont => Settings.bodyFont != null ? Settings.bodyFont : TMP_Settings.defaultFontAsset;
+    private static TMP_FontAsset dynamicBodyFont;
+
+    public static TMP_FontAsset BodyFont
+    {
+        get
+        {
+            if (Settings.bodySourceFont != null)
+            {
+                // TMP 폰트 에셋이 없는 폰트 파일(Pretendard 등)은 실행 중 동적 폰트로 만들어 쓴다.
+                if (dynamicBodyFont == null)
+                    dynamicBodyFont = TMP_FontAsset.CreateFontAsset(Settings.bodySourceFont);
+                if (dynamicBodyFont != null) return dynamicBodyFont;
+            }
+            return Settings.bodyFont != null ? Settings.bodyFont : TMP_Settings.defaultFontAsset;
+        }
+    }
     public static TMP_FontAsset TitleFont => Settings.titleFont != null ? Settings.titleFont : BodyFont;
 
     public static Canvas CreateOverlayCanvas(string name, int sortingOrder, Transform parent = null)

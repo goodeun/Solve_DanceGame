@@ -82,6 +82,14 @@ public class TutorialDirector : MonoBehaviour
         wheel?.SetJudgementSuspended(true);
         musicClock?.SetAutoPhase(false);
 
+        // 튜토리얼에서는 피버를 쓰지 않는다.
+        RhythmWheelFever fever = wheel != null ? wheel.GetComponent<RhythmWheelFever>() : null;
+        if (fever != null)
+        {
+            fever.FeverEnabled = false;
+            fever.SetGauge(0f);
+        }
+
         if (steps == null || steps.Count == 0) steps = DefaultSteps();
         if (outroLines == null || outroLines.Count == 0)
             outroLines = StoryDialogueLine.List(

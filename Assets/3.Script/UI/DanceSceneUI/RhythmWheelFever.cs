@@ -33,6 +33,8 @@ public sealed class RhythmWheelFever : MonoBehaviour
     public bool IsActive => active;
     public bool IsQueued => queued;
     public int FeverCount => feverCount;
+    /// <summary>false면 게이지가 차지 않고 피버도 시작하지 않는다(튜토리얼).</summary>
+    public bool FeverEnabled { get; set; } = true;
     private bool ReachedLimit => maxFeversPerGame > 0 && feverCount >= maxFeversPerGame;
     public float Gauge => gauge;
     public int DurationBars { get => durationBars; set => durationBars = Mathf.Max(1, value); }
@@ -62,7 +64,7 @@ public sealed class RhythmWheelFever : MonoBehaviour
     private void OnEnable() { if (combo != null) { combo.OnComboSaved += Save; combo.OnComboFailed += Fail; } timing.BeatStarted += HandleBeatStarted; }
     private void OnDisable() { if (combo != null) { combo.OnComboSaved -= Save; combo.OnComboFailed -= Fail; } timing.BeatStarted -= HandleBeatStarted; }
 
-    private void Save(Keys _) { if (active || ReachedLimit) return; gauge = Mathf.Clamp01(gauge + gain); queued |= gauge >= 1; hud?.AddFeverGage(gauge); }
+    private void Save(Keys _) { if (active || ReachedLimit || !FeverEnabled) return; gauge = Mathf.Clamp01(gauge + gain); queued |= gauge >= 1; hud?.AddFeverGage(gauge); }
     private void Fail() { if (active) return; gauge = Mathf.Clamp01(gauge - loss); hud?.AddFeverGage(gauge); }
 
     /// <summary>테스트·튜토리얼용: 게이지를 직접 설정한다.</summary>
@@ -91,7 +93,7 @@ public sealed class RhythmWheelFever : MonoBehaviour
         if (!queued || beat % 4 != 0)
             return;
 
-        if (ReachedLimit)
+        if (ReachedLimit || !FeverEnabled)
         {
             queued = false;
             return;
