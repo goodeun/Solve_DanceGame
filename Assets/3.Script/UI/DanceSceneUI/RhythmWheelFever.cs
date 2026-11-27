@@ -3,6 +3,7 @@ using UnityEngine;
 /// <summary>
 /// 피버 게이지와 피버 타임 진행.
 /// 마디 성공으로 충전하고, 가득 차면 다음 마디 첫 박부터 지정 마디 수만큼 피버가 진행된다.
+/// 피버는 마지막 마디의 쉬는 박에서 끝나며, 그때 HUD·입력이 복구되어 다음 마디 첫 박부터 바로 플레이할 수 있다.
 /// 피버 길이는 마디 단위로 Inspector에서 조절하며, 시작 시점에 확정되어 진행 중에는 바뀌지 않는다.
 /// </summary>
 public sealed class RhythmWheelFever : MonoBehaviour
@@ -12,9 +13,6 @@ public sealed class RhythmWheelFever : MonoBehaviour
 
     [Tooltip("피버 타임 길이(마디). Play Mode 중에 바꾸면 다음 피버부터 반영된다.")]
     [SerializeField, Min(1)] private int durationBars = 3;
-
-    [Tooltip("피니시 애니메이션(OnFeverEnded)을 피버 종료 몇 박 전에 시작할지.")]
-    [SerializeField, Min(0)] private int finishLeadBeats = 2;
 
     [SerializeField] private FeverCamera feverCamera;
     [SerializeField] private ComboAndMagnification combo;
@@ -35,13 +33,13 @@ public sealed class RhythmWheelFever : MonoBehaviour
     public int CurrentFeverBars { get; private set; }
     public bool IsJudgementLocked => feverCamera != null && feverCamera.IsCameraSequenceActive;
 
-    /// <summary>피버 시작(다음 마디 첫 박).</summary>
+    /// <summary>피버 시작(마디 첫 박).</summary>
     public event System.Action OnFeverStarted;
-    /// <summary>피니시 연출 시작 시점(종료 finishLeadBeats 박 전).</summary>
+    /// <summary>피버 종료(마지막 마디의 쉬는 박). 피니시 연출 시작 시점.</summary>
     public event System.Action OnFeverEnded;
     /// <summary>피버 중 한 마디가 끝날 때마다(자동 득점용). 인자: 피버 내 마디 번호(1부터).</summary>
     public event System.Action<int> OnFeverBar;
-    /// <summary>피버 완전 종료(게임플레이 복귀).</summary>
+    /// <summary>피버 완전 종료(게임플레이 복귀). OnFeverEnded 직후 호출된다.</summary>
     public event System.Action OnFeverFinished;
 
     private void Awake()
@@ -54,8 +52,8 @@ public sealed class RhythmWheelFever : MonoBehaviour
         if (hud == null) hud = FindFirstObjectByType<DanceSceneHUD>();
     }
 
-    private void OnEnable() { if (combo != null) { combo.OnComboSaved += Save; combo.OnComboFailed += Fail; } timing.PhraseCompleted += StartFever; timing.BeatStarted += CheckFeverEnd; }
-    private void OnDisable() { if (combo != null) { combo.OnComboSaved -= Save; combo.OnComboFailed -= Fail; } timing.PhraseCompleted -= StartFever; timing.BeatStarted -= CheckFeverEnd; }
+    private void OnEnable() { if (combo != null) { combo.OnComboSaved += Save; combo.OnComboFailed += Fail; } timing.BeatStarted += HandleBeatStarted; }
+    private void OnDisable() { if (combo != null) { combo.OnComboSaved -= Save; combo.OnComboFailed -= Fail; } timing.BeatStarted -= HandleBeatStarted; }
 
     private void Save(Keys _) { if (active) return; gauge = Mathf.Clamp01(gauge + gain); queued |= gauge >= 1; hud?.AddFeverGage(gauge); }
     private void Fail() { if (active) return; gauge = Mathf.Clamp01(gauge - loss); hud?.AddFeverGage(gauge); }
@@ -69,44 +67,57 @@ public sealed class RhythmWheelFever : MonoBehaviour
         hud?.AddFeverGage(gauge);
     }
 
-    private void StartFever()
+    private void HandleBeatStarted(int beat)
     {
-        if (!queued || active) return;
+        if (active)
+        {
+            int elapsed = beat - feverStartBeat;
+            if (elapsed > 0 && elapsed % 4 == 0)
+                OnFeverBar?.Invoke(elapsed / 4);
+
+            if (beat == feverEndBeat - 1)
+                EndFever();
+            return;
+        }
+
+        // Start on the next phrase's first beat after the gauge fills.
+        if (!queued || beat % 4 != 0)
+            return;
 
         // 좌석 변경 구간·대사 중에는 피버를 미루고, 판정이 열린 첫 마디에서 시작한다.
-        if (judgement != null && judgement.IsBeatBlocked(timing.CurrentBeat)) return;
+        if (judgement != null && judgement.IsBeatBlocked(beat))
+            return;
 
         queued = false;
         active = true;
         CurrentFeverBars = Mathf.Max(1, durationBars);
         int beatCount = CurrentFeverBars * 4;
-        feverStartBeat = timing.CurrentBeat;
-        feverEndBeat = feverStartBeat + beatCount;
+        feverStartBeat = beat;
+        feverEndBeat = beat + beatCount;
 
-        // 카메라 컷은 종료 박에 맞춰 복귀 블렌드가 끝나도록 블렌드 시간만큼 앞당긴다.
-        float blend = timing.BeatDurationSeconds;
-        float total = beatCount * timing.BeatDurationSeconds;
-        hud?.RequestFeverTime(true, Mathf.Max(blend, total - blend), blend);
+        // 피버 구간은 판정에서 제외한다. 마지막 마디의 쉬는 박에서 피버가 끝나도
+        // 그 마디가 '입력 없는 실패 마디'로 처리되지 않게 한다(HP·분위기·콤보 감소 방지).
+        judgement?.BlockRange(feverStartBeat, feverEndBeat);
+
+        // Finish on the rest beat immediately before the next phrase begins.
+        float activeDuration = Mathf.Max(1, beatCount - 1) * timing.BeatDurationSeconds;
+        hud?.RequestFeverTime(true, activeDuration, timing.BeatDurationSeconds);
         OnFeverStarted?.Invoke();
     }
 
-    private void CheckFeverEnd(int beat)
+    private void EndFever()
     {
-        if (!active) return;
+        // 마지막 마디의 자동 득점은 쉬는 박(종료 시점)에 지급한다.
+        OnFeverBar?.Invoke(CurrentFeverBars);
 
-        if (beat == feverEndBeat - finishLeadBeats) OnFeverEnded?.Invoke();
-
-        int elapsed = beat - feverStartBeat;
-        if (elapsed > 0 && elapsed % 4 == 0)
-            OnFeverBar?.Invoke(elapsed / 4);
-
-        if (beat < feverEndBeat) return;
         feverEndBeat = -1;
         feverStartBeat = -1;
         gauge = 0f;
         active = false;
+        feverCamera?.AllowGameplayInput();
         hud?.AddFeverGage(gauge);
         hud?.EndFeverTime();
+        OnFeverEnded?.Invoke();
         OnFeverFinished?.Invoke();
     }
 }
