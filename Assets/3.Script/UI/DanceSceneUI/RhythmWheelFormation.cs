@@ -8,6 +8,7 @@ public class RhythmWheelFormation : MonoBehaviour
     [SerializeField] private ComboAndMagnification comboAndMagnification;
     [SerializeField] private StageController stageController;
     [SerializeField] private NGBubbleManager ngBubbleManager;
+    [SerializeField] private ScoreManager scoreManager;
 
     [SerializeField] private Stage currentStage;
 
@@ -19,9 +20,10 @@ public class RhythmWheelFormation : MonoBehaviour
         if (rhythmwheel == null)
             rhythmwheel = FindFirstObjectByType<RhythmWheelInput>();
 
-        comboAndMagnification ??= FindFirstObjectByType<ComboAndMagnification>();
-        stageController ??= FindFirstObjectByType<StageController>();
-        ngBubbleManager ??= FindFirstObjectByType<NGBubbleManager>();
+        if (comboAndMagnification == null) comboAndMagnification = FindFirstObjectByType<ComboAndMagnification>();
+        if (stageController == null) stageController = FindFirstObjectByType<StageController>();
+        if (ngBubbleManager == null) ngBubbleManager = FindFirstObjectByType<NGBubbleManager>();
+        if (scoreManager == null) scoreManager = FindFirstObjectByType<ScoreManager>();
 
         ApplyStage(Stage.Square, squareRotations);
     }
@@ -69,7 +71,10 @@ public class RhythmWheelFormation : MonoBehaviour
         }
 
         comboAndMagnification?.SetStage(stage);
+        scoreManager?.SetStageMode(stage);
         ngBubbleManager?.MoveStage(stage);
         currentStage = stage;
     }
+
+    public Stage CurrentStage => currentStage;
 }

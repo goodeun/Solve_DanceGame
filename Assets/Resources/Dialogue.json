@@ -43,6 +43,72 @@
       "minPower": 0,
       "minStyle": 0,
       "minCondition": 0
+    },
+    {
+      "id": "Boss_P_001",
+      "scene": "Boss",
+      "state": "positive",
+      "text": "Rival!<br>Rival!",
+      "minRhythm": 0,
+      "minGroove": 0,
+      "minPower": 0,
+      "minStyle": 0,
+      "minCondition": 0
+    },
+    {
+      "id": "Boss_P_002",
+      "scene": "Boss",
+      "state": "positive",
+      "text": "Now THAT's<br>a real dancer!",
+      "minRhythm": 0,
+      "minGroove": 0,
+      "minPower": 0,
+      "minStyle": 0,
+      "minCondition": 0
+    },
+    {
+      "id": "Boss_P_003",
+      "scene": "Boss",
+      "state": "positive",
+      "text": "The king<br>is back!",
+      "minRhythm": 0,
+      "minGroove": 0,
+      "minPower": 0,
+      "minStyle": 0,
+      "minCondition": 0
+    },
+    {
+      "id": "Boss_N_001",
+      "scene": "Boss",
+      "state": "negative",
+      "text": "Newbie,<br>go home~",
+      "minRhythm": 0,
+      "minGroove": 0,
+      "minPower": 0,
+      "minStyle": 0,
+      "minCondition": 0
+    },
+    {
+      "id": "Boss_N_002",
+      "scene": "Boss",
+      "state": "negative",
+      "text": "You call<br>that a step?",
+      "minRhythm": 0,
+      "minGroove": 0,
+      "minPower": 0,
+      "minStyle": 0,
+      "minCondition": 0
+    },
+    {
+      "id": "Boss_N_003",
+      "scene": "Boss",
+      "state": "negative",
+      "text": "This floor<br>is mine.",
+      "minRhythm": 0,
+      "minGroove": 0,
+      "minPower": 0,
+      "minStyle": 0,
+      "minCondition": 0
     }
   ]
 }

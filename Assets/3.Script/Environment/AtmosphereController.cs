@@ -25,6 +25,8 @@ public class AtmosphereController : MonoBehaviour
     public int Heating => heating;
     public int Burning => burning;
     public float MoodScore => moodScore;
+    /// <summary>분위기 상승 폭 배수. 튜토리얼에서 한 번의 입력으로 변화를 보여줄 때 사용.</summary>
+    public float GainScale { get; set; } = 1f;
 
     private readonly List<AudienceController> audiences = new();
     private Keys lastPressedKey;
@@ -131,7 +133,7 @@ public class AtmosphereController : MonoBehaviour
             };
         }
 
-        AddMood(moodChange);
+        AddMood(moodChange * GainScale);
     }
 
     private bool ReceivesPhraseFor(Keys phraseFinalKey) => !routeByFinalKey || finalKey == phraseFinalKey;

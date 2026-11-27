@@ -8,29 +8,18 @@ public class MultiplierUI : MonoBehaviour
 {
     [SerializeField] private List<KeyImage> uIConfigs;
 
-    private Dictionary<Keys, TextMeshProUGUI> uiDict = new Dictionary<Keys, TextMeshProUGUI>();
-
-    private void Awake()
-    {
-        foreach(var config in uIConfigs)
-        {
-            if (config.MagText != null)
-            {
-                uiDict[config.key] = config.MagText;
-            }
-        }
-    }
-
+    // 키 이미지의 키는 무대 배치(사각형/마름모)에 따라 바뀌므로 매번 현재 키로 찾는다.
     public void UpdateUI(Dictionary<Keys, float> curMultipliers, bool isFever)
     {
-        foreach (var kvp in curMultipliers)
-        {
-            if (uiDict.TryGetValue(kvp.Key, out TextMeshProUGUI textUI))
-            {
-                if (!textUI.gameObject.activeInHierarchy) continue;
+        if (uIConfigs == null || curMultipliers == null) return;
 
-                textUI.text = $"{Mathf.RoundToInt(kvp.Value * 100f)}%";
-            }
+        foreach (var config in uIConfigs)
+        {
+            if (config == null || config.MagText == null) continue;
+            if (!config.MagText.gameObject.activeInHierarchy) continue;
+            if (!curMultipliers.TryGetValue(config.key, out float value)) continue;
+
+            config.MagText.text = $"{Mathf.RoundToInt(value * 100f)}%";
         }
     }
 }

@@ -17,8 +17,15 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
     private readonly HashSet<int> resolvedBeats = new();
     [SerializeField] private ScoreManager scoreManager;
 
+    // 판정 게이트: 대사·전환 구간에서 입력, 자동 Miss, 마디 실패를 함께 막는다.
+    private bool suspended;
+    private int blockedUntilBeat = int.MinValue;
+
     public int Score => scoreManager != null ? scoreManager.TotalScore : 0;
+    /// <summary>Just·Good 입력 연속 횟수. 결과용 마디 콤보는 ComboAndMagnification.BarCombo를 사용한다.</summary>
     public int Combo { get; private set; }
+    public bool IsSuspended => suspended;
+    public int BlockedUntilBeat => blockedUntilBeat;
     public float JustWindowSeconds => justWindow * timing.BeatDurationSeconds;
     public event Action<Keys, Judge, float> Judged;
 
@@ -32,16 +39,32 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
 
     private void OnEnable() { Combo = 0; resolvedBeats.Clear(); }
 
+    /// <summary>무기한 판정 중지(대사, 곡 시작 전, 곡 종료 후). false로 풀면 즉시 판정이 열린다.</summary>
+    public void SetSuspended(bool value) => suspended = value;
+
+    /// <summary>지정 박 이전의 모든 박을 판정에서 제외한다. 일반전 좌석 변경 구간에 사용.</summary>
+    public void BlockUntilBeat(int beat) => blockedUntilBeat = Mathf.Max(blockedUntilBeat, beat);
+
+    /// <summary>판정 중지를 풀되, 지정 박(보통 다음 마디 첫 박)부터 판정을 연다.</summary>
+    public void ResumeAtBeat(int beat)
+    {
+        blockedUntilBeat = beat;
+        suspended = false;
+    }
+
+    public bool IsBeatBlocked(int beat) => suspended || beat < blockedUntilBeat;
+
     private void Update()
     {
         // Fever keeps normal key scoring, but missed beats must not break the
         // combo while its bonus window is active.
-        if (fever != null && fever.IsActive)
+        if (fever != null && (fever.IsActive || fever.IsJudgementLocked))
             return;
 
         if (!timing.TryGetCurrentBeatTiming(timing.ElapsedSeconds, out int currentBeat, out float elapsedIntoBeat, out float beatDuration))
             return;
         if (currentBeat < 0) return;
+        if (IsBeatBlocked(currentBeat)) return;
         // A press belongs to the nearest beat boundary.  Keep the preceding
         // beat open until the midpoint of this beat so its late Bad/Good side
         // can still be judged before resolving it as a Miss.
@@ -66,6 +89,9 @@ public sealed class RhythmWheelJudgement : MonoBehaviour
         // The fourth beat in each phrase remains a rest.  The timestamp-based
         // input sampling in RhythmWheelTiming already handles callback delay.
         if (beat % 4 == 3)
+            return false;
+
+        if (IsBeatBlocked(beat))
             return false;
 
         if (!resolvedBeats.Add(beat)) 

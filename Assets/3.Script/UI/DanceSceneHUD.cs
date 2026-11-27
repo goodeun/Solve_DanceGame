@@ -66,7 +66,8 @@ public class DanceSceneHUD : MonoBehaviour
     {
         if (isFever)
         {
-            StartCoroutine(HideHud(feverDuration));
+            if (hideHudRoutine != null) StopCoroutine(hideHudRoutine);
+            hideHudRoutine = StartCoroutine(HideHud(feverDuration));
             feverUI.FeverSuccess(feverDuration, returnBlendDuration);
         }
         else
@@ -75,16 +76,32 @@ public class DanceSceneHUD : MonoBehaviour
         }
     }
 
-    //내부용
+    private Coroutine hideHudRoutine;
+
+    // 피버 중 HUD 숨김. 게임플레이 종료(박 기준)에 맞춰 EndFeverTime에서 복구하며,
+    // 시간 기준 복구는 EndFeverTime이 호출되지 않는 경우의 안전장치다.
     private IEnumerator HideHud(float feverDuration)
     {
         canvas.alpha = 0;
 
-        yield return new WaitForSeconds(feverDuration);
+        yield return new WaitForSeconds(feverDuration + 2f);
 
         canvas.alpha = 1;
+        hideHudRoutine = null;
     }
 
+    /// <summary>피버 종료 박에서 HUD를 복구한다.</summary>
+    public void EndFeverTime()
+    {
+        if (hideHudRoutine != null)
+        {
+            StopCoroutine(hideHudRoutine);
+            hideHudRoutine = null;
+        }
+
+        if (canvas != null)
+            canvas.alpha = 1;
+    }
 
     #region 디버그
 

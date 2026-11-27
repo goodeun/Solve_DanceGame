@@ -13,8 +13,20 @@ public class NGBubbleManager : MonoBehaviour
     private FmodMusicClock musicClock;
     private RhythmWheelFever fever;
 
-    private int point3chance = 10;
-    private int point6chance = 5;
+    [Header("Tackle Gimmick (3개 객석 동시 태클)")]
+    [Tooltip("일반전에서 마디마다 3개 동시 태클이 나올 확률(%). 기획상 보스전 기믹이므로 기본 0")]
+    [SerializeField, Range(0, 100)] private int normalTripleChance = 0;
+    [Tooltip("보스전에서 마디마다 3개 동시 태클이 나올 확률(%)")]
+    [SerializeField, Range(0, 100)] private int bossTripleChance = 20;
+    [Tooltip("보스전에서 마디마다 태클 1개가 추가로 나올 확률(%) - 더 높은 출현 빈도")]
+    [SerializeField, Range(0, 100)] private int bossExtraBubbleChance = 35;
+    [Tooltip("보스전 방치 불이익 배수(배율 하락·객석 점수 감소)")]
+    [SerializeField, Min(1f)] private float bossPenaltyScale = 2f;
+
+    /// <summary>튜토리얼 등에서 무작위 태클 생성을 끈다(Miss로 생기는 태클은 유지).</summary>
+    public bool RandomGimmickEnabled { get; set; } = true;
+
+    private bool IsBossBattle => PhaseController.Instance != null && PhaseController.Instance.CurrentPhase == Phase.Villain;
 
     private Stage stage = Stage.Square;
 
@@ -115,7 +127,7 @@ public class NGBubbleManager : MonoBehaviour
             if ((int)key < 0)
                 continue;
 
-            stageController.GetSeatForKey(key)?.RemovePlayerPoints(pointsLostPerBubblePerBeat);
+            stageController.GetSeatForKey(key)?.RemovePlayerPoints(Mathf.RoundToInt(pointsLostPerBubblePerBeat * bossPenaltyScale));
         }
     }
 
@@ -127,15 +139,15 @@ public class NGBubbleManager : MonoBehaviour
         // 이벤트 구독 후 갯수 새고 넘김
         CreateBubble(miss);
 
-        // 랜덤 기믹 출현
-        int range = Random.Range(0, 100);
-        if (range <= point6chance)
+        // 랜덤 기믹 출현 (6개 동시 생성은 폐기, 3개 동시 생성만 유지)
+        if (RandomGimmickEnabled)
         {
-            BubbleGimmick(6);
-        }
-        else if (range <= point6chance + point3chance)
-        {
-            BubbleGimmick(3);
+            bool boss = IsBossBattle;
+            int tripleChance = boss ? bossTripleChance : normalTripleChance;
+            if (Random.Range(0, 100) < tripleChance)
+                BubbleGimmick(3);
+            else if (boss && Random.Range(0, 100) < bossExtraBubbleChance)
+                BubbleGimmick(1);
         }
 
         RemoveBubble(command, k);
@@ -158,29 +170,8 @@ public class NGBubbleManager : MonoBehaviour
     {
         if (command != KeyCommand.AAB) return;
 
-        int index = 0;
-
-        switch (key)
-        {
-            case Keys.Q:
-                index = 0;
-                break;
-            case Keys.E:
-                index = 1;
-                break;
-            case Keys.A:
-                index = 2;
-                break;
-            case Keys.D:
-                index = 3;
-                break;
-            case Keys.W:
-                index = 4;
-                break;
-            case Keys.S:
-                index = 5;
-                break;
-        }
+        int index = KeyToIndex(key);
+        if (index < 0 || index >= negativeBubble.Length) return;
 
         NegativeBubble curBubble = negativeBubble[index];
 
@@ -249,7 +240,48 @@ public class NGBubbleManager : MonoBehaviour
     private void CaculateDecrease(int ActiveBubble)
     {
         // 배율 하락
-        scoreManager.DecreaseMultipliers(ActiveBubble);
+        scoreManager?.DecreaseMultipliers(ActiveBubble, IsBossBattle ? bossPenaltyScale : 1f);
     }
+
+    // 말풍선 배열 순서: 0 Q, 1 E, 2 A, 3 D, 4 W, 5 S
+    private static int KeyToIndex(Keys key) => key switch
+    {
+        Keys.Q => 0,
+        Keys.E => 1,
+        Keys.A => 2,
+        Keys.D => 3,
+        Keys.W => 4,
+        Keys.S => 5,
+        _ => -1
+    };
+
+    /// <summary>해당 키 객석에 태클 말풍선이 떠 있는지.</summary>
+    public bool IsBubbleActive(Keys key)
+    {
+        int index = KeyToIndex(key);
+        return negativeBubble != null && index >= 0 && index < negativeBubble.Length
+            && negativeBubble[index] != null && negativeBubble[index].gameObject.activeSelf;
+    }
+
+    /// <summary>현재 배치의 빈 객석 하나에 태클 말풍선을 띄운다(튜토리얼·연출용).</summary>
+    public bool SpawnBubble()
+    {
+        if (!GetBubble(out NegativeBubble bubble)) return false;
+
+        bubble.gameObject.SetActive(true);
+        ActiveBubble++;
+        return true;
+    }
+
+    /// <summary>현재 배치의 빈 객석 count개에 동시에 태클을 띄운다.</summary>
+    public int SpawnBubbles(int count)
+    {
+        int spawned = 0;
+        for (int i = 0; i < count; i++)
+            if (SpawnBubble()) spawned++;
+        return spawned;
+    }
+
+    public void ClearBubbles() => ClearAllNegativeBubbles();
 
 }

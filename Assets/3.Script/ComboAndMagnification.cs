@@ -8,6 +8,12 @@ public class ComboAndMagnification : MonoBehaviour
     public event System.Action<Keys, int, int, int, int, KeyCommand> OnPhraseHandoff;
     public event System.Action<Keys> OnComboSaved;
     public event System.Action OnComboFailed;
+    /// <summary>마디 콤보 변경 시 (현재 콤보).</summary>
+    public event System.Action<int> OnBarComboChanged;
+
+    /// <summary>세 박을 모두 성공한 마디가 연속된 횟수. 마디가 끝날 때 하나씩 적립된다.</summary>
+    public int BarCombo { get; private set; }
+    public int MaxBarCombo { get; private set; }
 
     [Header("4-Beat Input Recording")]
     [SerializeField] private RhythmWheelUI rhythmWheel;
@@ -96,6 +102,10 @@ public class ComboAndMagnification : MonoBehaviour
         //currentPhraseKeys.Clear();
         comboSavedThisPhrase = true;
 
+        BarCombo++;
+        MaxBarCombo = Mathf.Max(MaxBarCombo, BarCombo);
+        OnBarComboChanged?.Invoke(BarCombo);
+
         OnComboSaved?.Invoke(phrase[phrase.Length - 1]);
         ApplyPhraseMood(phrase[phrase.Length - 1]);
 
@@ -106,7 +116,9 @@ public class ComboAndMagnification : MonoBehaviour
 
         // Fever can overlap a phrase.  Keep its bonus window from producing a
         // combo failure, while still allowing regular input scoring.
-        if (rhythmWheel != null && (rhythmWheel.IsJudgementLocked || rhythmWheel.IsFeverActive))
+        // 좌석 변경·대사 등으로 판정 제외된 마디도 성공·실패로 세지 않는다.
+        bool blocked = rhythmWheel != null && rhythmWheel.IsPhraseBlocked(rhythmWheel.CurrentBeat);
+        if (rhythmWheel != null && (blocked || rhythmWheel.IsJudgementLocked || rhythmWheel.IsFeverActive))
         {
             currentPhraseKeys.Clear();
             currentPhraseJudgements.Clear();
@@ -135,6 +147,11 @@ public class ComboAndMagnification : MonoBehaviour
             return;
 
         comboFailedThisPhrase = true;
+        if (BarCombo != 0)
+        {
+            BarCombo = 0;
+            OnBarComboChanged?.Invoke(BarCombo);
+        }
         //currentPhraseKeys.Clear();
         //currentPhraseJudgements.Clear();
         OnComboFailed?.Invoke();
@@ -232,6 +249,25 @@ public class ComboAndMagnification : MonoBehaviour
     public void SetStage(Stage stage)
     {
         curStage = stage;
+    }
+
+    public Stage CurrentStage => curStage;
+
+    /// <summary>진행 중인 마디 기록을 버린다. 전환 진입·재개 시 이전 입력이 섞이지 않게 한다.</summary>
+    public void ResetCurrentPhrase()
+    {
+        currentPhraseKeys.Clear();
+        currentPhraseJudgements.Clear();
+        comboSavedThisPhrase = false;
+        comboFailedThisPhrase = false;
+        curCommand = KeyCommand.None;
+    }
+
+    public void ResetBarCombo()
+    {
+        BarCombo = 0;
+        MaxBarCombo = 0;
+        OnBarComboChanged?.Invoke(BarCombo);
     }
 }
 

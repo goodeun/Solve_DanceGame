@@ -38,6 +38,13 @@ public class FmodMusicClock : MonoBehaviour
 
     /// <summary>Raised on Unity's main thread for every FMOD timeline beat.</summary>
     public event Action<int, int, float, int, int> TimelineBeat;
+    /// <summary>곡 재생이 끝났을 때(FMOD 재생 상태가 STOPPED가 됨) 한 번 발생.</summary>
+    public event Action MusicEnded;
+
+    public bool IsEnded { get; private set; }
+    public bool AutoPhaseFromBpm => autoPhaseFromBpm;
+    /// <summary>곡이 시작되기 전의 기본 BPM(카운트다운 길이 계산용).</summary>
+    public float ConfiguredBpm => bpm;
 
     private EventInstance musicInstance;
     private readonly ConcurrentQueue<TimelineBeatData> pendingTimelineBeats = new();
@@ -92,6 +99,18 @@ public class FmodMusicClock : MonoBehaviour
     {
         if (!IsStarted || !musicInstance.isValid() || IsPaused) return;
 
+        if (!IsEnded)
+        {
+            musicInstance.getPlaybackState(out PLAYBACK_STATE playbackState);
+            if (playbackState == PLAYBACK_STATE.STOPPED)
+            {
+                IsEnded = true;
+                pendingTimelineBeats.Clear();
+                MusicEnded?.Invoke();
+                return;
+            }
+        }
+
         while (pendingTimelineBeats.TryDequeue(out TimelineBeatData data))
         {
             CurrentBar = data.Bar;
@@ -117,6 +136,30 @@ public class FmodMusicClock : MonoBehaviour
         musicInstance.start();
         IsStarted = true;
         IsPaused = false;
+    }
+
+    /// <summary>씬 흐름 관리자가 대사·카운트다운 후 직접 곡을 시작할 때 Awake에서 호출한다.</summary>
+    public void DisableAutoStart() => autoStart = false;
+
+    /// <summary>보스전처럼 속성 페이즈를 고정할 때 BPM 기반 자동 전환을 끈다.</summary>
+    public void SetAutoPhase(bool enabled) => autoPhaseFromBpm = enabled;
+
+    /// <summary>곡을 처음부터 다시 재생한다(튜토리얼 루프용). 게임 박 번호는 이어서 증가한다.</summary>
+    public void RestartMusic()
+    {
+        if (!musicInstance.isValid()) return;
+
+        musicInstance.start();
+        IsStarted = true;
+        IsPaused = false;
+        IsEnded = false;
+    }
+
+    public void StopMusic(bool allowFadeOut = true)
+    {
+        if (!IsStarted || !musicInstance.isValid()) return;
+
+        musicInstance.stop(allowFadeOut ? FMOD.Studio.STOP_MODE.ALLOWFADEOUT : FMOD.Studio.STOP_MODE.IMMEDIATE);
     }
 
     public void SetPause(bool paused)

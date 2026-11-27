@@ -167,7 +167,11 @@ public class BubbleManager : MonoBehaviour
 
         //TODO 플레이어 전체 스탯 객체 가져와야 함
         PlayerStats myStats = new PlayerStats { rhythm = 20, groove = 15, power = 10, style = 5, condition = 80 };
-        string targetLine = DialogueManager.Instance.GetDialogue("Dance", state.ToString(), myStats);
+        // 보스전(Villain 페이즈)에서는 보스 발언·보스를 응원하는 관객 문구를 사용한다.
+        bool bossBattle = PhaseController.Instance != null && PhaseController.Instance.CurrentPhase == Phase.Villain;
+        string targetLine = DialogueManager.Instance != null
+            ? DialogueManager.Instance.GetDialogue(bossBattle ? "Boss" : "Dance", state.ToString(), myStats)
+            : string.Empty;
 
         additiveBubble.Initialize(state, targetLine);
 

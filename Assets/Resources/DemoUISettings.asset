@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 351f4d3de6474ab1a9bc0f4c60b37c67, type: 3}
+  m_Name: DemoUISettings
+  m_EditorClassIdentifier: 
+  bodyFont: {fileID: 11400000, guid: 41d0213493d21b445a0d5532e4ffb66c, type: 2}
+  titleFont: {fileID: 11400000, guid: bcae19feb2834f24bb422b8af001d622, type: 2}
+  magenta: {r: 1, g: 0.18, b: 0.78, a: 1}
+  cyan: {r: 0.25, g: 0.85, b: 1, a: 1}
+  green: {r: 0.75, g: 1, b: 0.2, a: 1}
+  panel: {r: 0.08, g: 0.03, b: 0.12, a: 0.92}
+  text: {r: 1, g: 1, b: 1, a: 1}
+  phaseChangeSprite: {fileID: 0}
+  changeNextSprite: {fileID: 0}
+  dialogueBoxSprite: {fileID: 0}
+  dialogueNextIcon: {fileID: 0}
+  titleScene: DemoTitle
+  tutorialScene: DemoTutorial
+  mainScene: DanceScene_1
+  bossScene: DanceScene_Rival
+  resultScene: DemoResult

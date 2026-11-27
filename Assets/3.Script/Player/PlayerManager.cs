@@ -8,6 +8,20 @@ public class PlayerManager : MonoBehaviour
 
     public PlayerStats currentStats;
 
+    [Tooltip("대사 시스템용 플레이어 스탠딩. PlayerStanding enum 순서(Normal, Happy, Surprised, Sad, Angry)")]
+    [SerializeField] private Sprite[] standingSprites;
+
+    public Sprite GetStanding(PlayerStanding standing)
+    {
+        if (standingSprites == null || standingSprites.Length == 0) return null;
+
+        int index = (int)standing;
+        if (index < 0 || index >= standingSprites.Length || standingSprites[index] == null)
+            index = 0;
+
+        return standingSprites[index];
+    }
+
     private void Awake()
     {
         if (Instance == null)

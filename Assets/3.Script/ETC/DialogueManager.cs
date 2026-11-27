@@ -49,6 +49,11 @@ public class DialogueManager : MonoBehaviour
             int randomIndex = Random.Range(0, validEntries.Count);
             return validEntries[randomIndex].text;
         }
+
+        // 보스전 문구가 없으면 일반 댄스 문구로 대체한다.
+        if (scene == "Boss")
+            return GetDialogue("Dance", state, curStats);
+
         return "No data";
     }
 

@@ -37,6 +37,21 @@ public class StageController : MonoBehaviour
             Instance = null;
     }
 
+    public int SeatCount => seats != null ? seats.Length : 0;
+    public StageVisual GetSeat(int index) => seats != null && index >= 0 && index < seats.Length ? seats[index] : null;
+
+    /// <summary>현재 배치에서 키에 해당하는 객석 번호(Seats 배열 순서). 없으면 -1.</summary>
+    public int GetSeatIndexForKey(Keys key) => GetSeatIndex(key);
+
+    /// <summary>현재 배치에서 객석 번호에 해당하는 키.</summary>
+    public Keys GetKeyForSeat(int index)
+    {
+        Keys[] stageKeys = currentPhase == Stage.Square ? squareSeatKeys : rhombusSeatKeys;
+        return stageKeys != null && index >= 0 && index < stageKeys.Length ? stageKeys[index] : Keys.Q;
+    }
+
+    public float TransitionDuration => transitionDuration;
+
     public StageVisual GetSeatForKey(Keys key)
     {
         int seatIndex = GetSeatIndex(key);

@@ -49,6 +49,9 @@ public class DancePauseHandler : MonoBehaviour, IPauseSceneHandler
 
     public void OnResumeRequested(Action onReadyToResume)
     {
+        // 카운트다운은 씬 흐름 컴포넌트가 실행 중에 추가할 수 있으므로 늦게 찾는다.
+        if (countDownCon == null) countDownCon = FindAnyObjectByType<CountDownController>();
+
         if (countDownCon != null)
         {
             countDownCon.StartCountdown(onReadyToResume);

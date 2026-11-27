@@ -45,6 +45,8 @@ public sealed class PhaseController : MonoBehaviour
     private static readonly int EmissionColorId = Shader.PropertyToID("_EmissionColor");
     private readonly System.Collections.Generic.List<Tween> activeColorTweens = new();
     public Phase CurrentPhase => phase;
+    /// <summary>(이전 페이즈, 새 페이즈)</summary>
+    public event System.Action<Phase, Phase> PhaseChanged;
     public Color CurrentEmissionColor => GetEmissionColour(phase);
 
     public static PhaseController Instance { get; private set; }
@@ -98,7 +100,10 @@ public sealed class PhaseController : MonoBehaviour
 
     public void SetPhase(Phase nextPhase)
     {
+        Phase previous = phase;
         phase = nextPhase;
+        if (previous != nextPhase)
+            PhaseChanged?.Invoke(previous, nextPhase);
         scoreManager?.SetPhase(nextPhase);
         Apply(true);
     }
