@@ -10,6 +10,8 @@ public class PlayerDanceAnimator : MonoBehaviour
 
     [SerializeField] private GameObject finishSparkleEffect;
 
+    [SerializeField, Range(0.02f, 0.4f)] private float danceBlendBeats = 0.12f;
+
     private Animator animator;
 
     private readonly int hashIdle = Animator.StringToHash("Idle");
@@ -19,6 +21,13 @@ public class PlayerDanceAnimator : MonoBehaviour
     private readonly int hashDance_D = Animator.StringToHash("Dance_D");
     private readonly int hashDance_W = Animator.StringToHash("Dance_W");
     private readonly int hashDance_S = Animator.StringToHash("Dance_S");
+
+    private readonly int hashFail_Q = Animator.StringToHash("DanceFail_Q");
+    private readonly int hashFail_E = Animator.StringToHash("DanceFail_E");
+    private readonly int hashFail_A = Animator.StringToHash("DanceFail_A");
+    private readonly int hashFail_D = Animator.StringToHash("DanceFail_D");
+    private readonly int hashFail_W = Animator.StringToHash("DanceFail_W");
+    private readonly int hashFail_S = Animator.StringToHash("DanceFail_S");
 
     private readonly int hashFace_Idle = Animator.StringToHash("robo_idle");
     private readonly int hashFace_Just = Animator.StringToHash("Judge_Just");
@@ -61,14 +70,42 @@ public class PlayerDanceAnimator : MonoBehaviour
 
         if (judge == Judge.Miss)
         {
-            animator.CrossFade(hashIdle, 0.1f, 0, 0f);
+            BlendDance(hashIdle);
             return;
         }
 
-        int targetHash = GetDanceHash(key);
+        animator.speed = 1f / Mathf.Max(0.05f, rhythmWheel.BeatDurationSeconds);
+        // Bad still uses the existing score judgement; only the body performance changes.
+        bool failed = judge == Judge.Bad;
+        int targetHash = failed ? GetFailHash(key) : GetDanceHash(key);
+        BlendDance(targetHash, failed);
+    }
 
-        animator.speed = 1f / rhythmWheel.BeatDurationSeconds;
-        animator.CrossFade(targetHash, 0.1f, 0, 0f);
+    private void BlendDance(int targetHash, bool restart = false)
+    {
+        // Keep the one-beat loop running on repeated inputs instead of rewinding it.
+        AnimatorStateInfo destination = animator.IsInTransition(0)
+            ? animator.GetNextAnimatorStateInfo(0)
+            : animator.GetCurrentAnimatorStateInfo(0);
+        if (!restart && destination.shortNameHash == targetHash) return;
+
+        // Gameplay clips are one second long and Animator.speed maps that second to one beat.
+        // Fixed-time blending avoids inheriting the length of a previous idle/fever clip.
+        animator.CrossFadeInFixedTime(targetHash, danceBlendBeats, 0, 0f);
+    }
+
+    private int GetFailHash(Keys key)
+    {
+        switch (key)
+        {
+            case Keys.Q: return hashFail_Q;
+            case Keys.E: return hashFail_E;
+            case Keys.W: return hashFail_W;
+            case Keys.A: return hashFail_A;
+            case Keys.D: return hashFail_D;
+            case Keys.S: return hashFail_S;
+            default: return hashIdle;
+        }
     }
 
     private int GetDanceHash(Keys key)
