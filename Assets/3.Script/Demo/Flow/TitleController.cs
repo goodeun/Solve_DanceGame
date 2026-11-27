@@ -19,6 +19,9 @@ public class TitleController : MonoBehaviour
     [SerializeField, TextArea] private string demoNotice = "이번 데모는 댄스 파트(일반전 · 라이벌전)까지 플레이할 수 있습니다.\n일상 파트는 추후 업데이트로 추가될 예정입니다.";
     [SerializeField, TextArea] private string continueNotice = "이어하기는 일상 파트가 추가된 뒤 지원됩니다.\n이번 데모에서는 '새로하기'로 플레이해 주세요.";
     [SerializeField] private bool skipTutorialIfMissing = true;
+    [Header("Debug")]
+    [Tooltip("우측 상단에 라이벌 씬으로 바로 가는 디버그 버튼을 띄운다(배포 전에 끄기)")]
+    [SerializeField] private bool showDebugBossButton = true;
 
     private void Start()
     {
@@ -70,7 +73,20 @@ public class TitleController : MonoBehaviour
         DemoUI.Place((RectTransform)notice.transform, new Vector2(0.5f, 0.06f), new Vector2(1600f, 110f), Vector2.zero);
         notice.color = new Color(1f, 1f, 1f, 0.75f);
 
+        if (showDebugBossButton)
+        {
+            Button debugBoss = DemoUI.CreateButton("DebugBoss", canvas.transform, "[DEBUG] 라이벌전", new Vector2(320f, 70f), DebugBoss);
+            DemoUI.Place((RectTransform)debugBoss.transform, new Vector2(1f, 1f), new Vector2(320f, 70f), new Vector2(-190f, -65f));
+        }
+
         EventSystem.current?.SetSelectedGameObject(newGame.gameObject);
+    }
+
+    /// <summary>디버그: 기록 초기화 후 라이벌 씬으로 바로 이동.</summary>
+    private void DebugBoss()
+    {
+        DemoSession.Reset();
+        SceneFlow.Load(DemoUI.Settings.bossScene);
     }
 
     private void NewGame()
