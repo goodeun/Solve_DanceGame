@@ -5,8 +5,8 @@ public enum Keys
 
 public enum Stage
 {
-    Square, // »ç°¢Çü ¹èÄ¡ Q E A D
-    Rhombus, // ¸¶¸§¸ğ ¹èÄ¡ W A S D
+    Square, // ì‚¬ê°í˜• ë°°ì¹˜ Q E A D
+    Rhombus, // ë§ˆë¦„ëª¨ ë°°ì¹˜ W A S D
 }
 
 public enum Phase { Pop, HipHop, Techno, Villain }

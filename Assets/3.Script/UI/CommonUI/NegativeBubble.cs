@@ -43,7 +43,7 @@ public class NegativeBubble : MonoBehaviour
 
     public void DisableBubble()
     {
-        // TODO ������ �ִϸ��̼�
+        // TODO 꺼지는 애니메이션
         gameObject.SetActive(false);
     }
 
@@ -52,7 +52,7 @@ public class NegativeBubble : MonoBehaviour
         startPos = originPos + offsetPos;
     }
 
-    public void MoveAnchore(Stage stage) // 3, 4 �� ��ǳ���� �ش�
+    public void MoveAnchore(Stage stage) // 3, 4 번 말풍선만 해당
     {
         if (stage == Stage.Rhombus)
         {

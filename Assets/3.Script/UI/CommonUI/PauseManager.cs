@@ -30,7 +30,7 @@ public class PauseManager : MonoBehaviour
 
         if (sceneHandler == null)
         {
-            Debug.LogError("sceneHandlerObject¿¡ IPauseSceneHandler ±¸ÇöÃ¼°¡ ¿¬°áµÇÁö ¾ÊÀ½");
+            Debug.LogError("sceneHandlerObjectì— IPauseSceneHandler êµ¬í˜„ì²´ê°€ ì—°ê²°ë˜ì§€ ì•ŠìŒ");
         }
     }
 

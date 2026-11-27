@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class LifeSceneHUD : MonoBehaviour
 {
-    // ÀÏ»ó ÆÄÆ® µé¾î°¡¸é ÀÛ¼º
+    // ì¼ìƒ íŒŒíŠ¸ ë“¤ì–´ê°€ë©´ ì‘ì„±
 }

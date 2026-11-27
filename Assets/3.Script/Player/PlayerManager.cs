@@ -21,7 +21,7 @@ public class PlayerManager : MonoBehaviour
         }
         DontDestroyOnLoad(gameObject);
 
-        // TODO ÀÓ½Ã °ª, ÀÏ»ó ¾À°ú ¿¬µ¿ÇÏ¿© ºÒ·¯¿À±â.
+        // TODO ì„ì‹œ ê°’, ì¼ìƒ ì”¬ê³¼ ì—°ë™í•˜ì—¬ ë¶ˆëŸ¬ì˜¤ê¸°.
         currentStats = new PlayerStats { rhythm = 2000, groove = 1600, power = 1500, style = 5, condition = 80 };
     }
 

@@ -60,7 +60,7 @@ public class JudgementUI : MonoBehaviour
         judgement_img.DOFade(0, 0.1f);
     }
 
-    #region µð¹ö±×
+    #region ë””ë²„ê·¸
     public void DEBUG_JudgementTest()
     {
         StartCoroutine(DEBUG_JudgementTest_co());

@@ -7,14 +7,14 @@ Assets/Plugins/FMOD/**/Info.plist text eol=lf
 # ==========================================
 # FMOD Studio Metadata (Merge & EOL)
 # ==========================================
-# XML ¸ŞÅ¸µ¥ÀÌÅÍ ÁÙ¹Ù²Ş ÅëÀÏ (Windows/Mac Çù¾÷ ÇÊ¼ö)
+# XML ë©”íƒ€ë°ì´í„° ì¤„ë°”ê¿ˆ í†µì¼ (Windows/Mac í˜‘ì—… í•„ìˆ˜)
 *.xml text eol=lf
 *.fspro text eol=lf
 
 # ==========================================
-# Audio Assets & FMOD Banks (Git LFS ±ÇÀå)
+# Audio Assets & FMOD Banks (Git LFS ê¶Œì¥)
 # ==========================================
-# ¿øº» ¿¡¼Â (FMOD ÇÁ·ÎÁ§Æ® ³» Assets Æú´õ)
+# ì›ë³¸ ì—ì…‹ (FMOD í”„ë¡œì íŠ¸ ë‚´ Assets í´ë”)
 *.wav filter=lfs diff=lfs merge=lfs -text
 *.ogg filter=lfs diff=lfs merge=lfs -text
 *.mp3 filter=lfs diff=lfs merge=lfs -text
@@ -22,6 +22,6 @@ Assets/Plugins/FMOD/**/Info.plist text eol=lf
 *.aif filter=lfs diff=lfs merge=lfs -text
 *.aiff filter=lfs diff=lfs merge=lfs -text
 
-# ¹ğÅ© ÆÄÀÏµµ GitÀ¸·Î Çü»ó °ü¸®ÇÒ °æ¿ì (StreamingAssets À¯Áö ½Ã)
+# ë±…í¬ íŒŒì¼ë„ Gitìœ¼ë¡œ í˜•ìƒ ê´€ë¦¬í•  ê²½ìš° (StreamingAssets ìœ ì§€ ì‹œ)
 *.bank filter=lfs diff=lfs merge=lfs -text
 *.strings.bank filter=lfs diff=lfs merge=lfs -text

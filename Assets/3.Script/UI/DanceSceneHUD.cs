@@ -7,7 +7,7 @@ public class DanceSceneHUD : MonoBehaviour
 {
     [SerializeField] private CanvasGroup canvas;
 
-    // Dance ÆÄÆ® HUD °ü¸®
+    // Dance íŒŒíŠ¸ HUD ê´€ë¦¬
     [SerializeField] private JudgementUI judgementUI;
     [SerializeField] private FeverGageUI feverGageUI;
     [SerializeField] private ScoreUI scoreUI;
@@ -36,33 +36,33 @@ public class DanceSceneHUD : MonoBehaviour
         }
     }
 
-    public void JudgementEffect(Judge judge) // ÆÇÁ¤½Ã ³ª¿À´Â ÀÌÆåÆ®
+    public void JudgementEffect(Judge judge) // íŒì •ì‹œ ë‚˜ì˜¤ëŠ” ì´í™íŠ¸
     {
         judgementUI.JudgementUpdate(judge);
     }
 
-    public void AddFeverGage(float value) // ÇÇ¹ö °ÔÀÌÁö
+    public void AddFeverGage(float value) // í”¼ë²„ ê²Œì´ì§€
     {
         feverGageUI.UpdateFeverGage(value);
     }
 
-    public void AddScore(int totalScore) // ÀüÃ¼ Á¡¼ö - Á¡¼ö ¿À¸¦ ¶§¸¶´Ù È£ÃâÇØ¼­ ÀüÃ¼ Á¡¼ö ÀÔ·Â
+    public void AddScore(int totalScore) // ì „ì²´ ì ìˆ˜ - ì ìˆ˜ ì˜¤ë¥¼ ë•Œë§ˆë‹¤ í˜¸ì¶œí•´ì„œ ì „ì²´ ì ìˆ˜ ì…ë ¥
     {
         scoreUI.ScoreUpdate(totalScore);
     }
 
-    public void HealthDamaged(int damage) // ½Ç¼ö½Ã Ã¼·Â ´â¾ÒÀ» ¶§
+    public void HealthDamaged(int damage) // ì‹¤ìˆ˜ì‹œ ì²´ë ¥ ë‹³ì•˜ì„ ë•Œ
     {
         healthUI.Damage(damage);
     }
 
-    public void HealthHealed(int healValue) // Ã¼·Â È¸º¹ÇÒ ¶§
+    public void HealthHealed(int healValue) // ì²´ë ¥ íšŒë³µí•  ë•Œ
     {
         healthUI.Heal(healValue);
     }
 
-    public void RequestFeverTime(bool isFever, float feverDuration, float returnBlendDuration = 0.5f) // ÇÇ¹ö Å¸ÀÓ ¾ó¸¶³ª Áö¼ÓÇÒÁö bpm, ¸¶µğ °è»êÇØ¼­ ÃÑ ÇÇ¹ö duration ÀÔ·Â
-                                                                    // isFever  true - ÇÇ¹ö ÁøÀÔ ¼º°ø | false - ÇÇ¹ö ÁøÀÔ ½ÇÆĞ
+    public void RequestFeverTime(bool isFever, float feverDuration, float returnBlendDuration = 0.5f) // í”¼ë²„ íƒ€ì„ ì–¼ë§ˆë‚˜ ì§€ì†í• ì§€ bpm, ë§ˆë”” ê³„ì‚°í•´ì„œ ì´ í”¼ë²„ duration ì…ë ¥
+                                                                    // isFever  true - í”¼ë²„ ì§„ì… ì„±ê³µ | false - í”¼ë²„ ì§„ì… ì‹¤íŒ¨
     {
         if (isFever)
         {
@@ -75,7 +75,7 @@ public class DanceSceneHUD : MonoBehaviour
         }
     }
 
-    //³»ºÎ¿ë
+    //ë‚´ë¶€ìš©
     private IEnumerator HideHud(float feverDuration)
     {
         canvas.alpha = 0;
@@ -86,7 +86,7 @@ public class DanceSceneHUD : MonoBehaviour
     }
 
 
-    #region µğ¹ö±×
+    #region ë””ë²„ê·¸
 
     public void DEBUG_FeverTime(bool isFever)
     {

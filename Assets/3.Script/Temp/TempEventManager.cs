@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//�ӽ� �̺�Ʈ.
+//임시 이벤트.
 public static class TempEventManager
 {
     public static Action OnBeat_Temp;

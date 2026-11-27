@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class HUDManager : MonoBehaviour
 {
-    // °ÔÀÓ ¾À HUD¿Í ÀÏ»ó ¾À HUD´Â °¢±â ´Ù¸¥ HUDÀÌ°í, »ó½Ã HUDManager°¡ ÇöÀç UI¸¦ º¯°æ.
+    // ê²Œì„ ì”¬ HUDì™€ ì¼ìƒ ì”¬ HUDëŠ” ê°ê¸° ë‹¤ë¥¸ HUDì´ê³ , ìƒì‹œ HUDManagerê°€ í˜„ì¬ UIë¥¼ ë³€ê²½.
 
     public static HUDManager Instance = null;
 
@@ -75,16 +75,16 @@ public class HUDManager : MonoBehaviour
         InGameEvent.OnLifeToDance += SwitchSceneToDanceScene;
         InGameEvent.OnDanceToLife += SwitchSceneToLifeScene;
 
-        // TODO ¾Æ·¡´Â ÀÓ½Ã HUD È°¼ºÈ­
-        // ³ªÁß¿¡ ¾À ½ÃÀÛ ÀÌº¥Æ®·Î ºÒ·¯¿Ã °Í
+        // TODO ì•„ë˜ëŠ” ì„ì‹œ HUD í™œì„±í™”
+        // ë‚˜ì¤‘ì— ì”¬ ì‹œì‘ ì´ë²¤íŠ¸ë¡œ ë¶ˆëŸ¬ì˜¬ ê²ƒ
 
         SwitchSceneToDanceScene();
     }
 
     public void SwitchSceneToDanceScene()
     {
-        // Life UI¸¦ Á¾·áÇÏ°í Dance UI¸¦ Å²´Ù.
-        Debug.Log("[HUD] ´í½º ÆÄÆ® UI È°¼ºÈ­");
+        // Life UIë¥¼ ì¢…ë£Œí•˜ê³  Dance UIë¥¼ í‚¨ë‹¤.
+        Debug.Log("[HUD] ëŒ„ìŠ¤ íŒŒíŠ¸ UI í™œì„±í™”");
 
         danceHUD.gameObject.SetActive(true);
         lifeHUD.gameObject.SetActive(false);
@@ -92,8 +92,8 @@ public class HUDManager : MonoBehaviour
 
     public void SwitchSceneToLifeScene()
     {
-        // Dance UI ¸¦ Á¾·áÇÏ°í Life UI¸¦ Å²´Ù.
-        Debug.Log("[HUD] ÀÏ»ó ÆÄÆ® UI È°¼ºÈ­");
+        // Dance UI ë¥¼ ì¢…ë£Œí•˜ê³  Life UIë¥¼ í‚¨ë‹¤.
+        Debug.Log("[HUD] ì¼ìƒ íŒŒíŠ¸ UI í™œì„±í™”");
 
         danceHUD.gameObject.SetActive(false);
         lifeHUD.gameObject.SetActive(true);

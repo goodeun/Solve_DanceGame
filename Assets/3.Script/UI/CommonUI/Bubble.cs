@@ -84,7 +84,7 @@ public class Bubble : MonoBehaviour
         seq.Append(visualRoot.DOMove(visualRoot.position + new Vector3(0, -0.5f, 0), 0.2f).SetEase(Ease.OutBack))
             .Join(visualRoot.DOPunchScale(new Vector3(0.3f, -0.3f, 0), 0.2f, 10, 1))
             .Append(visualRoot.DOScale(Vector3.zero, 0.2f).SetEase(Ease.OutBack))
-            //TODO ÀÌÆåÆ® Àç»ý
+            //TODO ì´íŽ™íŠ¸ ìž¬ìƒ
             .AppendCallback(effect.Play)
             .AppendInterval(0.2f)
             .OnComplete(() => onCompleteCallback?.Invoke()

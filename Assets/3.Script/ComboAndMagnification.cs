@@ -151,7 +151,7 @@ public class ComboAndMagnification : MonoBehaviour
             audienceBlock.ApplyPhraseMood(phraseFinalKey, phraseJudgements);
     }
 
-    // TODO Ŀ�ǵ� ���
+    // TODO 커맨드 계산
     private bool CommandCaculate(List<Keys> phrase, out KeyCommand command, int miss)
     {
         command = KeyCommand.None;
@@ -165,19 +165,19 @@ public class ComboAndMagnification : MonoBehaviour
 
         if (a < 1 || b < 1 || c < 1) return false;
 
-        //AAB Ŀ�ǵ�
+        //AAB 커맨드
         if(a == b && Mathf.Abs(c-b) == 1)
         {
             command = KeyCommand.AAB;
             return true;
         }
-        //ABA Ŀ�ǵ�
+        //ABA 커맨드
         if(a==c && Mathf.Abs(b-a) ==1)
         {
             command = KeyCommand.ABA;
             return true;
         }
-        //ABC Ŀ�ǵ�
+        //ABC 커맨드
         if(b - a == c-b && Mathf.Abs(b-a)==1)
         {
             command = KeyCommand.ABC;

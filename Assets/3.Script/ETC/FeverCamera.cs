@@ -26,7 +26,7 @@ public class FeverCamera : MonoBehaviour
         feverUI = FindAnyObjectByType<FeverUI>();
         feverUI.FeverCameraGroup = this;
 
-        //TODO ÇÃ·¹ÀÌ¾î ¾Ö´Ï¸ŞÀÌÅÍ ¿¬°á. ÀÓ½Ã·Î ÅÂ±× ´Ş¾Æµ×½À´Ï´Ù.
+        //TODO í”Œë ˆì´ì–´ ì• ë‹ˆë©”ì´í„° ì—°ê²°. ì„ì‹œë¡œ íƒœê·¸ ë‹¬ì•„ë’€ìŠµë‹ˆë‹¤.
         player = GameObject.FindWithTag("Player").transform;
 
         Setting();
@@ -42,7 +42,7 @@ public class FeverCamera : MonoBehaviour
     {
         if(player == null)
         {
-            Debug.Log("FeverCamera°¡ player¸¦ Ã£Áö ¸øÇÔ");
+            Debug.Log("FeverCameraê°€ playerë¥¼ ì°¾ì§€ ëª»í•¨");
         }
 
         for (int i = 0; i < feverCameras.Length; i++)
@@ -61,12 +61,12 @@ public class FeverCamera : MonoBehaviour
 
     private IEnumerator FeverSuccess_co(float duration, float returnBlendDuration)
     {
-        //TODO ÇÃ·¹ÀÌ¾î ¾Ö´Ï¸ŞÀÌÅÍ ¿¬°á
+        //TODO í”Œë ˆì´ì–´ ì• ë‹ˆë©”ì´í„° ì—°ê²°
         //playerAnimator.SetTrigger("FeverStart");
 
         mainCameraBrain.DefaultBlend.Style = CinemachineBlendDefinition.Styles.Cut;
 
-        //TODO BPM °è»êÇÏ¿© Ä«¸Ş¶ó ¿¬Ãâ
+        //TODO BPM ê³„ì‚°í•˜ì—¬ ì¹´ë©”ë¼ ì—°ì¶œ
         float timePerCut = duration / feverCameras.Length;
 
         Camera.main.cullingMask &= ~hiddenLayerMask;
@@ -87,7 +87,7 @@ public class FeverCamera : MonoBehaviour
                     .SetEase(Ease.Linear);
             }
 
-            //TODO ÇÃ·¹ÀÌ¾î ¸¶Áö¸· Æ÷Â¡
+            //TODO í”Œë ˆì´ì–´ ë§ˆì§€ë§‰ í¬ì§•
 
             yield return new WaitForSeconds(currentDuration);
 

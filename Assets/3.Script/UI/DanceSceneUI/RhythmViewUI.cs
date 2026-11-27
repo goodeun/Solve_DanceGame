@@ -17,8 +17,8 @@ public class RhythmViewUI : MonoBehaviour
     [SerializeField] private FmodMusicClock musicClock;
     [SerializeField] private RhythmWheelUI rhythmWheel;
 
-    [Header("È£¼± ¼¼ÆÃ")]
-    [Tooltip("½ºÇÁ¶óÀÌÆ®¿¡ ¸Â°Ô Á¶Àı")]
+    [Header("í˜¸ì„  ì„¸íŒ…")]
+    [Tooltip("ìŠ¤í”„ë¼ì´íŠ¸ì— ë§ê²Œ ì¡°ì ˆ")]
     [SerializeField] private float radiusX = 300f;
     [SerializeField] private float radiusY = 150f;
     [SerializeField] private float startAngle = 180f;
@@ -70,7 +70,7 @@ public class RhythmViewUI : MonoBehaviour
 
     private float GetBarProgress()
     {
-        // TODO ¸¶µğ ÁøÇà·ü °è»ê
+        // TODO ë§ˆë”” ì§„í–‰ë¥  ê³„ì‚°
         if (!musicClock.TryGetElapsedSeconds(out float elapsed)) return 0f;
 
         float beatProgress = Mathf.Clamp01((elapsed - musicClock.CurrentBeatStartSeconds) / musicClock.BeatDurationSeconds);
@@ -81,7 +81,7 @@ public class RhythmViewUI : MonoBehaviour
 
     private void UpdateIndicator(float t)
     {
-        // TODO Å¸¿ø Á¢¼± °¢µµ Àû¿ë
+        // TODO íƒ€ì› ì ‘ì„  ê°ë„ ì ìš©
         float angleDeg = Mathf.Lerp(startAngle, endAngle, t);
         float rad = angleDeg * Mathf.Deg2Rad;
 

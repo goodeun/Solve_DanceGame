@@ -50,7 +50,7 @@ public class PausePanelView : MonoBehaviour
         StartCoroutine(curAnim);
     }
 
-    //------------ �ִϸ��̼� -------------
+    //------------ 애니메이션 -------------
 
     private IEnumerator GameToPause_anim_co(Action onComplete)
     {

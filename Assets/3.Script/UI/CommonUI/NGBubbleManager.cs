@@ -124,10 +124,10 @@ public class NGBubbleManager : MonoBehaviour
         if (fever != null && fever.IsActive)
             return;
 
-        // �̺�Ʈ ���� �� ���� ���� �ѱ�
+        // 이벤트 구독 후 갯수 새고 넘김
         CreateBubble(miss);
 
-        // ���� ��� ����
+        // 랜덤 기믹 출현
         int range = Random.Range(0, 100);
         if (range <= point6chance)
         {
@@ -206,7 +206,7 @@ public class NGBubbleManager : MonoBehaviour
         int start = (stage == Stage.Square) ? 0 : 2;
         int end = (stage == Stage.Square) ? 4 : 6;
 
-        // ���ڸ� ��� �� ��ȯ
+        // 빈자리 계산 후 반환
 
         for (int i = start; i < end; i++)
         {
@@ -248,7 +248,7 @@ public class NGBubbleManager : MonoBehaviour
 
     private void CaculateDecrease(int ActiveBubble)
     {
-        // ���� �϶�
+        // 배율 하락
         scoreManager.DecreaseMultipliers(ActiveBubble);
     }
 

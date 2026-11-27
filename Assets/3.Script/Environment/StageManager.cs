@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class StageManager : MonoBehaviour
 {
-    // Àü °´¼®ÀÇ °ü¸® ¸Å´ÏÀú
+    // ì „ ê°ì„ì˜ ê´€ë¦¬ ë§¤ë‹ˆì €
 }

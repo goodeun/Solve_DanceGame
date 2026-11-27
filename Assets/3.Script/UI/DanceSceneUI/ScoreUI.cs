@@ -41,7 +41,7 @@ public class ScoreUI : MonoBehaviour
             .Append(addScore_t.DOFade(0f, 0.3f));
     }
 
-    #region �����
+    #region 디버그
 
     public void DEBUG_ScoreUpdate()
     {

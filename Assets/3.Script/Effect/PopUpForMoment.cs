@@ -6,10 +6,10 @@ using DG.Tweening;
 
 public class PopUpForMoment : MonoBehaviour
 {
-    [Header("ÆË¾÷ ÀÚµ¿ ²¨Áü ¼³Á¤")]
+    [Header("íŒì—… ìë™ êº¼ì§ ì„¤ì •")]
     [SerializeField] private bool isAutoClose = true;
 
-    [Header("ÆË¾÷ À¯Áö ½Ã°£")]
+    [Header("íŒì—… ìœ ì§€ ì‹œê°„")]
     [SerializeField] private float holdTime = 1f;
     [SerializeField] private Ease ease = Ease.OutBack;
     private void OnEnable()
