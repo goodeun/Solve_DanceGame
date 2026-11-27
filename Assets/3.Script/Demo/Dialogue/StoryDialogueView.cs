@@ -167,6 +167,50 @@ public class StoryDialogueView : MonoBehaviour
         if (invokeComplete) complete?.Invoke();
     }
 
+    // ---------------- Pause 숨김 ----------------
+
+    [Header("Pause")]
+    [Tooltip("Pause 시 대사창이 아래로 내려가는 거리")]
+    [SerializeField] private float pauseHideDistance = 520f;
+    [SerializeField, Min(0.05f)] private float pauseHideDuration = 0.3f;
+
+    private bool pauseHidden;
+    private bool hasPauseOrigin;
+    private Vector2 boxPauseOrigin;
+    private Vector2 standingPauseOrigin;
+
+    /// <summary>Pause 중 대사창을 아래로 숨기거나 되돌린다(대사가 없으면 아무 일도 하지 않음).</summary>
+    public static void SetPauseHidden(bool hidden)
+    {
+        if (instance != null) instance.ApplyPauseHidden(hidden);
+    }
+
+    private void ApplyPauseHidden(bool hidden)
+    {
+        if (pauseHidden == hidden || box == null) return;
+        pauseHidden = hidden;
+
+        if (!hasPauseOrigin)
+        {
+            boxPauseOrigin = box.anchoredPosition;
+            if (standingImage != null) standingPauseOrigin = ((RectTransform)standingImage.transform).anchoredPosition;
+            hasPauseOrigin = true;
+        }
+
+        Vector2 offset = hidden ? new Vector2(0f, -pauseHideDistance) : Vector2.zero;
+        Ease ease = hidden ? Ease.InBack : Ease.OutBack;
+
+        box.DOKill(true);
+        box.DOAnchorPos(boxPauseOrigin + offset, pauseHideDuration).SetEase(ease).SetUpdate(true);
+
+        if (standingImage != null)
+        {
+            var standing = (RectTransform)standingImage.transform;
+            standing.DOKill(true);
+            standing.DOAnchorPos(standingPauseOrigin + offset, pauseHideDuration).SetEase(ease).SetUpdate(true);
+        }
+    }
+
     private bool IsPaused => (pauseManager != null && pauseManager.isPauseActive) || Time.timeScale == 0f;
 
     private bool AdvancePressed()
