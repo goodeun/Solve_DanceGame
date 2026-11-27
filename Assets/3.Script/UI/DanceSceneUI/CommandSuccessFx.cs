@@ -30,6 +30,8 @@ public class CommandSuccessFx : MonoBehaviour
     [SerializeField, Range(4, 24)] private int sparkCount = 12;
     [SerializeField] private bool seatBurst = true;
     [SerializeField] private bool punchWheel = true;
+    [Tooltip("AAB(태클 처리)는 태클 말풍선의 액체(MetaBall) 연출이 터지므로 여기서는 글자와 휠 튕김만")]
+    [SerializeField] private bool aabLabelOnly = true;
 
     private ComboAndMagnification combo;
     private RhythmWheelUI wheel;
@@ -66,10 +68,11 @@ public class CommandSuccessFx : MonoBehaviour
         float power = (perfect ? 1.35f : 1f) * scale;
 
         Vector2 wheelPos = WheelPosition();
-        Burst(wheelPos, color, power, true);
+        bool labelOnly = aabLabelOnly && command == KeyCommand.AAB;
+        if (!labelOnly) Burst(wheelPos, color, power, true);
         Label(wheelPos + labelOffset, perfect ? label + perfectSuffix : label, color, power);
 
-        if (seatBurst && TrySeatPosition(lastKey, out Vector2 seatPos))
+        if (!labelOnly && seatBurst && TrySeatPosition(lastKey, out Vector2 seatPos))
             Burst(seatPos, color, power * 0.6f, false);
 
         if (punchWheel && wheel != null)
