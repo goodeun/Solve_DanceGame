@@ -8,6 +8,7 @@ using UnityEngine.UI;
 /// 버튼·패널을 Inspector에서 직접 지정해도 된다.
 /// - Resume : 기존 흐름 유지(메뉴 닫기 → 1박 카운트다운 → 재개)
 /// - Option, Credit : 서브 패널을 열고 ESC로 닫는다(PauseManager의 서브 패널 스택 사용)
+/// - Credit : 크레딧 롤(CreditRollView)
 /// - Main : 확인 팝업 후 타이틀 씬으로 이동
 /// - Quit : 확인 팝업 후 게임 종료(프리팹에 없으면 Main 버튼을 복제해 아래에 만든다)
 /// Option 패널에는 설정 화면(OptionsMenuView)을 붙인다.
@@ -67,6 +68,9 @@ public class PauseMenuButtons : MonoBehaviour
         PrepareSubPanel(optionPanel);
         if (optionPanel != null && optionPanel.GetComponent<OptionsMenuView>() == null)
             optionPanel.AddComponent<OptionsMenuView>();
+        // Credit 버튼은 크레딧 롤(검은 화면 + 좌측 하단 춤추는 캐릭터)을 연다.
+        if (creditPanel != null && creditPanel.GetComponent<CreditRollView>() == null)
+            creditPanel.AddComponent<CreditRollView>();
         PrepareSubPanel(creditPanel);
         PrepareSubPanel(FindChild("MainConfirmPopup"));
         resumeButton?.onClick.AddListener(Resume);
@@ -145,7 +149,8 @@ public class PauseMenuButtons : MonoBehaviour
     {
         if (pauseManager == null || panel == null) return;
 
-        var sub = panel.GetComponent<SimplePauseSubPanel>();
+        // 패널에 전용 연출(크레딧 롤 등)이 있으면 그걸 쓰고, 없으면 기본 슬라이드 패널
+        IPauseSubPanel sub = panel.GetComponent<IPauseSubPanel>();
         if (sub == null) sub = panel.AddComponent<SimplePauseSubPanel>();
         pauseManager.OpenSubPanel(sub);
     }

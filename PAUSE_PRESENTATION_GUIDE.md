@@ -104,3 +104,18 @@
 - **화면 비율:** 배치 값은 1920×1080 기준이다. 16:9 외 비율에서는 일러스트와 캐릭터 위치가 어긋날 수 있다.
 - **조명:** 메뉴 캐릭터는 씬의 Directional Light를 그대로 받는다. 따로 조명을 주려면 메뉴 캐릭터 근처(`Rig World Position`)에 라이트를 둔다.
 - **관련 파일:** `Assets/3.Script/Player/PausePresentation.cs`, `Player/DancePauseHandler.cs`, `UI/CommonUI/PauseButtonFx.cs`, `UI/CommonUI/PauseMenuButtons.cs`, `UI/CommonUI/PauseManager.cs`.
+
+## 5. 크레딧 롤 (Pause → Credit 버튼에서만)
+
+`CreditPanel`에 실행 시 `CreditRollView`가 붙는다.
+
+1. 화면이 검게 페이드 → 크레딧이 아래에서 위로 올라감, 좌측 하단에 메뉴 캐릭터가 작게(전신) 춤 루프
+2. 다 올라가면 글씨·캐릭터가 사라지고 검은 화면만 남음
+3. 우측 하단에 "아무 키나 눌러 돌아가기"가 깜빡임 → 아무 키(또는 클릭) 입력 시 크레딧이 닫히고 바로 Pause로 복귀
+4. ESC는 언제든 Pause로 복귀
+
+| 바꾸고 싶은 것 | 위치 |
+|---|---|
+| 크레딧 내용(현재 임시) | `CreditRollView` → `Title`, `Subtitle`, `Sections`(제목+본문), `End Line`, `Continue Text` |
+| 속도·색·캐릭터 크기 | `CreditRollView` → `Scroll Speed`, `Heading/Body Color`, `Character Size/Margin`, `Fade Duration` |
+| 캐릭터 춤·구도 | `PausePresentation` → `Credit Dance State`(컨트롤러에 `Credit_Dance` 상태를 만들면 자동 사용, 임시 `Fever_Loop`), `Credit Crop Bottom`, `Credit Yaw` |

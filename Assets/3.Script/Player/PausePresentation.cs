@@ -43,6 +43,14 @@ public class PausePresentation : MonoBehaviour
     [SerializeField, Range(-180f, 180f)] private float subMenuYaw = -18f;
     [SerializeField, Min(0.05f)] private float subMenuShotDuration = 0.25f;
 
+    [Header("Credits (크레딧 롤: 좌측 하단 작은 전신 + 춤 루프)")]
+    [Tooltip("크레딧 중 춤 상태 이름(Base Layer). 없으면 대체 상태 사용")]
+    [SerializeField] private string creditDanceState = "Credit_Dance";
+    [SerializeField] private string creditDanceFallback = "Fever_Loop";
+    [Tooltip("전신 구도: 0보다 작으면 발 아래 여유")]
+    [SerializeField, Range(-0.3f, 0.5f)] private float creditCropBottom = -0.06f;
+    [SerializeField, Range(-180f, 180f)] private float creditYaw = 18f;
+
     [Header("Player Motion")]
     [SerializeField] private string enterState = "Pause_Enter";
     [SerializeField] private string enterStateFallback = "Fever_Finish";
@@ -121,9 +129,12 @@ public class PausePresentation : MonoBehaviour
     private PauseManager pauseManager;
     private bool active;
     private bool exiting;
+    private bool creditsMode;
     private int subDepth;
 
     public bool IsActive => active;
+    /// <summary>메뉴 캐릭터를 찍은 이미지(크레딧 등 다른 화면에서도 쓴다).</summary>
+    public Texture PortraitTexture => portraitTexture;
     /// <summary>카운트다운 없는 복귀에서 쓰던 값(호환용). 이제 게임 카메라를 움직이지 않으므로 퇴장 시간과 같다.</summary>
     public float ExitBlendWithoutCountdown => exitDuration;
 
@@ -635,7 +646,7 @@ public class PausePresentation : MonoBehaviour
 
     private void HandleSubPanelDepth(int depth)
     {
-        if (!active) return;
+        if (!active || creditsMode) return;
         subDepth = depth;
 
         // 메뉴 깊이가 바뀌면 인물 구도가 바뀐다: 서브 메뉴에서는 상반신 클로즈업 + 반대편 각도
@@ -647,6 +658,32 @@ public class PausePresentation : MonoBehaviour
         charRect.DOPunchAnchorPos(new Vector2(deep ? 30f : -30f, 0f), subMenuShotDuration, 8, 0.5f).SetUpdate(true);
         pattern.DOKill();
         pattern.DOColor(deep ? new Color(accentColor.r, accentColor.g, accentColor.b, patternColor.a * 1.6f) : patternColor, subMenuShotDuration).SetUpdate(true);
+    }
+
+    /// <summary>크레딧 롤 시작: 전신 구도로 바꾸고 춤 루프를 재생한다.</summary>
+    public void BeginCreditsPose()
+    {
+        if (!active || rigAnimator == null) return;
+        creditsMode = true;
+
+        if (motionRoutine != null) StopCoroutine(motionRoutine);
+        motionRoutine = null;
+
+        ApplyShot(creditCropBottom, creditYaw, 0f);
+        int dance = ResolveState(creditDanceState, creditDanceFallback);
+        if (dance != 0) rigAnimator.CrossFadeInFixedTime(dance, motionCrossFade, 0);
+    }
+
+    /// <summary>크레딧 롤 종료: Pause 구도와 Pause 루프로 되돌린다.</summary>
+    public void EndCreditsPose()
+    {
+        if (!creditsMode) return;
+        creditsMode = false;
+        if (!active || rigAnimator == null) return;
+
+        ApplyShot(cropBottom, portraitYaw, 0f);
+        int loop = ResolveState(loopState, loopStateFallback);
+        if (loop != 0) rigAnimator.CrossFadeInFixedTime(loop, motionCrossFade, 0);
     }
 
     /// <summary>버튼 선택·호버 시 작은 반응(PauseButtonFx가 호출).</summary>
@@ -693,6 +730,7 @@ public class PausePresentation : MonoBehaviour
     private void FinishVisuals()
     {
         exiting = false;
+        creditsMode = false;
         if (fxCanvas != null) fxCanvas.gameObject.SetActive(false);
         if (dimCanvas != null) dimCanvas.gameObject.SetActive(false);
         if (portraitCamera != null) portraitCamera.enabled = false;
