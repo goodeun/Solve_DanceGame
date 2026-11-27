@@ -87,3 +87,24 @@ Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoRes
 - **아트 리소스**: Phase Change / Change Next 이미지, 대사창, 스탠딩(`PlayerManager.standingSprites`, 대사별 NPC 스프라이트), 타이틀·결과 배경은 비어 있으면 텍스트·단색으로 표시된다.
 - **수치**: 결과 기준 점수(`ResultController.targetScore` 300,000), 피버 게이지 `gain`, 보스 분위기 수치는 임시값. 일반전에서 피버 1회 이상 나오도록 플레이하며 조정 필요.
 - 컴파일은 Unity 2021.3 참조 어셈블리 + uGUI/TMP/InputSystem/Cinemachine 스텁으로 검증했고, 남은 오류는 Unity 6 전용 `Color.aliceBlue/deepPink`(기존 코드, Unity 6에선 정상)뿐이다. **실제 플레이 검증은 하지 못했다.**
+
+## Pause 연출 (페르소나식) 수정 가이드
+
+구조: 게임 카메라·실제 플레이어는 건드리지 않는다. 시간 정지된 게임 화면 위에 Dim(정렬 600) → 연출 캔버스(1400: 대각선 패널·패턴·슬래시·캐릭터·PAUSE) → PauseSystem 버튼(1500).
+캐릭터는 실제 플레이어를 복제한 메뉴 전용 리그를 화면 밖(y = -3000)에 두고 전용 카메라로 찍어 RenderTexture로 띄운다. 진입 순간 실제 플레이어의 동작을 복사한 뒤 Pause 진입 → 루프 모션으로 넘어간다.
+
+수정은 모두 **DancePauseHandler 오브젝트의 `PausePresentation` 컴포넌트**에서 한다.
+
+| 바꾸고 싶은 것 | 항목 |
+|---|---|
+| 캐릭터 크롭·각도 | `Crop Bottom`(허벅지 위 크롭 위치), `Crop Top Margin`, `Portrait Yaw/Pitch`, `Portrait Fov` |
+| 서브 메뉴 클로즈업 | `Sub Menu Crop Bottom`, `Sub Menu Yaw`, `Sub Menu Shot Duration` |
+| Pause 모션 | 컨트롤러 Base Layer에 `Pause_Enter`, `Pause_Loop` 상태를 만들면 자동 사용(임시: Fever_Finish → Idle) |
+| 화면 배치 | `Character Position/Size/Tilt`, `Title Position`, `Slash Angle`, `Back Panel Angle` |
+| 색 | `Dim/Back Panel/Slash/Accent/Pattern/Title Color` |
+| 리소스 교체 | `Back Panel Sprite`, `Slash Sprite`, `Title Sprite`(넣으면 글자 대신 이미지), `Character Overlay Sprite`(캐릭터 위 일러스트), `Pattern Texture` |
+| 속도 | `Enter Duration`(0.5), `Exit Duration`(0.2) — 각 요소는 이 값의 비율로 맞춰져 있어 하나만 바꿔도 전체가 같이 빨라지거나 느려진다 |
+| 버튼 연출 | 임시 연출은 `Animate Buttons`로 끈다. 버튼 반응은 각 버튼에 자동으로 붙는 `PauseButtonFx` |
+
+- 서브 패널(Option·Credit·MainConfirmPopup)은 시작할 때 닫히고, PausePanel 밖(형제)으로 옮겨져 서브 메뉴 진입 시 함께 꺼지지 않는다(`PauseMenuButtons`).
+- 서브 메뉴 깊이 변경은 `PauseManager.SubPanelDepthChanged` 이벤트로 알린다.

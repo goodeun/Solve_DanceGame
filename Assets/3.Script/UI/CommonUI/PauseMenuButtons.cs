@@ -53,6 +53,12 @@ public class PauseMenuButtons : MonoBehaviour
         if (mainButton == null) mainButton = FindButton("Main_b");
         if (optionPanel == null) optionPanel = FindChild("OptionPanel");
         if (creditPanel == null) creditPanel = FindChild("CreditPanel");
+
+        // 서브 패널·팝업은 처음에 닫아 둔다(반투명 배경이 겹쳐 화면이 희게 덮이던 문제).
+        // PausePanel의 자식이면 서브 메뉴 진입 때 PausePanel과 함께 꺼지므로 PausePanel 옆(형제)으로 옮긴다.
+        PrepareSubPanel(optionPanel);
+        PrepareSubPanel(creditPanel);
+        PrepareSubPanel(FindChild("MainConfirmPopup"));
         resumeButton?.onClick.AddListener(Resume);
         optionButton?.onClick.AddListener(() => OpenSubPanel(optionPanel));
         creditButton?.onClick.AddListener(() => OpenSubPanel(creditPanel));
@@ -63,6 +69,17 @@ public class PauseMenuButtons : MonoBehaviour
     {
         if (wiredManager != null) wired.Remove(wiredManager);
         wired.RemoveWhere(m => m == null);
+    }
+
+    private static void PrepareSubPanel(GameObject panel)
+    {
+        if (panel == null) return;
+
+        Transform parent = panel.transform.parent;
+        if (parent != null && parent.GetComponent<PausePanelView>() != null && parent.parent != null)
+            panel.transform.SetParent(parent.parent, false);
+
+        panel.SetActive(false);
     }
 
     private Button FindButton(string name)

@@ -13,6 +13,9 @@ public class PauseManager : MonoBehaviour
     private readonly Stack<IPauseSubPanel> subPanelStack = new Stack<IPauseSubPanel>();
 
     private PauseState curState = PauseState.Playing;
+
+    /// <summary>서브 패널 깊이가 바뀔 때(0 = Pause 메인 메뉴). 연출(인물 구도 변경 등)에 사용.</summary>
+    public event Action<int> SubPanelDepthChanged;
     public bool isPauseActive
     {
         get
@@ -61,6 +64,7 @@ public class PauseManager : MonoBehaviour
             {
                 subPanelStack.Push(subPanel);
                 curState = PauseState.Paused;
+                SubPanelDepthChanged?.Invoke(subPanelStack.Count);
             });
         });
     }
@@ -71,6 +75,7 @@ public class PauseManager : MonoBehaviour
         curState = PauseState.Transitioning;
 
         IPauseSubPanel top = subPanelStack.Pop();
+        SubPanelDepthChanged?.Invoke(subPanelStack.Count);
 
         top.PlayClose(() =>
         {
