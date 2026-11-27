@@ -63,6 +63,10 @@ Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoRes
 - Pause 패널이 대사창보다 앞에 보이도록 PauseSystem Canvas 정렬을 1500으로 올림
 - 보스전 승패를 기존 객석 점수로 판정, 별도 분위기 막대 HUD 삭제
 
+### 3차 수정
+- 피버 빈도: 게이지 +0.036/성공 마디, -0.02/실패 마디(DemoMain·DemoTutorial 씬 값), 한 판 최대 2회(`maxFeversPerGame`). 피버 구간이 좌석 변경 구간과 겹치면 시작하지 않음
+- 페이즈 변경: 공지가 먼저 나오고 색·BPM은 전환이 끝나는 박에 바뀌도록 변경(`ScheduledBars` 기본). 전환 중 리듬 휠 펄스 링 숨김
+
 ## 3. 미결 사항(Q1~Q7)에 적용한 기본값
 
 | Q | 적용한 기본값 | 바꾸는 곳 |
@@ -77,7 +81,7 @@ Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoRes
 
 ## 4. 확인이 필요한 점
 
-- **일반전 좌석 변경 트리거**: 기본값은 곡의 BPM 변화로 페이즈가 바뀔 때(`OnPhaseChange`). 현재 FMOD 곡에는 템포 마커가 2개(128 → 82.5초에 90)뿐이라 **좌석 변경이 1회만, 힙합 페이즈 없이** 진행된다. 곡을 3구간으로 편집하거나, `NormalBattleDirector`의 Trigger Mode를 `ScheduledBars`로 바꿔 마디를 지정하면 2회가 된다.
+- **일반전 페이즈 변경**: 기본은 `ScheduledBars`. 새 페이즈가 시작되는 마디(곡의 템포 마커)를 지정하면 그 앞 2마디에서 공지·좌석 이동·3·2·1이 진행되고, 색은 곡의 BPM이 바뀌는 박에 함께 바뀐다. 현재 곡은 템포 마커가 하나(0초 128BPM 테크노 → 82.5초 = 44마디째 90BPM 팝)라 **좌석 변경 1회, 힙합 없음**. 곡이 3구간이 되면 `Scheduled Changes`에 마디·페이즈를 추가한다(곡 시작 페이즈는 `Initial Phase`).
 - **튜토리얼 BGM**: `DemoTutorial`의 `FmodMusicClock > Music Event Path`에 튜토리얼 곡을 지정. 곡이 끝나면 처음부터 다시 재생한다. 메트로놈은 FMOD 이벤트가 없으면 내장 클릭음을 쓴다.
 - **HP·게임오버 연동(P1)**: 보스전 패배 시 `BossBattleDirector.onPlayerLost` 이벤트가 발생한다. 게임오버 흐름이 처리하려면 `defeatHandledExternally`를 켠다. 전환·대사 중 판정 제외 여부는 `RhythmWheelUI.IsBeatBlocked(beat)` / `RhythmWheelJudgement.IsSuspended`로 확인할 수 있다.
 - **아트 리소스**: Phase Change / Change Next 이미지, 대사창, 스탠딩(`PlayerManager.standingSprites`, 대사별 NPC 스프라이트), 타이틀·결과 배경은 비어 있으면 텍스트·단색으로 표시된다.
