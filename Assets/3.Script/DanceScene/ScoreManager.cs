@@ -45,12 +45,33 @@ public class ScoreManager : MonoBehaviour
     private const float MAX_MULTIPLIER = 3.0f;
     private const float FEVER_MULTIPLIER = 3.0f; // 피버 고정 배율
 
-    // 배율 상승/하강 폭 (임시)
-    //TODO 상승폭 하강폭 밸런스 테스트하며 정하기.
-    private const float PENALTY_PRESSED = -0.2f;
     private const float PENALTY_BUBBLE = -0.01f;
-    private const float BONUS_NEXT = 0.1f;
-    private const float BONUS_OTHER = 0.03f;
+
+    // 배율 밸런스(임시 수치). 목표: 피버 제외, 잘 쳐도 네 키 배율 평균이 200%를 넘지 않게.
+    [Header("Multiplier Balance")]
+    [Tooltip("누른 키의 배율 감소(처음 한 번). 0.1 = 10%")]
+    [SerializeField, Min(0f)] private float pressPenalty = 0.10f;
+    [Tooltip("같은 키를 연속으로 누를 때마다 감소폭이 이만큼 더 커진다(10% → 15% → 20% ...)")]
+    [SerializeField, Min(0f)] private float repeatPenaltyStep = 0.05f;
+    [Tooltip("한 번에 줄어드는 최대 감소폭")]
+    [SerializeField, Min(0f)] private float maxPressPenalty = 0.40f;
+    [Tooltip("시계 방향 다음 키의 배율 증가")]
+    [SerializeField, Min(0f)] private float bonusNext = 0.10f;
+    [Tooltip("나머지 키의 배율 증가")]
+    [SerializeField, Min(0f)] private float bonusOther = 0.03f;
+    [Tooltip("스타일 스탯 1당 증가량(증가폭에 더해짐)")]
+    [SerializeField, Min(0f)] private float styleBonusPerPoint = 0.01f;
+    [Tooltip("증가 체감: 배율이 높을수록 증가폭이 줄어든다. 실제 증가 = 증가폭 × e^(-값 × (현재배율 - 1)). 클수록 빨리 둔해진다")]
+    [SerializeField, Min(0f)] private float gainFalloff = 1.3f;
+    [Tooltip("증가로는 이 배율을 넘지 않는다(안 누른 키가 혼자 최대치까지 쌓이는 것 방지). 2.5 = 250%")]
+    [SerializeField, Min(1f)] private float gainCeiling = 2.5f;
+    [Tooltip("배율이 100% 아래일 때 회복을 빠르게 하는 최대 배수")]
+    [SerializeField, Min(1f)] private float maxGainBoost = 1.5f;
+
+    private Keys lastPressedKey;
+    private bool hasLastPressed;
+    private int repeatCount;
+    private readonly Dictionary<Keys, float> lastPenalty = new Dictionary<Keys, float>();
 
     [Header("Fever")]
     [Tooltip("피버 중 마디당 자동 득점 = 피버 시작 속성 기본 점수 × 이 값 × 피버 배수")]
@@ -224,7 +245,8 @@ public class ScoreManager : MonoBehaviour
         if (command != KeyCommand.ABC || curPhase == Phase.Villain || isFeverTime) return;
         if (!keyMultipliers.ContainsKey(lastKey)) return;
 
-        keyMultipliers[lastKey] = Mathf.Clamp(keyMultipliers[lastKey] - PENALTY_PRESSED * abcPenaltyRelief, MIN_MULTIPLIER, MAX_MULTIPLIER);
+        float penalty = lastPenalty.TryGetValue(lastKey, out float p) ? p : pressPenalty;
+        keyMultipliers[lastKey] = Mathf.Clamp(keyMultipliers[lastKey] + penalty * abcPenaltyRelief, MIN_MULTIPLIER, MAX_MULTIPLIER);
         multiplierUI?.UpdateUI(keyMultipliers, isFeverTime);
     }
 
@@ -289,6 +311,11 @@ public class ScoreManager : MonoBehaviour
         multiplierUI?.UpdateUI(keyMultipliers, isFeverTime);
     }
 
+    /// <summary>
+    /// 키 입력 후 배율 갱신.
+    /// - 누른 키: 감소. 같은 키를 연속으로 누를수록 감소폭이 커진다(pressPenalty + repeatPenaltyStep × (연속 - 1)).
+    /// - 시계 방향 다음 키 / 나머지 키: 증가. 배율이 높을수록 증가폭이 작아진다(gainFalloff).
+    /// </summary>
     private void UpdateMultipliers(Keys pressedKey)
     {
         if (isFeverTime) return;
@@ -297,7 +324,11 @@ public class ScoreManager : MonoBehaviour
         int keyCount = curKeyOrder.Length;
         int nextKeyIndex = (pressedIndex + 1) % keyCount; //시계방향 다음 키 인덱스
 
-        float styleBouns = (PlayerManager.Instance != null ? PlayerManager.Instance.currentStats.style : 0) * 0.01f;
+        repeatCount = hasLastPressed && lastPressedKey == pressedKey ? repeatCount + 1 : 1;
+        lastPressedKey = pressedKey;
+        hasLastPressed = true;
+
+        float styleBonus = (PlayerManager.Instance != null ? PlayerManager.Instance.currentStats.style : 0) * styleBonusPerPoint;
 
         for (int i = 0; i < keyCount; i++)
         {
@@ -306,21 +337,37 @@ public class ScoreManager : MonoBehaviour
 
             if (i == pressedIndex)
             {
-                targetValue += PENALTY_PRESSED;
-            }
-            else if (i == nextKeyIndex)
-            {
-                targetValue += (BONUS_NEXT + styleBouns);
+                float penalty = Mathf.Min(maxPressPenalty, pressPenalty + repeatPenaltyStep * (repeatCount - 1));
+                lastPenalty[targetKey] = penalty;
+                targetValue -= penalty;
             }
             else
             {
-                targetValue += (BONUS_OTHER + styleBouns);
+                float gain = (i == nextKeyIndex ? bonusNext : bonusOther) + styleBonus;
+                if (targetValue < gainCeiling)
+                    targetValue = Mathf.Min(gainCeiling, targetValue + gain * GainScale(targetValue));
             }
 
             keyMultipliers[targetKey] = Mathf.Clamp(targetValue, MIN_MULTIPLIER, MAX_MULTIPLIER);
         }
 
         multiplierUI?.UpdateUI(keyMultipliers, isFeverTime);
+    }
+
+    /// <summary>배율이 높을수록 작아지는 증가 배수(100%에서 1). 100% 아래에서는 조금 더 빨리 회복.</summary>
+    private float GainScale(float multiplier) => Mathf.Min(maxGainBoost, Mathf.Exp(-gainFalloff * (multiplier - 1f)));
+
+    /// <summary>네 키 배율 평균(디버그·밸런스 확인용).</summary>
+    public float AverageMultiplier
+    {
+        get
+        {
+            ScoreManager t = Target;
+            if (t.curKeyOrder == null || t.curKeyOrder.Length == 0) return 1f;
+            float sum = 0f;
+            foreach (Keys k in t.curKeyOrder) sum += t.keyMultipliers.TryGetValue(k, out float v) ? v : 1f;
+            return sum / t.curKeyOrder.Length;
+        }
     }
 
     public void DecreaseMultipliers(int activeBubble) => DecreaseMultipliers(activeBubble, 1f);

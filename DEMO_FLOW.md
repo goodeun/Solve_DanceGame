@@ -129,3 +129,14 @@ Build Settings: DemoTitle → DemoTutorial → DemoMain → DemoBoss → DemoRes
 - `LiquidBurst`가 터뜨린 파티클은 Particle Camera → Tex_MetaBall → MasterCanvas `EffectFilter (RawImage)`로 보인다.
 - EffectFilter가 말풍선(Bubbles) UI보다 아래에 그려져 가려지던 문제 → 처음 터질 때 EffectFilter를 형제 중 맨 위로 올린다.
 - 원본 파티클 수명(0.3초)·깊이(객석 거리)로는 너무 작고 짧아서, 고정 깊이 16에서 수명 2.4배로 터뜨린다.
+
+## 배율 밸런스 (ScoreManager > Multiplier Balance)
+
+- 누른 키 감소: 처음 10%, 같은 키를 연속으로 누를수록 5%씩 더 커짐(최대 40%).
+- 다른 키 증가: 다음 키 10% / 나머지 3% + 스타일 스탯 1%/점. 배율이 높을수록 증가폭이 줄어든다(`Gain Falloff` 1.3), 증가로는 250%를 넘지 않음.
+- 시뮬레이션(스타일 5): 시계 방향·무작위·AAB 등 어떤 패턴도 피버 제외 네 키 평균이 약 1.8~1.95배에서 수렴.
+- 수치는 전부 Inspector에서 조정 가능(임시값).
+
+## 보스 등장 컷씬
+
+[`CUTSCENE_GUIDE.md`](CUTSCENE_GUIDE.md) 참고. 메뉴 `Solve/Demo/Create Boss Intro Cutscene`으로 기본 틀 생성.

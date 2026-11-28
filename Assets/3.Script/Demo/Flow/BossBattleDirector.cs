@@ -37,6 +37,8 @@ public class BossBattleDirector : MonoBehaviour
     [SerializeField, Min(0f)] private float rivalDropDuration = 1.2f;
     [Tooltip("게임 플레이 중 라이벌이 춤추는 UFO 공중 무대. 인트로 컷씬 동안 숨겼다가 컷씬 뒤 위에서 내려온다. 비우면 씬에서 찾는다")]
     [SerializeField] private FloatingRivalStage rivalStage;
+    [Tooltip("보스 등장 컷씬(Timeline). 가장 먼저 재생되고, 인트로 대사가 끝날 때까지 마지막 장면을 유지한 뒤 정리된다")]
+    [SerializeField] private TimelineCutscene introCutscene;
     [Tooltip("카메라 무빙 + 대사 등장 연출(없으면 introDialogue만 재생)")]
     [SerializeField] private CinematicDialoguePlayer introCinematic;
     [SerializeField] private StoryDialogueSequence introDialogue;
@@ -189,6 +191,13 @@ public class BossBattleDirector : MonoBehaviour
         }
 
         bool done = false;
+        if (introCutscene != null && introCutscene.HasContent)
+        {
+            introCutscene.Play(() => done = true);
+            while (!done) yield return null;
+        }
+
+        done = false;
         if (introCinematic != null && introCinematic.HasShots)
         {
             introCinematic.Play(() => done = true);
@@ -200,7 +209,8 @@ public class BossBattleDirector : MonoBehaviour
             while (!done) yield return null;
         }
 
-        // 컷씬이 끝나면 라이벌이 공중 무대를 타고 내려온다.
+        // 컷씬 정리(컷씬용 보스·카메라 끄기) 후 라이벌이 공중 무대를 타고 내려온다.
+        if (introCutscene != null) introCutscene.Finish();
         if (rivalStage != null)
         {
             done = false;
@@ -292,6 +302,11 @@ public class BossBattleDirector : MonoBehaviour
     {
         if (battling) EndBattle();
     }
+
+#if UNITY_EDITOR
+    /// <summary>에디터 메뉴(컷씬 틀 만들기)에서 인트로 컷씬을 연결한다.</summary>
+    public void EditorSetIntroCutscene(TimelineCutscene cutscene) => introCutscene = cutscene;
+#endif
 
     /// <summary>결과 계산(기존 객석 점수): 객석 수 → 총 분위기 → 완전 동률은 플레이어 승리.</summary>
     public bool EvaluateWinner(out int playerSeats, out int rivalSeats, out float playerTotal, out float rivalTotal)
