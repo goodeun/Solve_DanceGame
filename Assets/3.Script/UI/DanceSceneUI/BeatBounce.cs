@@ -52,6 +52,25 @@ public class BeatBounce : MonoBehaviour
         else basePosition = transform.localPosition;
     }
 
+    /// <summary>코드에서 만든 오브젝트에 수치를 줄 때(SplitBeatBounce 등).</summary>
+    public void Configure(float scale, Vector2 axis, Vector2 thump, float accent, float restScale)
+    {
+        scaleAmount = scale;
+        scaleAxis = axis;
+        thumpOffset = thump;
+        downbeatAccent = accent;
+        restBeatScale = restScale;
+    }
+
+    /// <summary>현재 위치·크기를 기준(제자리)으로 다시 잡는다.</summary>
+    public void Rebase()
+    {
+        baseScale = transform.localScale;
+        baseRotation = transform.localRotation;
+        if (rect != null) baseAnchored = rect.anchoredPosition;
+        else basePosition = transform.localPosition;
+    }
+
     private void OnDisable() => Restore();
 
     private void LateUpdate()

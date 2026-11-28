@@ -14,6 +14,8 @@ public class NegativeBubble : MonoBehaviour
     private Vector2 originPos;
     private Vector2 startPos;
     [SerializeField] private float offsetY = -40f;
+    [Tooltip("Spine 말풍선(있으면 등장·꿈틀·터짐을 Spine으로). 비우면 자식에서 찾는다")]
+    [SerializeField] private SpineBubbleSkin spineSkin;
 
     private void Awake()
     {
@@ -22,12 +24,14 @@ public class NegativeBubble : MonoBehaviour
         text = GetComponentInChildren<TextMeshProUGUI>();
 
         originPos = rectTransform != null ? rectTransform.anchoredPosition : (Vector2)transform.localPosition;
+        if (spineSkin == null) spineSkin = GetComponentInChildren<SpineBubbleSkin>(true);
 
         gameObject.SetActive(false);
     }
 
     private void OnEnable()
     {
+        if (spineSkin != null) spineSkin.PlayAppear();
         transform.DOKill();
         if (rectTransform != null)
         {
@@ -62,6 +66,16 @@ public class NegativeBubble : MonoBehaviour
         LiquidBurst.Spawn(screen, depth, LiquidBurst.NegativeChannel);
 
         transform.DOKill();
+        if (spineSkin != null && spineSkin.HasPop)
+        {
+            // Spine 터짐 애니메이션이 끝나면 꺼진다.
+            spineSkin.PlayPop(() =>
+            {
+                if (this != null) gameObject.SetActive(false);
+            });
+            return;
+        }
+
         DOTween.Sequence().SetLink(gameObject)
             .Append(transform.DOScale(new Vector3(1.35f, 0.7f, 1f), 0.06f).SetEase(Ease.OutQuad))
             .Append(transform.DOScale(new Vector3(0.6f, 1.4f, 1f), 0.06f))

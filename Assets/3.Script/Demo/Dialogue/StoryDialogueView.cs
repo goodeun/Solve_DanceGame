@@ -43,6 +43,7 @@ public class StoryDialogueView : MonoBehaviour
     [SerializeField] private string gloomySfxEvent;
 
     private Coroutine playRoutine;
+    private SpineBubbleSkin boxSkin;
     private PauseManager pauseManager;
     private Action pendingComplete;
 
@@ -105,6 +106,21 @@ public class StoryDialogueView : MonoBehaviour
         var outline = boxImage.gameObject.AddComponent<Outline>();
         outline.effectColor = s.magenta;
         outline.effectDistance = new Vector2(4f, -4f);
+
+        // Spine 대사창(있으면 이미지 대신 꿈틀거리는 말풍선). 글자보다 뒤에 깔린다.
+        if (s.dialogueBoxSpinePrefab != null)
+        {
+            GameObject spine = Instantiate(s.dialogueBoxSpinePrefab, box, false);
+            spine.name = "SpineBox";
+            spine.transform.SetAsFirstSibling();
+            boxSkin = spine.GetComponent<SpineBubbleSkin>();
+            if (boxSkin == null) boxSkin = spine.GetComponentInChildren<SpineBubbleSkin>(true);
+            if (boxSkin != null && boxSkin.IsReady)
+            {
+                boxImage.enabled = false;
+                outline.enabled = false;
+            }
+        }
 
         nameText = DemoUI.CreateText("Name", box, "", 40f, TextAlignmentOptions.Left, true);
         var nameRect = (RectTransform)nameText.transform;
@@ -250,8 +266,14 @@ public class StoryDialogueView : MonoBehaviour
                 yield return WaitUnscaled(line.delayBefore);
             }
 
+            bool wasVisible = box.gameObject.activeSelf;
             ApplyLine(line);
             SetVisible(true);
+            if (boxSkin != null)
+            {
+                if (!wasVisible && line.style == DialogueStyle.Normal) boxSkin.PlayAppear();
+                else boxSkin.PlayStyle(line.style);
+            }
             line.onLineStarted?.Invoke();
 
             // 타이핑

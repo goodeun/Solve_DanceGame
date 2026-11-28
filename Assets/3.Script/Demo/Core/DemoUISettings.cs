@@ -27,6 +27,8 @@ public class DemoUISettings : ScriptableObject
     public Sprite changeNextSprite;
     public Sprite dialogueBoxSprite;
     public Sprite dialogueNextIcon;
+    [Tooltip("Spine 대사창 프리펩(SkeletonGraphic + SpineBubbleSkin). 넣으면 대사창 이미지 대신 쓴다. SPINE_BUBBLE_GUIDE.md 참고")]
+    public GameObject dialogueBoxSpinePrefab;
 
     [Header("Scene Names (Build Settings에 등록된 이름)")]
     public string titleScene = "DemoTitle";

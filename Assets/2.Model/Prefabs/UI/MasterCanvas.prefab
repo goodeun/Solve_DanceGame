@@ -8849,6 +8849,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 1664947490387343236}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a09763c952784f02bee5de2f63160775, type: 3}
+  m_Script: {fileID: 11500000, guid: 0a0034857f074c218206e7b5735d134a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BeatBounce
+  m_EditorClassIdentifier: Assembly-CSharp::SplitBeatBounce

@@ -21,6 +21,8 @@ public class Bubble : MonoBehaviour
 
     [SerializeField] private TextMeshPro Text;
     [SerializeField] private ParticleSystem effect;
+    [Tooltip("Spine 말풍선(있으면 등장·꿈틀·사라짐을 Spine으로). 비우면 자식에서 찾는다")]
+    [SerializeField] private SpineBubbleSkin spineSkin;
 
 
     private BubbleState State;
@@ -31,6 +33,7 @@ public class Bubble : MonoBehaviour
     {
         bubbleImage = GetComponentInChildren<SpriteRenderer>();
         effect = GetComponentInChildren<ParticleSystem>();
+        if (spineSkin == null) spineSkin = GetComponentInChildren<SpineBubbleSkin>(true);
     }
     private void OnEnable()
     {
@@ -67,6 +70,7 @@ public class Bubble : MonoBehaviour
 
     public void Spawn_Anim()
     {
+        if (spineSkin != null) spineSkin.PlayAppear();
         Vector3 originPos = visualRoot.position;
 
         visualRoot.position += new Vector3(0, -0.5f, 0);
@@ -80,6 +84,7 @@ public class Bubble : MonoBehaviour
     {
         seq = DOTween.Sequence();
         effect.gameObject.SetActive(true);
+        if (spineSkin != null) spineSkin.PlayDisappear();
 
         seq.Append(visualRoot.DOMove(visualRoot.position + new Vector3(0, -0.5f, 0), 0.2f).SetEase(Ease.OutBack))
             .Join(visualRoot.DOPunchScale(new Vector3(0.3f, -0.3f, 0), 0.2f, 10, 1))

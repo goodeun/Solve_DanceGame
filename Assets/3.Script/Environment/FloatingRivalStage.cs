@@ -54,10 +54,17 @@ public class FloatingRivalStage : MonoBehaviour
 
     [Header("Placement")]
     [Tooltip("객석 앵커에서 플레이어 무대 쪽(앞)으로 당기는 거리")]
-    [SerializeField] private float forwardOffset = 22f;
+    [SerializeField] private float forwardOffset = 26f;
     [SerializeField] private float heightOffset = 0f;
     [Tooltip("가운데(사각형)에 있을 때 추가 높이. 음수면 아래로(Fever UI에 가리지 않게)")]
     [SerializeField] private float centerHeightOffset = -7f;
+    [Header("Placement - Side (WASD 좌상·우상)")]
+    [Tooltip("옆 자리에서 플레이어 무대 쪽으로 당기는 거리(가운데보다 더 당겨야 멀어 보이지 않는다)")]
+    [SerializeField] private float sideForwardOffset = 32f;
+    [Tooltip("옆 자리를 화면 가운데 쪽으로 끌어오는 비율(0 = 객석 위치 그대로, 0.5 = 절반만큼 안쪽)")]
+    [SerializeField, Range(0f, 0.9f)] private float sideInward = 0.35f;
+    [Tooltip("옆 자리에 있을 때 추가 높이")]
+    [SerializeField] private float sideHeightOffset = -4f;
     [Tooltip("사각형에서 쓸 위쪽 두 앵커(시계 방향 Seats 순서: 0 = 좌상, 1 = 우상)")]
     [SerializeField] private int topLeftAnchorIndex = 0;
     [SerializeField] private int topRightAnchorIndex = 1;
@@ -258,8 +265,17 @@ public class FloatingRivalStage : MonoBehaviour
         Vector3 toPlayer = PlayerStagePosition() - anchor;
         toPlayer.y = 0f;
         Vector3 forward = toPlayer.sqrMagnitude > 0.0001f ? toPlayer.normalized : Vector3.back;
-        float height = heightOffset + (s == Slot.Center ? centerHeightOffset : 0f);
-        return anchor + forward * forwardOffset + Vector3.up * height;
+        if (s == Slot.Center)
+            return anchor + forward * forwardOffset + Vector3.up * (heightOffset + centerHeightOffset);
+
+        // 옆 자리: 앞으로 더 당기고, 플레이어 무대 정면 줄(가운데) 쪽으로 끌어온다.
+        Vector3 position = anchor + forward * sideForwardOffset;
+        Vector3 center = PlayerStagePosition();
+        Vector3 lateral = Vector3.ProjectOnPlane(position - center, Vector3.forward);
+        lateral.y = 0f;
+        position -= lateral * sideInward;
+        position.y = anchor.y + heightOffset + sideHeightOffset;
+        return position;
     }
 
     private float TargetYaw(Slot s, Vector3 position)

@@ -64,9 +64,12 @@ MonoBehaviour:
   rimColor: {r: 0.85, g: 0.2, b: 1, a: 1}
   rimIntensity: 2.5
   rimBeatPulse: 2
-  forwardOffset: 22
+  forwardOffset: 26
   heightOffset: 0
   centerHeightOffset: -7
+  sideForwardOffset: 32
+  sideInward: 0.35
+  sideHeightOffset: -4
   topLeftAnchorIndex: 0
   topRightAnchorIndex: 1
   maxYaw: 18
